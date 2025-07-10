@@ -1,0 +1,18 @@
+<div class="min-h-screen bg-gray-50 flex items-center justify-center py-8">
+  <div class="max-w-md mx-auto px-4">
+    <div class="bg-white rounded-lg shadow-md p-6 text-center">
+      <h1 class="text-2xl font-bold text-gray-900 mb-4">기념패 주문 시스템</h1>
+      <p class="text-gray-600 mb-6">
+        고객님은 알림톡으로 받으신 개인화 링크를 통해 주문서를 작성하실 수 있습니다.
+      </p>
+      
+      <!-- Demo Link for Testing -->
+      <div class="border-t border-gray-200 pt-6">
+        <p class="text-sm text-gray-500 mb-4">테스트용 링크:</p>
+        <%= link_to "샘플 주문서 작성", 
+              edit_order_path("2025071012345678"), 
+              class: "btn-primary inline-block" %>
+      </div>
+    </div>
+  </div>
+</div>

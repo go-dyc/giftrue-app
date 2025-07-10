@@ -1,0 +1,735 @@
+<div class="min-h-screen bg-gray-50 py-4">
+  <div class="max-w-2xl mx-auto px-4">
+    <!-- Header -->
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-900 mb-2">기프트루 인물 피규어 정보 입력</h1>
+      <p class="text-gray-600">단계별로 정보를 입력해주세요</p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="mb-6">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-sm font-medium text-gray-700">진행 상황</span>
+        <span class="text-sm font-medium text-gray-700"><%= @step %>/3 단계</span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-2">
+        <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+             style="width: <%= (@step.to_f / 3 * 100).round(1) %>%"></div>
+      </div>
+      <div class="flex justify-between mt-1">
+        <span class="text-xs text-gray-500 <%= 'font-semibold text-blue-600' if @step >= 1 %>">정면 사진</span>
+        <span class="text-xs text-gray-500 <%= 'font-semibold text-blue-600' if @step >= 2 %>">포즈 및 의상 정보</span>
+        <span class="text-xs text-gray-500 <%= 'font-semibold text-blue-600' if @step >= 3 %>">기념패 스타일 선택</span>
+      </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <%= form_with model: @order, url: @order.persisted? ? order_path(@order.naver_order_number) : orders_path, 
+                    method: @order.persisted? ? :patch : :post, 
+                    local: true, 
+                    multipart: true, 
+                    class: "space-y-8" do |form| %>
+        
+        <%= hidden_field_tag :step, @step %>
+        <%= hidden_field_tag :naver_order_number, @order.naver_order_number unless @order.persisted? %>
+        <% if @step < 3 %>
+          <%= hidden_field_tag :next_step, @step + 1 %>
+        <% else %>
+          <%= hidden_field_tag :complete_step, true %>
+        <% end %>
+
+        <!-- Step 1: Basic Information -->
+        <% if @step == 1 %>
+          <div class="space-y-6">
+            <div>
+              <h2 class="text-xl font-semibold text-gray-900 mb-4">1단계: 정면 사진</h2>
+            </div>
+            
+            <!-- Orderer Name -->
+            <div>
+              <%= form.label :orderer_name, "주문자 성함 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.text_field :orderer_name, 
+                    class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 #{'border-red-300' if @order.errors[:orderer_name].any?}",
+                    placeholder: "성함을 입력해주세요",
+                    required: true,
+                    id: "orderer_name_input" %>
+              <% if @order.errors[:orderer_name].any? %>
+                <p class="text-red-500 text-sm mt-1"><%= @order.errors[:orderer_name].first %></p>
+              <% end %>
+              <!-- 클라이언트 사이드 에러 메시지 -->
+              <p id="orderer_name_error" class="text-red-500 text-sm mt-1 hidden"></p>
+            </div>
+
+            <!-- Main Images -->
+            <div>
+              <%= form.label :main_images, "메인 사진 업로드 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <p class="text-sm text-gray-600 mb-3">최대 5개까지 업로드 가능합니다</p>
+              
+              <!-- Image Upload Slots -->
+              <div class="grid grid-cols-5 gap-2 mb-4" id="image_slots">
+                <% 5.times do |i| %>
+                  <div class="image-slot aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center hover:border-blue-400 transition-all cursor-pointer text-center p-2" 
+                       data-slot="<%= i %>">
+                    <svg class="w-4 h-4 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    <span class="text-xs text-gray-500 mt-1"><%= i + 1 %></span>
+                  </div>
+                <% end %>
+              </div>
+              
+              <%= form.file_field :main_images, 
+                    multiple: true, 
+                    accept: "image/jpeg,image/png",
+                    class: "hidden",
+                    id: "main_images_input" %>
+              
+              <div class="text-center">
+                <label for="main_images_input" class="btn-primary cursor-pointer">
+                  사진 선택하기
+                </label>
+                <p class="text-xs text-gray-500 mt-2">JPG, PNG 파일 | 개당 최대 10MB</p>
+              </div>
+              
+              <% if @order.errors[:main_images].any? %>
+                <p class="text-red-500 text-sm mt-2"><%= @order.errors[:main_images].first %></p>
+              <% end %>
+              <!-- 클라이언트 사이드 에러 메시지 -->
+              <p id="main_images_error" class="text-red-500 text-sm mt-2 hidden"></p>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Step 2: Additional Information -->
+        <% if @step == 2 %>
+          <div class="space-y-6">
+            <div>
+              <h2 class="text-xl font-semibold text-gray-900 mb-4">2단계: 포즈 및 의상 정보 (선택사항)</h2>
+            </div>
+            
+            <!-- Optional Images -->
+            <div>
+              <%= form.label :optional_images, "추가 사진 (선택)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <p class="text-sm text-gray-600 mb-3">최대 5개까지 업로드 가능합니다</p>
+              
+              <!-- Image Upload Slots for Optional Images -->
+              <div class="grid grid-cols-5 gap-2 mb-4" id="optional_image_slots">
+                <% 5.times do |i| %>
+                  <div class="optional-image-slot aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center hover:border-blue-400 transition-all cursor-pointer text-center p-2" 
+                       data-slot="<%= i %>">
+                    <svg class="w-4 h-4 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    <span class="text-xs text-gray-500 mt-1"><%= i + 1 %></span>
+                  </div>
+                <% end %>
+              </div>
+              
+              <%= form.file_field :optional_images, 
+                    multiple: true, 
+                    accept: "image/jpeg,image/png",
+                    class: "hidden",
+                    id: "optional_images_input" %>
+              
+              <div class="text-center">
+                <label for="optional_images_input" class="btn-primary cursor-pointer">
+                  사진 업로드
+                </label>
+                <p class="text-xs text-gray-500 mt-2">JPG, PNG 파일 | 개당 최대 10MB</p>
+              </div>
+              
+              <% if @order.errors[:optional_images].any? %>
+                <p class="text-red-500 text-sm mt-2"><%= @order.errors[:optional_images].first %></p>
+              <% end %>
+            </div>
+
+            <!-- Additional Requests -->
+            <div>
+              <%= form.label :additional_requests, "추가 요청사항 (선택)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.text_area :additional_requests, 
+                    class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none",
+                    rows: 4,
+                    placeholder: "제작 시 특별히 고려해야 할 사항이 있다면 적어주세요..." %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Step 3: Style and Message -->
+        <% if @step == 3 %>
+          <div class="space-y-6">
+            <div>
+              <h2 class="text-xl font-semibold text-gray-900 mb-4">3단계: 스타일 및 문구</h2>
+            </div>
+            
+            <!-- Plaque Style Selection -->
+            <div>
+              <%= form.label :plaque_style, "기념패 스타일 *", class: "block text-sm font-medium text-gray-700 mb-3" %>
+              <div class="grid grid-cols-2 gap-3">
+                <% [
+                  { value: 'gold_metal', name: '금속패 (골드)', desc: '고급스러운 골드' },
+                  { value: 'silver_metal', name: '금속패 (실버)', desc: '깔끔한 실버' },
+                  { value: 'acrylic_cartoon', name: '아크릴패 (카툰)', desc: '귀여운 카툰스타일' },
+                  { value: 'acrylic_realistic', name: '아크릴패 (실사)', desc: '생생한 실사스타일' }
+                ].each do |style| %>
+                  <div class="relative">
+                    <%= form.radio_button :plaque_style, style[:value], 
+                          class: "hidden peer",
+                          id: "style_#{style[:value]}" %>
+                    <label for="style_<%= style[:value] %>" 
+                           class="block cursor-pointer border-2 border-gray-200 rounded-lg p-4 hover:border-blue-400 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all">
+                      <div class="text-center">
+                        <div class="w-full h-32 bg-gray-100 rounded-md mb-3 overflow-hidden">
+                          <img src="/images/plaques/<%= style[:value] %>.png" 
+                               class="w-full h-full object-contain"
+                               alt="<%= style[:name] %>"
+                               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                          <div class="w-full h-full flex items-center justify-center text-gray-500 text-sm" style="display: none;">
+                            <%= style[:name] %>
+                          </div>
+                        </div>
+                        <h3 class="font-medium text-gray-900 text-sm"><%= style[:name] %></h3>
+                        <p class="text-xs text-gray-600"><%= style[:desc] %></p>
+                      </div>
+                    </label>
+                  </div>
+                <% end %>
+              </div>
+              <% if @order.errors[:plaque_style].any? %>
+                <p class="text-red-500 text-sm mt-2"><%= @order.errors[:plaque_style].first %></p>
+              <% end %>
+            </div>
+
+            <!-- Style-specific Input Fields -->
+            <div class="<%= 'hidden' unless @order.plaque_style.present? %>" id="message_section">
+              
+              <!-- Gold Metal Style -->
+              <div class="style-input gold_metal <%= 'hidden' unless @order.plaque_style == 'gold_metal' %>">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">🥇 금속패 (골드) 제작 정보</h3>
+                
+                <%= form.label :plaque_message, "새김 문구 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <p class="text-sm text-gray-600 mb-3">고급스러운 골드 금속패에 새길 문구를 입력해주세요 (내용 최대 100자)</p>
+                <div class="relative">
+                  <%= form.text_area :plaque_message, 
+                        class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none #{'border-red-300' if @order.errors[:plaque_message].any?}",
+                        rows: 3,
+                        placeholder: "예: 감사합니다 아버님\n평생 건강하세요\n2025.01.01",
+                        required: @order.plaque_style == 'gold_metal',
+                        data: { style: 'gold_metal' },
+                        id: 'plaque_message_gold_metal' %>
+                  <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                    최대 50자 (3줄 권장)
+                  </div>
+                </div>
+                <div class="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                  <p class="text-sm text-yellow-800">💡 금속패 팁: 간결하고 임팩트 있는 문구가 좋습니다</p>
+                </div>
+              </div>
+
+              <!-- Silver Metal Style -->
+              <div class="style-input silver_metal <%= 'hidden' unless @order.plaque_style == 'silver_metal' %>">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">🥈 금속패 (실버) 제작 정보</h3>
+                
+                <%= form.label :plaque_message, "새김 문구 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <p class="text-sm text-gray-600 mb-3">세련된 실버 금속패에 새길 문구를 입력해주세요</p>
+                <div class="relative">
+                  <%= form.text_area :plaque_message, 
+                        class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none #{'border-red-300' if @order.errors[:plaque_message].any?}",
+                        rows: 3,
+                        placeholder: "예: 우수사원 홍길동\n탁월한 성과를 축하합니다\n2025년 1월",
+                        required: @order.plaque_style == 'silver_metal',
+                        data: { style: 'silver_metal' },
+                        id: 'plaque_message_silver_metal' %>
+                  <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                    최대 50자 (3줄 권장)
+                  </div>
+                </div>
+                <div class="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-md">
+                  <p class="text-sm text-gray-700">💡 실버패 팁: 깔끔하고 전문적인 문구가 어울립니다</p>
+                </div>
+              </div>
+
+              <!-- Acrylic Cartoon Style -->
+              <div class="style-input acrylic_cartoon <%= 'hidden' unless @order.plaque_style == 'acrylic_cartoon' %>">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">🎨 아크릴패 (카툰) 제작 정보</h3>
+                
+                <%= form.label :plaque_message, "카툰 스타일 문구 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <p class="text-sm text-gray-600 mb-3">귀여운 카툰 스타일로 제작할 문구를 입력해주세요</p>
+                <div class="relative">
+                  <%= form.text_area :plaque_message, 
+                        class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none #{'border-red-300' if @order.errors[:plaque_message].any?}",
+                        rows: 4,
+                        placeholder: "예: 우리 가족 최고!\n사랑해요 할머니♥\n건강하세요\n2025년",
+                        required: @order.plaque_style == 'acrylic_cartoon',
+                        data: { style: 'acrylic_cartoon' },
+                        id: 'plaque_message_acrylic_cartoon' %>
+                  <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                    최대 80자 (4줄 권장)
+                  </div>
+                </div>
+                <div class="mt-2 p-3 bg-pink-50 border border-pink-200 rounded-md">
+                  <p class="text-sm text-pink-800">💡 카툰패 팁: 밝고 따뜻한 표현과 이모티콘을 활용해보세요</p>
+                </div>
+              </div>
+
+              <!-- Acrylic Realistic Style -->
+              <div class="style-input acrylic_realistic <%= 'hidden' unless @order.plaque_style == 'acrylic_realistic' %>">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">🎨 아크릴패 (실사) 제작 정보</h3>
+                
+                <%= form.label :plaque_message, "실사 스타일 문구 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <p class="text-sm text-gray-600 mb-3">생생한 실사 스타일로 제작할 문구를 입력해주세요</p>
+                <div class="relative">
+                  <%= form.text_area :plaque_message, 
+                        class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none #{'border-red-300' if @order.errors[:plaque_message].any?}",
+                        rows: 3,
+                        placeholder: "예: 김철수님\n정년퇴임을 축하드립니다\n30년간 수고하셨습니다\n2025.02.28",
+                        required: @order.plaque_style == 'acrylic_realistic',
+                        data: { style: 'acrylic_realistic' },
+                        id: 'plaque_message_acrylic_realistic' %>
+                  <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                    최대 100자 (4줄 권장)
+                  </div>
+                </div>
+                <div class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                  <p class="text-sm text-blue-800">💡 실사패 팁: 정확한 날짜와 정중한 표현을 사용하세요</p>
+                </div>
+              </div>
+
+              <% if @order.errors[:plaque_message].any? %>
+                <p class="text-red-500 text-sm mt-3"><%= @order.errors[:plaque_message].first %></p>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+          <% if @step > 1 %>
+            <%= link_to "이전으로", edit_order_path(@order.naver_order_number, step: @step - 1), 
+                  class: "btn-secondary" %>
+          <% else %>
+            <div></div>
+          <% end %>
+
+          <% if @step < 3 %>
+            <%= form.submit "다음 단계", class: "btn-primary" %>
+          <% else %>
+            <%= form.submit "주문 완료", class: "btn-primary" %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+// Function to initialize everything
+function initializePageFunctionality() {
+  // Style selection functionality
+  function setupStyleSelection() {
+    const styleRadios = document.querySelectorAll('input[name="order[plaque_style]"]');
+    const messageSection = document.getElementById('message_section');
+    const styleInputs = document.querySelectorAll('.style-input');
+    
+    console.log('Setting up style selection - Found style radios:', styleRadios.length);
+    console.log('Found message section:', messageSection);
+    console.log('Found style inputs:', styleInputs.length);
+    
+    // Remove existing listeners and add new ones
+    styleRadios.forEach(radio => {
+      // Remove existing listener if any
+      radio.removeEventListener('change', handleStyleChange);
+      // Add new listener
+      radio.addEventListener('change', handleStyleChange);
+    });
+    
+    function handleStyleChange() {
+      console.log('Style radio changed:', this.value, 'checked:', this.checked);
+      
+      if (this.checked) {
+        const messageSection = document.getElementById('message_section');
+        const styleInputs = document.querySelectorAll('.style-input');
+        const allTextareas = document.querySelectorAll('textarea[name="order[plaque_message]"]');
+        
+        // Show message section
+        if (messageSection) {
+          console.log('Showing message section');
+          messageSection.classList.remove('hidden');
+          messageSection.classList.add('animate-fade-in');
+        }
+        
+        // Remove required from all textareas first
+        allTextareas.forEach(textarea => {
+          textarea.removeAttribute('required');
+        });
+        
+        // Hide all style inputs
+        styleInputs.forEach(input => {
+          input.classList.add('hidden');
+        });
+        
+        // Show the selected style input
+        const selectedStyleInput = document.querySelector(`.style-input.${this.value}`);
+        console.log('Selected style input:', selectedStyleInput);
+        
+        if (selectedStyleInput) {
+          console.log('Showing selected style input for:', this.value);
+          selectedStyleInput.classList.remove('hidden');
+          selectedStyleInput.classList.add('animate-fade-in');
+          
+          // Add required to the visible textarea
+          const visibleTextarea = selectedStyleInput.querySelector('textarea[name="order[plaque_message]"]');
+          if (visibleTextarea) {
+            visibleTextarea.setAttribute('required', 'required');
+            console.log('Added required to textarea for style:', this.value);
+          }
+        }
+      }
+    }
+  }
+
+  // Image slot functionality for main images
+  function setupImageSlots() {
+    const imageSlots = document.querySelectorAll('.image-slot');
+    const mainImagesInput = document.getElementById('main_images_input');
+    
+    // Remove existing event listeners first to prevent duplicates
+    imageSlots.forEach(slot => {
+      // Remove any existing click listeners by cloning the element
+      const newSlot = slot.cloneNode(true);
+      slot.parentNode.replaceChild(newSlot, slot);
+    });
+    
+    // Get fresh references after cloning
+    const refreshedImageSlots = document.querySelectorAll('.image-slot');
+    
+    // Add click event listeners to refreshed slots
+    refreshedImageSlots.forEach(slot => {
+      slot.addEventListener('click', function() {
+        mainImagesInput.click();
+      });
+    });
+    
+    if (mainImagesInput) {
+      // Remove existing change listener
+      mainImagesInput.removeEventListener('change', handleMainImageChange);
+      // Add new change listener
+      mainImagesInput.addEventListener('change', handleMainImageChange);
+    }
+  }
+  
+  // Separate function for main image change handling
+  function handleMainImageChange(e) {
+    const files = Array.from(e.target.files);
+    const imageSlots = document.querySelectorAll('.image-slot');
+    
+    // Clear existing previews in slots
+    imageSlots.forEach(slot => {
+      slot.innerHTML = `
+        <svg class="w-4 h-4 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        <span class="text-xs text-gray-500 mt-1">${slot.dataset.slot * 1 + 1}</span>
+      `;
+      slot.className = 'image-slot aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center hover:border-blue-400 transition-all cursor-pointer text-center p-2';
+      
+      // Re-add click listener to cleared slot
+      slot.addEventListener('click', function() {
+        document.getElementById('main_images_input').click();
+      });
+    });
+    
+    // Show previews in slots
+    files.slice(0, 5).forEach((file, index) => {
+      if (file.type.startsWith('image/') && index < 5) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const slot = imageSlots[index];
+          slot.innerHTML = `
+            <img src="${e.target.result}" class="w-full h-full object-cover rounded-lg">
+            <div class="absolute top-1 right-1 bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded">
+              ${index + 1}
+            </div>
+          `;
+          slot.className = 'image-slot aspect-square border-2 border-blue-500 rounded-lg relative overflow-hidden cursor-pointer';
+          
+          // Re-add click listener to image slot
+          slot.addEventListener('click', function() {
+            document.getElementById('main_images_input').click();
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  // Optional images preview with slots
+  function handleOptionalImages() {
+    const optionalImageSlots = document.querySelectorAll('.optional-image-slot');
+    const optionalImagesInput = document.getElementById('optional_images_input');
+    
+    // Remove existing event listeners first to prevent duplicates
+    optionalImageSlots.forEach(slot => {
+      // Remove any existing click listeners by cloning the element
+      const newSlot = slot.cloneNode(true);
+      slot.parentNode.replaceChild(newSlot, slot);
+    });
+    
+    // Get fresh references after cloning
+    const refreshedOptionalSlots = document.querySelectorAll('.optional-image-slot');
+    
+    // Add click event listeners to refreshed slots
+    refreshedOptionalSlots.forEach(slot => {
+      slot.addEventListener('click', function() {
+        optionalImagesInput.click();
+      });
+    });
+    
+    if (optionalImagesInput) {
+      // Remove existing change listener
+      optionalImagesInput.removeEventListener('change', handleOptionalImageChange);
+      // Add new change listener
+      optionalImagesInput.addEventListener('change', handleOptionalImageChange);
+    }
+  }
+  
+  // Separate function for optional image change handling
+  function handleOptionalImageChange(e) {
+    const files = Array.from(e.target.files);
+    const optionalImageSlots = document.querySelectorAll('.optional-image-slot');
+    
+    // Clear existing previews in slots
+    optionalImageSlots.forEach(slot => {
+      slot.innerHTML = `
+        <svg class="w-4 h-4 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        <span class="text-xs text-gray-500 mt-1">${slot.dataset.slot * 1 + 1}</span>
+      `;
+      slot.className = 'optional-image-slot aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center hover:border-blue-400 transition-all cursor-pointer text-center p-2';
+      
+      // Re-add click listener to cleared slot
+      slot.addEventListener('click', function() {
+        document.getElementById('optional_images_input').click();
+      });
+    });
+    
+    // Show previews in slots
+    files.slice(0, 5).forEach((file, index) => {
+      if (file.type.startsWith('image/') && index < 5) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const slot = optionalImageSlots[index];
+          slot.innerHTML = `
+            <img src="${e.target.result}" class="w-full h-full object-cover rounded-lg">
+            <div class="absolute top-1 right-1 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded">
+              추가 ${index + 1}
+            </div>
+          `;
+          slot.className = 'optional-image-slot aspect-square border-2 border-green-500 rounded-lg relative overflow-hidden cursor-pointer';
+          
+          // Re-add click listener to image slot
+          slot.addEventListener('click', function() {
+            document.getElementById('optional_images_input').click();
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  // Character counter for message - updated for style-specific limits
+  function setupCharacterCounter() {
+    const messageTextareas = document.querySelectorAll('textarea[name="order[plaque_message]"]');
+    
+    messageTextareas.forEach(textarea => {
+      const counter = textarea.parentNode.querySelector('.text-xs.text-gray-400');
+      const style = textarea.dataset.style;
+      
+      // Set limits based on style
+      let maxLength = 200;
+      let label = '자';
+      
+      switch(style) {
+        case 'gold_metal':
+        case 'silver_metal':
+          maxLength = 50;
+          label = '자 (3줄 권장)';
+          break;
+        case 'acrylic_cartoon':
+          maxLength = 80;
+          label = '자 (4줄 권장)';
+          break;
+        case 'acrylic_realistic':
+          maxLength = 100;
+          label = '자 (4줄 권장)';
+          break;
+      }
+      
+      textarea.addEventListener('input', function() {
+        const length = this.value.length;
+        counter.textContent = `${length}/${maxLength}${label}`;
+        
+        if (length > maxLength) {
+          counter.classList.add('text-red-500');
+          counter.classList.remove('text-gray-400');
+        } else {
+          counter.classList.add('text-gray-400');
+          counter.classList.remove('text-red-500');
+        }
+      });
+      
+      // Initialize counter
+      const length = textarea.value.length;
+      counter.textContent = `${length}/${maxLength}${label}`;
+    });
+  }
+
+  // Step 1 validation functions
+  function validateStep1() {
+    let isValid = true;
+    
+    // Validate orderer name
+    const nameInput = document.getElementById('orderer_name_input');
+    const nameError = document.getElementById('orderer_name_error');
+    
+    if (nameInput) {
+      const name = nameInput.value.trim();
+      if (!name) {
+        nameError.textContent = '주문자 성함을 입력해주세요.';
+        nameError.classList.remove('hidden');
+        nameInput.classList.add('border-red-300');
+        nameInput.classList.remove('border-gray-300');
+        isValid = false;
+      } else {
+        nameError.classList.add('hidden');
+        nameInput.classList.remove('border-red-300');
+        nameInput.classList.add('border-gray-300');
+      }
+    }
+    
+    // Validate main images
+    const imagesInput = document.getElementById('main_images_input');
+    const imagesError = document.getElementById('main_images_error');
+    
+    if (imagesInput) {
+      const hasImages = imagesInput.files.length > 0;
+      if (!hasImages) {
+        imagesError.textContent = '메인 사진을 최소 1개 업로드해주세요.';
+        imagesError.classList.remove('hidden');
+        isValid = false;
+      } else {
+        imagesError.classList.add('hidden');
+      }
+    }
+    
+    return isValid;
+  }
+  
+  // Real-time validation setup
+  function setupRealTimeValidation() {
+    // Name input validation
+    const nameInput = document.getElementById('orderer_name_input');
+    if (nameInput) {
+      nameInput.addEventListener('blur', validateStep1);
+      nameInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+          const nameError = document.getElementById('orderer_name_error');
+          nameError.classList.add('hidden');
+          this.classList.remove('border-red-300');
+          this.classList.add('border-gray-300');
+        }
+      });
+    }
+    
+    // Images input validation
+    const imagesInput = document.getElementById('main_images_input');
+    if (imagesInput) {
+      imagesInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+          const imagesError = document.getElementById('main_images_error');
+          imagesError.classList.add('hidden');
+        }
+        validateStep1();
+      });
+    }
+  }
+  
+  // Next step button validation
+  function setupButtonValidation() {
+    const form = document.querySelector('form');
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        // Only validate for step 1
+        const stepInput = document.querySelector('input[name="step"]');
+        if (stepInput && stepInput.value === '1') {
+          if (!validateStep1()) {
+            e.preventDefault();
+            
+            // Scroll to first error
+            const firstError = document.querySelector('.text-red-500:not(.hidden)');
+            if (firstError) {
+              firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // Initialize required attributes on page load
+  function initializeRequiredAttributes() {
+    const allTextareas = document.querySelectorAll('textarea[name="order[plaque_message]"]');
+    const checkedRadio = document.querySelector('input[name="order[plaque_style]"]:checked');
+    
+    // Remove required from all textareas first
+    allTextareas.forEach(textarea => {
+      textarea.removeAttribute('required');
+    });
+    
+    // Add required only to the visible one (if any style is selected)
+    if (checkedRadio) {
+      const selectedStyleInput = document.querySelector(`.style-input.${checkedRadio.value}`);
+      if (selectedStyleInput) {
+        const visibleTextarea = selectedStyleInput.querySelector('textarea[name="order[plaque_message]"]');
+        if (visibleTextarea) {
+          visibleTextarea.setAttribute('required', 'required');
+          console.log('Initialized required attribute for:', checkedRadio.value);
+        }
+      }
+    }
+  }
+
+  // Initialize all functionality
+  initializeRequiredAttributes();
+  setupStyleSelection();
+  setupImageSlots();
+  handleOptionalImages();
+  setupCharacterCounter();
+  setupRealTimeValidation();
+  setupButtonValidation();
+}
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', initializePageFunctionality);
+
+// Initialize on Turbo navigation (for step changes)
+document.addEventListener('turbo:load', initializePageFunctionality);
+
+// Initialize on page visibility change (fallback)
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) {
+    setTimeout(initializePageFunctionality, 100);
+  }
+});
+</script>
+
+<style>
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+</style>

@@ -1,0 +1,133 @@
+<div class="px-4 sm:px-6 lg:px-8">
+  <div class="sm:flex sm:items-center">
+    <div class="sm:flex-auto">
+      <h1 class="text-2xl font-semibold text-gray-900">주문 관리</h1>
+      <p class="mt-2 text-sm text-gray-700">
+        기념패 주문 현황을 확인하고 관리할 수 있습니다.
+      </p>
+    </div>
+  </div>
+
+  <!-- Status Filter Tabs -->
+  <div class="mt-8">
+    <div class="border-b border-gray-200">
+      <nav class="-mb-px flex space-x-8">
+        <% @status_counts.each do |status, count| %>
+          <%= link_to admin_orders_path(status: status), 
+                class: "#{@status_filter == status ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" do %>
+            <%= status %>
+            <span class="ml-2 py-0.5 px-2 rounded-full text-xs font-medium <%= @status_filter == status ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-900' %>">
+              <%= count %>
+            </span>
+          <% end %>
+        <% end %>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Orders Table -->
+  <div class="mt-8 flow-root">
+    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+      <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+        <% if @orders.any? %>
+          <table class="min-w-full divide-y divide-gray-300">
+            <thead>
+              <tr>
+                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
+                  주문번호
+                </th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  주문자
+                </th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  상태
+                </th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  스타일
+                </th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  주문일시
+                </th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  미리보기
+                </th>
+                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
+                  <span class="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <% @orders.each do |order| %>
+                <tr class="hover:bg-gray-50">
+                  <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
+                    <%= order.naver_order_number %>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                    <%= order.orderer_name %>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                    <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium 
+                      <%= case order.status
+                          when '주문접수' then 'bg-blue-100 text-blue-800'
+                          when '시안확정' then 'bg-yellow-100 text-yellow-800'
+                          when '제작중' then 'bg-purple-100 text-purple-800'
+                          when '배송중' then 'bg-orange-100 text-orange-800'
+                          when '배송완료' then 'bg-green-100 text-green-800'
+                          else 'bg-gray-100 text-gray-800'
+                          end %>">
+                      <%= order.status %>
+                    </span>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                    <%= case order.plaque_style
+                        when 'gold_metal' then '금속패 (골드)'
+                        when 'silver_metal' then '금속패 (실버)'
+                        when 'wood_classic' then '원목패 (클래식)'
+                        when 'crystal_premium' then '크리스탈패 (프리미엄)'
+                        else order.plaque_style
+                        end %>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                    <%= order.created_at.strftime("%Y-%m-%d %H:%M") %>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                    <% if order.main_images.attached? %>
+                      <div class="flex -space-x-1">
+                        <% order.main_images.limit(3).each do |image| %>
+                          <%= image_tag image, class: "h-8 w-8 rounded-full object-cover border-2 border-white" %>
+                        <% end %>
+                        <% if order.main_images.count > 3 %>
+                          <div class="h-8 w-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center">
+                            <span class="text-xs text-gray-600">+<%= order.main_images.count - 3 %></span>
+                          </div>
+                        <% end %>
+                      </div>
+                    <% else %>
+                      <span class="text-gray-400">이미지 없음</span>
+                    <% end %>
+                  </td>
+                  <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+                    <%= link_to "상세보기", admin_order_path(order), 
+                          class: "text-blue-600 hover:text-blue-900" %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% else %>
+          <div class="text-center py-12">
+            <div class="text-gray-500">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">주문이 없습니다</h3>
+              <p class="mt-1 text-sm text-gray-500">
+                <%= @status_filter == '전체' ? '아직 주문이 없습니다.' : "#{@status_filter} 상태의 주문이 없습니다." %>
+              </p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
