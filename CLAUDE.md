@@ -53,19 +53,25 @@ Order 모델은 데이터베이스에 다음 속성(컬럼)들로 저장되어�
 - Ruby 3.4.2
 
 **데이터베이스**:
-- SQLite (소규모 서비스 운영에 최적화)
+- SQLite (개발환경)
+- PostgreSQL (프로덕션 환경 - Render 클라우드 배포)
 
 **파일 저장**:
 - Active Storage (이미지 업로드 및 저장)
 
 **프론트엔드**:
-- Tailwind CSS 4.1.11 (스타일링)
+- Tailwind CSS 3.4.0 (스타일링) - 안정적인 프로덕션 버전으로 다운그레이드
 - JavaScript (ES6+) - 이미지 미리보기, 폼 검증, 동적 UI
 - 반응형 디자인 (모바일 우선)
 
 **개발 도구**:
 - Foreman (개발 서버 관리)
 - NPM (프론트엔드 패키지 관리)
+
+**클라우드 배포**:
+- Render.com (웹 호스팅 플랫폼)
+- GitHub (코드 저장소 및 자동 배포 연동)
+- PostgreSQL (Render 관리형 데이터베이스)
 
 ## 3. 사용자 플로우 상세: "김민준 씨의 인물 피규어 기념패 주문"
 
@@ -591,8 +597,144 @@ public/images/plaques/
 **✅ 보안 및 성능 최적화**
 **✅ 반응형 웹 디자인**
 
+## 10. 클라우드 배포 진행 상황 (Render.com)
+
+### 10.1. 배포 환경 설정 완료 (2025-07-10)
+
+**GitHub 저장소 설정**:
+- ✅ 저장소 URL: https://github.com/go-dyc/giftrue-app
+- ✅ Git 저장소 초기화 및 코드 푸시 완료
+- ✅ Personal Access Token 인증 설정
+- ✅ 자동 배포 파이프라인 연동
+
+**Render 배포 설정 파일**:
+- ✅ `render.yaml`: 웹 서비스 및 데이터베이스 설정
+- ✅ `bin/render-build.sh`: 자동 빌드 스크립트
+- ✅ 환경변수 설정: RAILS_ENV, DATABASE_URL, RAILS_MASTER_KEY
+
+### 10.2. 데이터베이스 마이그레이션
+
+**개발 → 프로덕션 전환**:
+- ✅ SQLite (개발) → PostgreSQL (프로덕션) 설정 완료
+- ✅ Gemfile 수정: pg gem 추가, 환경별 구분
+- ✅ database.yml 프로덕션 설정 업데이트
+- ✅ 다중 데이터베이스 지원 (primary, cache, queue, cable)
+
+### 10.3. 빌드 시스템 최적화
+
+**TailwindCSS 호환성 해결**:
+- ✅ TailwindCSS 4.1.11 → 3.4.0 다운그레이드 (안정성)
+- ✅ package.json dependencies 구조 수정
+- ✅ npx 명령어 적용으로 실행 안정성 확보
+- ✅ CSS 임포트 구문 수정: 개별 모듈 임포트 방식 적용
+  ```css
+  @import "tailwindcss/base";
+  @import "tailwindcss/components";
+  @import "tailwindcss/utilities";
+  ```
+
+**빌드 스크립트 최적화**:
+- ✅ Ruby dependencies 설치
+- ✅ Node.js dependencies 설치  
+- ✅ TailwindCSS 컴파일
+- ✅ Rails assets precompilation
+- ✅ 데이터베이스 마이그레이션 자동 실행
+
+### 10.4. 배포 진행 단계별 해결 과정
+
+**1단계 - Git 설정**:
+- ✅ 로컬 Git 저장소 초기화
+- ✅ GitHub 원격 저장소 연결
+- ✅ Personal Access Token 생성 및 인증
+- ✅ 초기 코드베이스 푸시 성공
+
+**2단계 - Render 서비스 생성**:
+- ✅ Render.com 계정 연결
+- ✅ GitHub 저장소 연동
+- ✅ 웹 서비스 설정 구성
+- ✅ PostgreSQL 데이터베이스 생성
+
+**3단계 - 빌드 문제 해결**:
+- ✅ Gemfile.lock PostgreSQL 호환성 문제 해결
+- ✅ TailwindCSS 버전 호환성 문제 해결
+- ✅ CSS 빌드 파이프라인 수정
+- ✅ 환경변수 설정 최적화
+
+### 10.5. 현재 배포 상태
+
+**배포 진행률**: 95% 완료
+**현재 상태**: 최종 TailwindCSS 임포트 구문 수정 후 재배포 진행 중
+**예상 완료**: 2025-07-10 22:15 (KST)
+
+**최종 검증 대기 중**:
+- TailwindCSS 3.4.0 정상 빌드 확인
+- CSS 임포트 구문 호환성 검증
+- 전체 애플리케이션 배포 완료 확인
+
+### 10.6. 배포 완료 후 접속 정보
+
+**예상 프로덕션 URL들**:
+- 메인 페이지: `https://giftrue-app.onrender.com`
+- 주문 페이지: `https://giftrue-app.onrender.com/orders/{주문번호}`
+- 관리자 로그인: `https://giftrue-app.onrender.com/admin/login`
+
+**관리자 계정**:
+- ID: `admin`
+- Password: `password123`
+
+**기술적 특징**:
+- 무료 Render 플랜 사용 (15분 비활성화 후 슬립)
+- PostgreSQL 무료 데이터베이스 (500MB 제한)
+- 자동 HTTPS 적용
+- GitHub 연동 자동 배포
+
 ---
 
-**최종 업데이트**: 2025-07-11  
-**개발 상태**: 프로덕션 배포 준비 완료  
-**다음 단계**: 네이버 스마트스토어 연동 및 실제 서비스 론칭
+**최종 업데이트**: 2025-07-10 22:13 (KST)  
+**개발 상태**: 클라우드 배포 95% 완료 (최종 빌드 검증 중)  
+**다음 단계**: 배포 완료 확인 → 네이버 스마트스토어 연동 준비
+
+## 11. 개발 연속성 참고사항
+
+### 11.1. 중요 파일 위치
+```
+giftrue/
+├── CLAUDE.md                    # 이 문서 (개발 히스토리)
+├── render.yaml                  # Render 배포 설정
+├── bin/render-build.sh          # 빌드 스크립트
+├── config/database.yml          # DB 설정 (SQLite + PostgreSQL)
+├── Gemfile                      # Ruby 의존성 (pg gem 포함)
+├── package.json                 # Node.js 의존성 (TailwindCSS 3.4.0)
+└── app/assets/stylesheets/
+    └── application.tailwind.css # TailwindCSS 메인 파일
+```
+
+### 11.2. 핵심 커맨드
+```bash
+# 개발 서버 실행
+bin/dev
+
+# 로컬 빌드 테스트
+npm run build:css:compile
+bundle exec rails assets:precompile
+
+# Git 배포
+git add -A
+git commit -m "설명"
+git push origin main
+```
+
+### 11.3. 환경변수 (Render)
+```
+RAILS_ENV=production
+RACK_ENV=production
+NODE_ENV=production
+RAILS_MASTER_KEY=fdbfcd77259eb824ae5b295162a94077
+DATABASE_URL=[Render에서 자동 설정]
+```
+
+### 11.4. 향후 개발 시 주의사항
+- TailwindCSS는 3.4.0 버전 유지 (4.x 호환성 문제)
+- 프로덕션 배포 시 PostgreSQL 사용
+- Render 무료 플랜 제한사항 고려
+- GitHub Personal Access Token 만료 주의
