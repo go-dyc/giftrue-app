@@ -9,7 +9,7 @@
   "browserslist": [
     "defaults"
   ],
-  "devDependencies": {
+  "dependencies": {
     "tailwindcss": "^4.1.11"
   }
 }

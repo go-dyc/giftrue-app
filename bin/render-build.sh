@@ -9,7 +9,7 @@ bundle install
 npm install
 
 # Build CSS with Tailwind
-npm run build:css
+npm run build:css:compile
 
 # Precompile assets
 bundle exec rails assets:precompile
