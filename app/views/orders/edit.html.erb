@@ -655,14 +655,16 @@ function initializePageFunctionality() {
     }
   }
   
-  // Next step button validation
+  // Form validation on submit
   function setupButtonValidation() {
     const form = document.querySelector('form');
     if (form) {
       form.addEventListener('submit', function(e) {
-        // Only validate for step 1
         const stepInput = document.querySelector('input[name="step"]');
-        if (stepInput && stepInput.value === '1') {
+        const currentStep = stepInput ? stepInput.value : '1';
+        
+        // Validate based on current step
+        if (currentStep === '1') {
           if (!validateStep1()) {
             e.preventDefault();
             
@@ -672,9 +674,42 @@ function initializePageFunctionality() {
               firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
           }
+        } else if (currentStep === '3') {
+          // Step 3 validation - check if style and message are selected
+          const completeStepInput = document.querySelector('input[name="complete_step"]');
+          console.log('Step 3 submit - complete_step input found:', !!completeStepInput);
+          
+          if (completeStepInput) {
+            const isValid = validateStep3();
+            console.log('Step 3 validation result:', isValid);
+            
+            if (!isValid) {
+              e.preventDefault();
+              alert('기념패 스타일과 문구를 모두 입력해주세요.');
+            } else {
+              console.log('Step 3 validation passed - form should submit');
+            }
+          }
         }
       });
     }
+  }
+  
+  // Step 3 validation function
+  function validateStep3() {
+    // Check if style is selected
+    const checkedRadio = document.querySelector('input[name="order[plaque_style]"]:checked');
+    if (!checkedRadio) {
+      return false;
+    }
+    
+    // Check if message is filled for the selected style
+    const visibleTextarea = document.querySelector(`.style-input.${checkedRadio.value}:not(.hidden) textarea[name="order[plaque_message]"]`);
+    if (!visibleTextarea || !visibleTextarea.value.trim()) {
+      return false;
+    }
+    
+    return true;
   }
 
   // Initialize required attributes on page load
