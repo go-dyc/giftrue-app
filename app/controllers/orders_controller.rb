@@ -200,6 +200,8 @@ class OrdersController < ApplicationController
 
   def order_params
     # 모든 단계에서 모든 파라미터를 허용하여 데이터 유지
-    params.require(:order).permit(:orderer_name, :plaque_style, :plaque_message, :additional_requests, main_images: [], optional_images: [])
+    params.require(:order).permit(:orderer_name, :plaque_style, :plaque_message, :additional_requests, 
+                                 :plaque_title, :plaque_name, :plaque_content, :plaque_top_message, :plaque_main_message,
+                                 main_images: [], optional_images: [])
   end
 end

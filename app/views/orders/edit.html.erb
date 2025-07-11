@@ -206,92 +206,200 @@
               
               <!-- Gold Metal Style -->
               <div class="style-input gold_metal <%= 'hidden' unless @order.plaque_style == 'gold_metal' %>">
-                <h3 class="text-lg font-semibold text-gray-900 mb-3">🥇 금속패 (골드) 제작 정보</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">🥇 금속패 (골드) 제작 정보</h3>
                 
-                <%= form.label :plaque_message, "새김 문구 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
-                <p class="text-sm text-gray-600 mb-3">고급스러운 골드 금속패에 새길 문구를 입력해주세요 (내용 최대 100자)</p>
-                <div class="relative">
-                  <%= form.text_area :plaque_message, 
-                        class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none #{'border-red-300' if @order.errors[:plaque_message].any?}",
-                        rows: 3,
-                        placeholder: "예: 감사합니다 아버님\n평생 건강하세요\n2025.01.01",
-                        required: @order.plaque_style == 'gold_metal',
-                        data: { style: 'gold_metal' },
-                        id: 'plaque_message_gold_metal' %>
-                  <div class="absolute bottom-2 right-2 text-xs text-gray-400">
-                    최대 50자 (3줄 권장)
+                <!-- 제목 입력 -->
+                <div class="mb-4">
+                  <%= form.label :plaque_title, "제목 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                  <div class="relative">
+                    <%= form.text_field :plaque_title,
+                          class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                          placeholder: "예: 감사패, 공로패, 축하패",
+                          maxlength: 15,
+                          required: @order.plaque_style == 'gold_metal',
+                          data: { style: 'gold_metal', counter: 'title' } %>
+                    <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                      <span id="title_counter_gold">0</span>/15자
+                    </div>
                   </div>
                 </div>
-                <div class="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+
+                <!-- 성함 입력 -->
+                <div class="mb-4">
+                  <%= form.label :plaque_name, "성함 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                  <div class="relative">
+                    <%= form.text_field :plaque_name,
+                          class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                          placeholder: "예: 김철수님, 홍길동 귀하",
+                          maxlength: 40,
+                          required: @order.plaque_style == 'gold_metal',
+                          data: { style: 'gold_metal', counter: 'name' } %>
+                    <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                      <span id="name_counter_gold">0</span>/40자
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 본문 입력 -->
+                <div class="mb-4">
+                  <%= form.label :plaque_content, "본문 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                  <div class="relative">
+                    <%= form.text_area :plaque_content,
+                          class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none",
+                          rows: 4,
+                          placeholder: "예: 오랜 시간 동안 헌신적으로 일해주신 노고에 깊이 감사드리며, 앞으로도 건강하고 행복한 나날 보내시길 바랍니다.",
+                          maxlength: 150,
+                          required: @order.plaque_style == 'gold_metal',
+                          data: { style: 'gold_metal', counter: 'content' } %>
+                    <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                      <span id="content_counter_gold">0</span>/150자
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                   <p class="text-sm text-yellow-800">💡 금속패 팁: 간결하고 임팩트 있는 문구가 좋습니다</p>
                 </div>
               </div>
 
               <!-- Silver Metal Style -->
               <div class="style-input silver_metal <%= 'hidden' unless @order.plaque_style == 'silver_metal' %>">
-                <h3 class="text-lg font-semibold text-gray-900 mb-3">🥈 금속패 (실버) 제작 정보</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">🥈 금속패 (실버) 제작 정보</h3>
                 
-                <%= form.label :plaque_message, "새김 문구 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
-                <p class="text-sm text-gray-600 mb-3">세련된 실버 금속패에 새길 문구를 입력해주세요</p>
-                <div class="relative">
-                  <%= form.text_area :plaque_message, 
-                        class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none #{'border-red-300' if @order.errors[:plaque_message].any?}",
-                        rows: 3,
-                        placeholder: "예: 우수사원 홍길동\n탁월한 성과를 축하합니다\n2025년 1월",
-                        required: @order.plaque_style == 'silver_metal',
-                        data: { style: 'silver_metal' },
-                        id: 'plaque_message_silver_metal' %>
-                  <div class="absolute bottom-2 right-2 text-xs text-gray-400">
-                    최대 50자 (3줄 권장)
+                <!-- 제목 입력 -->
+                <div class="mb-4">
+                  <%= form.label :plaque_title, "제목 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                  <div class="relative">
+                    <%= form.text_field :plaque_title,
+                          class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                          placeholder: "예: 우수사원상, 공로패, 인정패",
+                          maxlength: 15,
+                          required: @order.plaque_style == 'silver_metal',
+                          data: { style: 'silver_metal', counter: 'title' } %>
+                    <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                      <span id="title_counter_silver">0</span>/15자
+                    </div>
                   </div>
                 </div>
-                <div class="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-md">
+
+                <!-- 성함 입력 -->
+                <div class="mb-4">
+                  <%= form.label :plaque_name, "성함 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                  <div class="relative">
+                    <%= form.text_field :plaque_name,
+                          class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                          placeholder: "예: 홍길동, 김영희 과장님",
+                          maxlength: 40,
+                          required: @order.plaque_style == 'silver_metal',
+                          data: { style: 'silver_metal', counter: 'name' } %>
+                    <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                      <span id="name_counter_silver">0</span>/40자
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 본문 입력 -->
+                <div class="mb-4">
+                  <%= form.label :plaque_content, "본문 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                  <div class="relative">
+                    <%= form.text_area :plaque_content,
+                          class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none",
+                          rows: 4,
+                          placeholder: "예: 탁월한 업무 성과와 모범적인 근무 태도로 회사 발전에 기여한 공로를 인정하여 이 상을 수여합니다.",
+                          maxlength: 150,
+                          required: @order.plaque_style == 'silver_metal',
+                          data: { style: 'silver_metal', counter: 'content' } %>
+                    <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                      <span id="content_counter_silver">0</span>/150자
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-3 bg-gray-50 border border-gray-200 rounded-md">
                   <p class="text-sm text-gray-700">💡 실버패 팁: 깔끔하고 전문적인 문구가 어울립니다</p>
                 </div>
               </div>
 
               <!-- Acrylic Cartoon Style -->
               <div class="style-input acrylic_cartoon <%= 'hidden' unless @order.plaque_style == 'acrylic_cartoon' %>">
-                <h3 class="text-lg font-semibold text-gray-900 mb-3">🎨 아크릴패 (카툰) 제작 정보</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">🎨 아크릴패 (카툰) 제작 정보</h3>
                 
-                <%= form.label :plaque_message, "카툰 스타일 문구 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
-                <p class="text-sm text-gray-600 mb-3">귀여운 카툰 스타일로 제작할 문구를 입력해주세요</p>
-                <div class="relative">
-                  <%= form.text_area :plaque_message, 
-                        class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none #{'border-red-300' if @order.errors[:plaque_message].any?}",
-                        rows: 4,
-                        placeholder: "예: 우리 가족 최고!\n사랑해요 할머니♥\n건강하세요\n2025년",
-                        required: @order.plaque_style == 'acrylic_cartoon',
-                        data: { style: 'acrylic_cartoon' },
-                        id: 'plaque_message_acrylic_cartoon' %>
-                  <div class="absolute bottom-2 right-2 text-xs text-gray-400">
-                    최대 80자 (4줄 권장)
+                <!-- 상단문구 입력 -->
+                <div class="mb-4">
+                  <%= form.label :plaque_top_message, "상단문구 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                  <div class="relative">
+                    <%= form.text_field :plaque_top_message,
+                          class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                          placeholder: "예: 사랑해요♥, 축하해요!, 고마워요",
+                          maxlength: 10,
+                          required: @order.plaque_style == 'acrylic_cartoon',
+                          data: { style: 'acrylic_cartoon', counter: 'top' } %>
+                    <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                      <span id="top_counter_cartoon">0</span>/10자
+                    </div>
                   </div>
                 </div>
-                <div class="mt-2 p-3 bg-pink-50 border border-pink-200 rounded-md">
+
+                <!-- 메시지 입력 -->
+                <div class="mb-4">
+                  <%= form.label :plaque_main_message, "메시지 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                  <div class="relative">
+                    <%= form.text_area :plaque_main_message,
+                          class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none",
+                          rows: 2,
+                          placeholder: "예: 우리 가족 최고! 건강하세요",
+                          maxlength: 25,
+                          required: @order.plaque_style == 'acrylic_cartoon',
+                          data: { style: 'acrylic_cartoon', counter: 'main' } %>
+                    <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                      <span id="main_counter_cartoon">0</span>/25자
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-3 bg-pink-50 border border-pink-200 rounded-md">
                   <p class="text-sm text-pink-800">💡 카툰패 팁: 밝고 따뜻한 표현과 이모티콘을 활용해보세요</p>
                 </div>
               </div>
 
               <!-- Acrylic Realistic Style -->
               <div class="style-input acrylic_realistic <%= 'hidden' unless @order.plaque_style == 'acrylic_realistic' %>">
-                <h3 class="text-lg font-semibold text-gray-900 mb-3">🎨 아크릴패 (실사) 제작 정보</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">📸 아크릴패 (실사) 제작 정보</h3>
                 
-                <%= form.label :plaque_message, "실사 스타일 문구 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
-                <p class="text-sm text-gray-600 mb-3">생생한 실사 스타일로 제작할 문구를 입력해주세요</p>
-                <div class="relative">
-                  <%= form.text_area :plaque_message, 
-                        class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none #{'border-red-300' if @order.errors[:plaque_message].any?}",
-                        rows: 3,
-                        placeholder: "예: 김철수님\n정년퇴임을 축하드립니다\n30년간 수고하셨습니다\n2025.02.28",
-                        required: @order.plaque_style == 'acrylic_realistic',
-                        data: { style: 'acrylic_realistic' },
-                        id: 'plaque_message_acrylic_realistic' %>
-                  <div class="absolute bottom-2 right-2 text-xs text-gray-400">
-                    최대 100자 (4줄 권장)
+                <!-- 상단문구 입력 -->
+                <div class="mb-4">
+                  <%= form.label :plaque_top_message, "상단문구 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                  <div class="relative">
+                    <%= form.text_field :plaque_top_message,
+                          class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                          placeholder: "예: 감사합니다, 축하드립니다, 고맙습니다",
+                          maxlength: 10,
+                          required: @order.plaque_style == 'acrylic_realistic',
+                          data: { style: 'acrylic_realistic', counter: 'top' } %>
+                    <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                      <span id="top_counter_realistic">0</span>/10자
+                    </div>
                   </div>
                 </div>
-                <div class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+
+                <!-- 메시지 입력 -->
+                <div class="mb-4">
+                  <%= form.label :plaque_main_message, "메시지 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                  <div class="relative">
+                    <%= form.text_area :plaque_main_message,
+                          class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none",
+                          rows: 2,
+                          placeholder: "예: 건강하고 행복하세요",
+                          maxlength: 25,
+                          required: @order.plaque_style == 'acrylic_realistic',
+                          data: { style: 'acrylic_realistic', counter: 'main' } %>
+                    <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                      <span id="main_counter_realistic">0</span>/25자
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-3 bg-blue-50 border border-blue-200 rounded-md">
                   <p class="text-sm text-blue-800">💡 실사패 팁: 정확한 날짜와 정중한 표현을 사용하세요</p>
                 </div>
               </div>
@@ -350,7 +458,6 @@ function initializePageFunctionality() {
       if (this.checked) {
         const messageSection = document.getElementById('message_section');
         const styleInputs = document.querySelectorAll('.style-input');
-        const allTextareas = document.querySelectorAll('textarea[name="order[plaque_message]"]');
         
         // Show message section
         if (messageSection) {
@@ -359,9 +466,9 @@ function initializePageFunctionality() {
           messageSection.classList.add('animate-fade-in');
         }
         
-        // Remove required from all textareas first
-        allTextareas.forEach(textarea => {
-          textarea.removeAttribute('required');
+        // Remove required from all inputs first
+        document.querySelectorAll('input[data-style], textarea[data-style]').forEach(input => {
+          input.removeAttribute('required');
         });
         
         // Hide all style inputs
@@ -378,12 +485,12 @@ function initializePageFunctionality() {
           selectedStyleInput.classList.remove('hidden');
           selectedStyleInput.classList.add('animate-fade-in');
           
-          // Add required to the visible textarea
-          const visibleTextarea = selectedStyleInput.querySelector('textarea[name="order[plaque_message]"]');
-          if (visibleTextarea) {
-            visibleTextarea.setAttribute('required', 'required');
-            console.log('Added required to textarea for style:', this.value);
-          }
+          // Add required to the visible inputs for this style
+          const visibleInputs = selectedStyleInput.querySelectorAll('input[data-style="' + this.value + '"], textarea[data-style="' + this.value + '"]');
+          visibleInputs.forEach(input => {
+            input.setAttribute('required', 'required');
+            console.log('Added required to input for style:', this.value);
+          });
         }
       }
     }
@@ -539,50 +646,60 @@ function initializePageFunctionality() {
     });
   }
 
-  // Character counter for message - updated for style-specific limits
+  // Character counter for all input fields
   function setupCharacterCounter() {
-    const messageTextareas = document.querySelectorAll('textarea[name="order[plaque_message]"]');
+    // Setup counters for all input fields with data-counter attribute
+    const inputFields = document.querySelectorAll('input[data-counter], textarea[data-counter]');
     
-    messageTextareas.forEach(textarea => {
-      const counter = textarea.parentNode.querySelector('.text-xs.text-gray-400');
-      const style = textarea.dataset.style;
+    inputFields.forEach(field => {
+      const counterType = field.dataset.counter;
+      const style = field.dataset.style;
       
-      // Set limits based on style
-      let maxLength = 200;
-      let label = '자';
-      
-      switch(style) {
-        case 'gold_metal':
-        case 'silver_metal':
-          maxLength = 50;
-          label = '자 (3줄 권장)';
+      // Find the corresponding counter element
+      let counterId = '';
+      switch(counterType) {
+        case 'title':
+          counterId = `title_counter_${style === 'gold_metal' ? 'gold' : 'silver'}`;
           break;
-        case 'acrylic_cartoon':
-          maxLength = 80;
-          label = '자 (4줄 권장)';
+        case 'name':
+          counterId = `name_counter_${style === 'gold_metal' ? 'gold' : 'silver'}`;
           break;
-        case 'acrylic_realistic':
-          maxLength = 100;
-          label = '자 (4줄 권장)';
+        case 'content':
+          counterId = `content_counter_${style === 'gold_metal' ? 'gold' : 'silver'}`;
+          break;
+        case 'top':
+          counterId = `top_counter_${style === 'acrylic_cartoon' ? 'cartoon' : 'realistic'}`;
+          break;
+        case 'main':
+          counterId = `main_counter_${style === 'acrylic_cartoon' ? 'cartoon' : 'realistic'}`;
           break;
       }
       
-      textarea.addEventListener('input', function() {
-        const length = this.value.length;
-        counter.textContent = `${length}/${maxLength}${label}`;
+      const counter = document.getElementById(counterId);
+      if (counter) {
+        // Add input event listener
+        field.addEventListener('input', function() {
+          const length = this.value.length;
+          const maxLength = parseInt(this.getAttribute('maxlength')) || 0;
+          counter.textContent = length;
+          
+          // Change color based on length
+          if (length > maxLength * 0.9) {
+            counter.classList.add('text-red-500');
+            counter.classList.remove('text-gray-400');
+          } else if (length > maxLength * 0.7) {
+            counter.classList.add('text-yellow-500');
+            counter.classList.remove('text-gray-400', 'text-red-500');
+          } else {
+            counter.classList.add('text-gray-400');
+            counter.classList.remove('text-red-500', 'text-yellow-500');
+          }
+        });
         
-        if (length > maxLength) {
-          counter.classList.add('text-red-500');
-          counter.classList.remove('text-gray-400');
-        } else {
-          counter.classList.add('text-gray-400');
-          counter.classList.remove('text-red-500');
-        }
-      });
-      
-      // Initialize counter
-      const length = textarea.value.length;
-      counter.textContent = `${length}/${maxLength}${label}`;
+        // Initialize counter
+        const length = field.value.length;
+        counter.textContent = length;
+      }
     });
   }
 
@@ -704,34 +821,56 @@ function initializePageFunctionality() {
       return false;
     }
     
-    // Check if message is filled for the selected style
-    const visibleTextarea = document.querySelector(`.style-input.${checkedRadio.value}:not(.hidden) textarea[name="order[plaque_message]"]`);
-    if (!visibleTextarea || !visibleTextarea.value.trim()) {
+    const style = checkedRadio.value;
+    const selectedStyleInput = document.querySelector(`.style-input.${style}:not(.hidden)`);
+    
+    if (!selectedStyleInput) {
       return false;
     }
     
-    return true;
+    // Check required fields based on style
+    let isValid = true;
+    
+    if (style === 'gold_metal' || style === 'silver_metal') {
+      // Metal plaques: title, name, content
+      const titleInput = selectedStyleInput.querySelector('input[name="order[plaque_title]"]');
+      const nameInput = selectedStyleInput.querySelector('input[name="order[plaque_name]"]');
+      const contentInput = selectedStyleInput.querySelector('textarea[name="order[plaque_content]"]');
+      
+      if (!titleInput || !titleInput.value.trim()) isValid = false;
+      if (!nameInput || !nameInput.value.trim()) isValid = false;
+      if (!contentInput || !contentInput.value.trim()) isValid = false;
+    } else if (style === 'acrylic_cartoon' || style === 'acrylic_realistic') {
+      // Acrylic plaques: top message, main message
+      const topInput = selectedStyleInput.querySelector('input[name="order[plaque_top_message]"]');
+      const mainInput = selectedStyleInput.querySelector('textarea[name="order[plaque_main_message]"]');
+      
+      if (!topInput || !topInput.value.trim()) isValid = false;
+      if (!mainInput || !mainInput.value.trim()) isValid = false;
+    }
+    
+    return isValid;
   }
 
   // Initialize required attributes on page load
   function initializeRequiredAttributes() {
-    const allTextareas = document.querySelectorAll('textarea[name="order[plaque_message]"]');
+    const allInputs = document.querySelectorAll('input[data-style], textarea[data-style]');
     const checkedRadio = document.querySelector('input[name="order[plaque_style]"]:checked');
     
-    // Remove required from all textareas first
-    allTextareas.forEach(textarea => {
-      textarea.removeAttribute('required');
+    // Remove required from all inputs first
+    allInputs.forEach(input => {
+      input.removeAttribute('required');
     });
     
-    // Add required only to the visible one (if any style is selected)
+    // Add required only to the visible ones (if any style is selected)
     if (checkedRadio) {
       const selectedStyleInput = document.querySelector(`.style-input.${checkedRadio.value}`);
       if (selectedStyleInput) {
-        const visibleTextarea = selectedStyleInput.querySelector('textarea[name="order[plaque_message]"]');
-        if (visibleTextarea) {
-          visibleTextarea.setAttribute('required', 'required');
+        const visibleInputs = selectedStyleInput.querySelectorAll('input[data-style="' + checkedRadio.value + '"], textarea[data-style="' + checkedRadio.value + '"]');
+        visibleInputs.forEach(input => {
+          input.setAttribute('required', 'required');
           console.log('Initialized required attribute for:', checkedRadio.value);
-        }
+        });
       }
     }
   }

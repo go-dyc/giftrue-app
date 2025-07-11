@@ -14,6 +14,20 @@ class Order < ApplicationRecord
   validates :plaque_style, presence: true, if: :validate_step_3_or_complete?
   validates :plaque_message, presence: true, if: :validate_step_3_or_complete?
   
+  # New detailed field validations
+  validates :plaque_title, presence: true, if: :validate_metal_plaque_fields?
+  validates :plaque_name, presence: true, if: :validate_metal_plaque_fields?
+  validates :plaque_content, presence: true, if: :validate_metal_plaque_fields?
+  validates :plaque_top_message, presence: true, if: :validate_acrylic_plaque_fields?
+  validates :plaque_main_message, presence: true, if: :validate_acrylic_plaque_fields?
+  
+  # Length validations for new fields
+  validates :plaque_title, length: { maximum: 15 }, if: :validate_metal_plaque_fields?
+  validates :plaque_name, length: { maximum: 40 }, if: :validate_metal_plaque_fields?
+  validates :plaque_content, length: { maximum: 150 }, if: :validate_metal_plaque_fields?
+  validates :plaque_top_message, length: { maximum: 10 }, if: :validate_acrylic_plaque_fields?
+  validates :plaque_main_message, length: { maximum: 25 }, if: :validate_acrylic_plaque_fields?
+  
   # Custom validation for file types and sizes
   validate :validate_main_images_content_type_and_size
   validate :validate_optional_images_content_type_and_size
@@ -58,6 +72,15 @@ class Order < ApplicationRecord
   
   def validating_complete!
     @validating_complete = true
+  end
+  
+  # Additional validation context methods
+  def validate_metal_plaque_fields?
+    (@validating_step_3 || @validating_complete) && ['gold_metal', 'silver_metal'].include?(plaque_style)
+  end
+  
+  def validate_acrylic_plaque_fields?
+    (@validating_step_3 || @validating_complete) && ['acrylic_cartoon', 'acrylic_realistic'].include?(plaque_style)
   end
 
   private
