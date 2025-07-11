@@ -7,6 +7,7 @@ class Order < ApplicationRecord
   validates :naver_order_number, presence: true, uniqueness: true
   validates :status, presence: true, inclusion: { in: %w[주문접수 시안확정 제작중 배송중 배송완료] }
   validates :plaque_style, inclusion: { in: %w[gold_metal silver_metal acrylic_cartoon acrylic_realistic], allow_blank: true }
+  validates :expected_delivery_days, presence: true, numericality: { greater_than: 0, less_than_or_equal_to: 90 }
   
   # Step-based validations
   validates :orderer_name, presence: true, if: :validate_step_1_or_complete?
@@ -47,7 +48,7 @@ class Order < ApplicationRecord
   end
   
   def expected_delivery_date
-    created_at + 15.days
+    created_at + (expected_delivery_days || 15).days
   end
   
   def to_param

@@ -24,6 +24,7 @@ Rails.application.routes.draw do
     resources :orders, only: [:index, :show, :update] do
       member do
         patch :update_status
+        patch :update_delivery_days
       end
     end
   end
