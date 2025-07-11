@@ -12,14 +12,18 @@ class Order < ApplicationRecord
   validates :orderer_name, presence: true, if: :validate_step_1_or_complete?
   validates :main_images, presence: true, if: :validate_step_1_or_complete?
   validates :plaque_style, presence: true, if: :validate_step_3_or_complete?
-  validates :plaque_message, presence: true, if: :validate_step_3_or_complete?
+  # Remove old plaque_message validation - replaced with detailed field validations
+  # validates :plaque_message, presence: true, if: :validate_step_3_or_complete?
   
-  # New detailed field validations
-  validates :plaque_title, presence: true, if: :validate_metal_plaque_fields?
-  validates :plaque_name, presence: true, if: :validate_metal_plaque_fields?
-  validates :plaque_content, presence: true, if: :validate_metal_plaque_fields?
-  validates :plaque_top_message, presence: true, if: :validate_acrylic_plaque_fields?
-  validates :plaque_main_message, presence: true, if: :validate_acrylic_plaque_fields?
+  # New detailed field validations - individual fields are not required, but at least one must be filled
+  # validates :plaque_title, presence: true, if: :validate_metal_plaque_fields?
+  # validates :plaque_name, presence: true, if: :validate_metal_plaque_fields?
+  # validates :plaque_content, presence: true, if: :validate_metal_plaque_fields?
+  # validates :plaque_top_message, presence: true, if: :validate_acrylic_plaque_fields?
+  # validates :plaque_main_message, presence: true, if: :validate_acrylic_plaque_fields?
+  
+  # Custom validation to ensure at least one set of fields is filled
+  validate :validate_plaque_fields_completion, if: :validate_step_3_or_complete?
   
   # Length validations for new fields
   validates :plaque_title, length: { maximum: 15 }, if: :validate_metal_plaque_fields?
@@ -81,6 +85,24 @@ class Order < ApplicationRecord
   
   def validate_acrylic_plaque_fields?
     (@validating_step_3 || @validating_complete) && ['acrylic_cartoon', 'acrylic_realistic'].include?(plaque_style)
+  end
+
+  # Custom validation method to ensure proper field completion
+  def validate_plaque_fields_completion
+    return unless plaque_style.present?
+    
+    case plaque_style
+    when 'gold_metal', 'silver_metal'
+      # For metal plaques, check if at least one field has content
+      if plaque_title.blank? && plaque_name.blank? && plaque_content.blank?
+        errors.add(:base, '제목, 성함, 본문 중 최소 하나는 입력해주세요.')
+      end
+    when 'acrylic_cartoon', 'acrylic_realistic'
+      # For acrylic plaques, check if at least one field has content
+      if plaque_top_message.blank? && plaque_main_message.blank?
+        errors.add(:base, '상단문구, 메시지 중 최소 하나는 입력해주세요.')
+      end
+    end
   end
 
   private

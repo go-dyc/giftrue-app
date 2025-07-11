@@ -216,7 +216,6 @@
                           class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                           placeholder: "예: 감사패, 공로패, 축하패",
                           maxlength: 15,
-                          required: @order.plaque_style == 'gold_metal',
                           data: { style: 'gold_metal', counter: 'title' } %>
                     <div class="absolute bottom-2 right-2 text-xs text-gray-400">
                       <span id="title_counter_gold">0</span>/15자
@@ -232,7 +231,6 @@
                           class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                           placeholder: "예: 김철수님, 홍길동 귀하",
                           maxlength: 40,
-                          required: @order.plaque_style == 'gold_metal',
                           data: { style: 'gold_metal', counter: 'name' } %>
                     <div class="absolute bottom-2 right-2 text-xs text-gray-400">
                       <span id="name_counter_gold">0</span>/40자
@@ -249,7 +247,6 @@
                           rows: 4,
                           placeholder: "예: 오랜 시간 동안 헌신적으로 일해주신 노고에 깊이 감사드리며, 앞으로도 건강하고 행복한 나날 보내시길 바랍니다.",
                           maxlength: 150,
-                          required: @order.plaque_style == 'gold_metal',
                           data: { style: 'gold_metal', counter: 'content' } %>
                     <div class="absolute bottom-2 right-2 text-xs text-gray-400">
                       <span id="content_counter_gold">0</span>/150자
@@ -274,7 +271,6 @@
                           class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                           placeholder: "예: 우수사원상, 공로패, 인정패",
                           maxlength: 15,
-                          required: @order.plaque_style == 'silver_metal',
                           data: { style: 'silver_metal', counter: 'title' } %>
                     <div class="absolute bottom-2 right-2 text-xs text-gray-400">
                       <span id="title_counter_silver">0</span>/15자
@@ -290,7 +286,6 @@
                           class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                           placeholder: "예: 홍길동, 김영희 과장님",
                           maxlength: 40,
-                          required: @order.plaque_style == 'silver_metal',
                           data: { style: 'silver_metal', counter: 'name' } %>
                     <div class="absolute bottom-2 right-2 text-xs text-gray-400">
                       <span id="name_counter_silver">0</span>/40자
@@ -307,7 +302,6 @@
                           rows: 4,
                           placeholder: "예: 탁월한 업무 성과와 모범적인 근무 태도로 회사 발전에 기여한 공로를 인정하여 이 상을 수여합니다.",
                           maxlength: 150,
-                          required: @order.plaque_style == 'silver_metal',
                           data: { style: 'silver_metal', counter: 'content' } %>
                     <div class="absolute bottom-2 right-2 text-xs text-gray-400">
                       <span id="content_counter_silver">0</span>/150자
@@ -332,7 +326,6 @@
                           class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                           placeholder: "예: 사랑해요♥, 축하해요!, 고마워요",
                           maxlength: 10,
-                          required: @order.plaque_style == 'acrylic_cartoon',
                           data: { style: 'acrylic_cartoon', counter: 'top' } %>
                     <div class="absolute bottom-2 right-2 text-xs text-gray-400">
                       <span id="top_counter_cartoon">0</span>/10자
@@ -349,7 +342,6 @@
                           rows: 2,
                           placeholder: "예: 우리 가족 최고! 건강하세요",
                           maxlength: 25,
-                          required: @order.plaque_style == 'acrylic_cartoon',
                           data: { style: 'acrylic_cartoon', counter: 'main' } %>
                     <div class="absolute bottom-2 right-2 text-xs text-gray-400">
                       <span id="main_counter_cartoon">0</span>/25자
@@ -374,7 +366,6 @@
                           class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                           placeholder: "예: 감사합니다, 축하드립니다, 고맙습니다",
                           maxlength: 10,
-                          required: @order.plaque_style == 'acrylic_realistic',
                           data: { style: 'acrylic_realistic', counter: 'top' } %>
                     <div class="absolute bottom-2 right-2 text-xs text-gray-400">
                       <span id="top_counter_realistic">0</span>/10자
@@ -391,7 +382,6 @@
                           rows: 2,
                           placeholder: "예: 건강하고 행복하세요",
                           maxlength: 25,
-                          required: @order.plaque_style == 'acrylic_realistic',
                           data: { style: 'acrylic_realistic', counter: 'main' } %>
                     <div class="absolute bottom-2 right-2 text-xs text-gray-400">
                       <span id="main_counter_realistic">0</span>/25자
@@ -485,12 +475,12 @@ function initializePageFunctionality() {
           selectedStyleInput.classList.remove('hidden');
           selectedStyleInput.classList.add('animate-fade-in');
           
-          // Add required to the visible inputs for this style
-          const visibleInputs = selectedStyleInput.querySelectorAll('input[data-style="' + this.value + '"], textarea[data-style="' + this.value + '"]');
-          visibleInputs.forEach(input => {
-            input.setAttribute('required', 'required');
-            console.log('Added required to input for style:', this.value);
-          });
+          // Don't set individual fields as required anymore - we'll handle validation in JavaScript
+          // const visibleInputs = selectedStyleInput.querySelectorAll('input[data-style="' + this.value + '"], textarea[data-style="' + this.value + '"]');
+          // visibleInputs.forEach(input => {
+          //   input.setAttribute('required', 'required');
+          //   console.log('Added required to input for style:', this.value);
+          // });
         }
       }
     }
@@ -803,7 +793,14 @@ function initializePageFunctionality() {
             
             if (!isValid) {
               e.preventDefault();
-              alert('기념패 스타일과 문구를 모두 입력해주세요.');
+              const style = document.querySelector('input[name="order[plaque_style]"]:checked')?.value;
+              let message = '기념패 스타일을 선택하고 내용을 입력해주세요.';
+              if (style === 'gold_metal' || style === 'silver_metal') {
+                message = '제목, 성함, 본문 중 최소 하나는 입력해주세요.';
+              } else if (style === 'acrylic_cartoon' || style === 'acrylic_realistic') {
+                message = '상단문구, 메시지 중 최소 하나는 입력해주세요.';
+              }
+              alert(message);
             } else {
               console.log('Step 3 validation passed - form should submit');
             }
@@ -828,51 +825,42 @@ function initializePageFunctionality() {
       return false;
     }
     
-    // Check required fields based on style
-    let isValid = true;
+    // Check that at least one field is filled based on style
+    let hasContent = false;
     
     if (style === 'gold_metal' || style === 'silver_metal') {
-      // Metal plaques: title, name, content
+      // Metal plaques: at least one of title, name, or content must be filled
       const titleInput = selectedStyleInput.querySelector('input[name="order[plaque_title]"]');
       const nameInput = selectedStyleInput.querySelector('input[name="order[plaque_name]"]');
       const contentInput = selectedStyleInput.querySelector('textarea[name="order[plaque_content]"]');
       
-      if (!titleInput || !titleInput.value.trim()) isValid = false;
-      if (!nameInput || !nameInput.value.trim()) isValid = false;
-      if (!contentInput || !contentInput.value.trim()) isValid = false;
+      if ((titleInput && titleInput.value.trim()) || 
+          (nameInput && nameInput.value.trim()) || 
+          (contentInput && contentInput.value.trim())) {
+        hasContent = true;
+      }
     } else if (style === 'acrylic_cartoon' || style === 'acrylic_realistic') {
-      // Acrylic plaques: top message, main message
+      // Acrylic plaques: at least one of top message or main message must be filled
       const topInput = selectedStyleInput.querySelector('input[name="order[plaque_top_message]"]');
       const mainInput = selectedStyleInput.querySelector('textarea[name="order[plaque_main_message]"]');
       
-      if (!topInput || !topInput.value.trim()) isValid = false;
-      if (!mainInput || !mainInput.value.trim()) isValid = false;
+      if ((topInput && topInput.value.trim()) || 
+          (mainInput && mainInput.value.trim())) {
+        hasContent = true;
+      }
     }
     
-    return isValid;
+    return hasContent;
   }
 
-  // Initialize required attributes on page load
+  // Initialize required attributes on page load - no longer needed since we handle validation in JavaScript
   function initializeRequiredAttributes() {
+    // Remove all required attributes since we're handling validation in JavaScript
     const allInputs = document.querySelectorAll('input[data-style], textarea[data-style]');
-    const checkedRadio = document.querySelector('input[name="order[plaque_style]"]:checked');
-    
-    // Remove required from all inputs first
     allInputs.forEach(input => {
       input.removeAttribute('required');
     });
-    
-    // Add required only to the visible ones (if any style is selected)
-    if (checkedRadio) {
-      const selectedStyleInput = document.querySelector(`.style-input.${checkedRadio.value}`);
-      if (selectedStyleInput) {
-        const visibleInputs = selectedStyleInput.querySelectorAll('input[data-style="' + checkedRadio.value + '"], textarea[data-style="' + checkedRadio.value + '"]');
-        visibleInputs.forEach(input => {
-          input.setAttribute('required', 'required');
-          console.log('Initialized required attribute for:', checkedRadio.value);
-        });
-      }
-    }
+    console.log('Removed required attributes from all style inputs');
   }
 
   // Initialize all functionality
