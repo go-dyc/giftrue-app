@@ -32,10 +32,10 @@
             <p class="text-sm font-medium text-gray-500">기념패 스타일</p>
             <p class="text-lg text-gray-900">
               <%= case @order.plaque_style
-                  when 'gold_metal' then '금속패 (골드)'
-                  when 'silver_metal' then '금속패 (실버)'
-                  when 'wood_classic' then '원목패 (클래식)'
-                  when 'crystal_premium' then '크리스탈패 (프리미엄)'
+                  when 'gold_metal' then '🥇 금속패 (골드)'
+                  when 'silver_metal' then '🥈 금속패 (실버)'
+                  when 'acrylic_cartoon' then '🎨 아크릴패 (카툰)'
+                  when 'acrylic_realistic' then '📸 아크릴패 (실사)'
                   else @order.plaque_style
                   end %>
             </p>
@@ -76,7 +76,18 @@
             <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
               <% @order.main_images.each_with_index do |image, index| %>
                 <div class="relative">
-                  <%= image_tag image, class: "w-full h-24 object-cover rounded-lg border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer" %>
+                  <% begin %>
+                    <%= image_tag image, class: "w-full h-24 object-cover rounded-lg border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer" %>
+                  <% rescue => e %>
+                    <div class="w-full h-24 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                      <div class="text-center">
+                        <svg class="w-8 h-8 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <p class="text-xs text-gray-500">이미지 오류</p>
+                      </div>
+                    </div>
+                  <% end %>
                   <div class="absolute top-1 right-1 bg-black bg-opacity-70 text-white text-xs px-1.5 py-0.5 rounded">
                     <%= index + 1 %>
                   </div>
@@ -93,7 +104,18 @@
             <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
               <% @order.optional_images.each_with_index do |image, index| %>
                 <div class="relative">
-                  <%= image_tag image, class: "w-full h-24 object-cover rounded-lg border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer" %>
+                  <% begin %>
+                    <%= image_tag image, class: "w-full h-24 object-cover rounded-lg border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer" %>
+                  <% rescue => e %>
+                    <div class="w-full h-24 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                      <div class="text-center">
+                        <svg class="w-8 h-8 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <p class="text-xs text-gray-500">이미지 오류</p>
+                      </div>
+                    </div>
+                  <% end %>
                   <div class="absolute top-1 right-1 bg-black bg-opacity-70 text-white text-xs px-1.5 py-0.5 rounded">
                     추가 <%= index + 1 %>
                   </div>
