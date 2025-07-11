@@ -51,7 +51,49 @@
       <div class="bg-white shadow rounded-lg p-6 mb-6">
         <h2 class="text-lg font-medium text-gray-900 mb-4">기념패 문구</h2>
         <div class="bg-gray-50 rounded-lg p-4">
-          <p class="text-gray-900 whitespace-pre-wrap"><%= @order.plaque_message %></p>
+          <% case @order.plaque_style %>
+          <% when 'gold_metal', 'silver_metal' %>
+            <!-- 금속패 필드들 -->
+            <% if @order.plaque_title.present? %>
+              <div class="mb-3">
+                <span class="text-sm font-semibold text-gray-700 block">제목</span>
+                <span class="text-gray-900"><%= @order.plaque_title %></span>
+              </div>
+            <% end %>
+            <% if @order.plaque_name.present? %>
+              <div class="mb-3">
+                <span class="text-sm font-semibold text-gray-700 block">성함</span>
+                <span class="text-gray-900"><%= @order.plaque_name %></span>
+              </div>
+            <% end %>
+            <% if @order.plaque_content.present? %>
+              <div class="mb-3">
+                <span class="text-sm font-semibold text-gray-700 block">본문</span>
+                <p class="text-gray-900 whitespace-pre-wrap"><%= @order.plaque_content %></p>
+              </div>
+            <% end %>
+          <% when 'acrylic_cartoon', 'acrylic_realistic' %>
+            <!-- 아크릴패 필드들 -->
+            <% if @order.plaque_top_message.present? %>
+              <div class="mb-3">
+                <span class="text-sm font-semibold text-gray-700 block">상단문구</span>
+                <span class="text-gray-900"><%= @order.plaque_top_message %></span>
+              </div>
+            <% end %>
+            <% if @order.plaque_main_message.present? %>
+              <div class="mb-3">
+                <span class="text-sm font-semibold text-gray-700 block">메시지</span>
+                <span class="text-gray-900"><%= @order.plaque_main_message %></span>
+              </div>
+            <% end %>
+          <% else %>
+            <!-- 레거시 호환성을 위한 fallback -->
+            <% if @order.plaque_message.present? %>
+              <p class="text-gray-900 whitespace-pre-wrap"><%= @order.plaque_message %></p>
+            <% else %>
+              <p class="text-gray-500 italic">입력된 문구가 없습니다.</p>
+            <% end %>
+          <% end %>
         </div>
       </div>
 
