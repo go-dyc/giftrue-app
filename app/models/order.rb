@@ -50,6 +50,22 @@ class Order < ApplicationRecord
     status == '주문접수'
   end
   
+  def completed?
+    # 주문이 완료된 것으로 간주하는 조건: 모든 필수 정보가 입력되었고 저장되어 있는 경우
+    return false if naver_order_number.blank? || orderer_name.blank? || plaque_style.blank?
+    return false unless main_images.attached?
+    
+    # 스타일별 세부 필드 확인
+    case plaque_style
+    when 'gold_metal', 'silver_metal'
+      !(plaque_title.blank? && plaque_name.blank? && plaque_content.blank?)
+    when 'acrylic_cartoon', 'acrylic_realistic'
+      !(plaque_top_message.blank? && plaque_main_message.blank?)
+    else
+      false
+    end
+  end
+  
   def expected_delivery_date
     created_at + (expected_delivery_days || SystemSetting.default_delivery_days).days
   end

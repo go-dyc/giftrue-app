@@ -21,6 +21,12 @@ class OrdersController < ApplicationController
       return
     end
     
+    # 주문이 완료된 경우 complete 페이지로 자동 리디렉션
+    if @order.completed?
+      redirect_to complete_order_path(@order.naver_order_number), notice: '주문이 완료되었습니다.'
+      return
+    end
+    
     @step = (params[:step] || determine_current_step).to_i
     @step = 1 if @step < 1 || @step > 3
   end
