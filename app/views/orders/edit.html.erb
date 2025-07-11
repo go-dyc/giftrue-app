@@ -29,7 +29,8 @@
                     method: @order.persisted? ? :patch : :post, 
                     local: true, 
                     multipart: true, 
-                    class: "space-y-8" do |form| %>
+                    class: "space-y-8",
+                    data: { turbo: false } do |form| %>
         
         <%= hidden_field_tag :step, @step %>
         <%= hidden_field_tag :naver_order_number, @order.naver_order_number unless @order.persisted? %>
