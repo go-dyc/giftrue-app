@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_11_142900) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_11_145212) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -53,8 +53,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_11_142900) do
     t.text "plaque_content"
     t.string "plaque_top_message"
     t.string "plaque_main_message"
-    t.integer "expected_delivery_days", default: 15
+    t.integer "expected_delivery_days"
     t.index ["naver_order_number"], name: "index_orders_on_naver_order_number", unique: true
+  end
+
+  create_table "system_settings", force: :cascade do |t|
+    t.string "key", null: false
+    t.text "value"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_system_settings_on_key", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

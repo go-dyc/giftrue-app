@@ -10,6 +10,8 @@ Rails.application.routes.draw do
 
   # Admin routes - MUST come before customer order routes
   namespace :admin do
+    get "settings/index"
+    get "settings/update"
     get "orders/index"
     get "orders/show"
     get "orders/update"
@@ -21,6 +23,11 @@ Rails.application.routes.draw do
     delete :logout, to: "sessions#destroy"
     
     root "orders#index"
+    
+    # Settings routes
+    get "settings", to: "settings#index"
+    patch "settings", to: "settings#update"
+    
     resources :orders, only: [:index, :show, :update] do
       member do
         patch :update_status

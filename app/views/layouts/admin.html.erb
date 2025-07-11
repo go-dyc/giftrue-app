@@ -23,10 +23,16 @@
       <nav class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex justify-between h-16">
-            <div class="flex items-center">
+            <div class="flex items-center space-x-8">
               <h1 class="text-xl font-semibold text-gray-900">
                 <%= link_to "기념패 관리자", admin_root_path, class: "hover:text-blue-600" %>
               </h1>
+              <nav class="flex space-x-6">
+                <%= link_to "주문 관리", admin_orders_path, 
+                      class: "text-sm font-medium text-gray-700 hover:text-blue-600 #{'text-blue-600' if request.path.start_with?('/admin/orders')}" %>
+                <%= link_to "시스템 설정", admin_settings_path, 
+                      class: "text-sm font-medium text-gray-700 hover:text-blue-600 #{'text-blue-600' if request.path.start_with?('/admin/settings')}" %>
+              </nav>
             </div>
             <div class="flex items-center space-x-4">
               <span class="text-sm text-gray-600">관리자: <%= current_admin %></span>

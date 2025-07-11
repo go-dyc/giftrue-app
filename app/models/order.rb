@@ -9,6 +9,9 @@ class Order < ApplicationRecord
   validates :plaque_style, inclusion: { in: %w[gold_metal silver_metal acrylic_cartoon acrylic_realistic], allow_blank: true }
   validates :expected_delivery_days, presence: true, numericality: { greater_than: 0, less_than_or_equal_to: 90 }
   
+  # 새 주문 생성 시 시스템 기본값 적용
+  before_validation :set_default_delivery_days, on: :create
+  
   # Step-based validations
   validates :orderer_name, presence: true, if: :validate_step_1_or_complete?
   validates :main_images, presence: true, if: :validate_step_1_or_complete?
@@ -48,7 +51,7 @@ class Order < ApplicationRecord
   end
   
   def expected_delivery_date
-    created_at + (expected_delivery_days || 15).days
+    created_at + (expected_delivery_days || SystemSetting.default_delivery_days).days
   end
   
   def to_param
@@ -142,5 +145,10 @@ class Order < ApplicationRecord
     if main_images.count > 5
       errors.add(:main_images, '메인 사진은 최대 5개까지 업로드할 수 있습니다.')
     end
+  end
+  
+  # 새 주문 생성 시 시스템 기본값 설정
+  def set_default_delivery_days
+    self.expected_delivery_days ||= SystemSetting.default_delivery_days
   end
 end
