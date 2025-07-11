@@ -37,10 +37,10 @@
               <p class="text-sm font-medium text-gray-500">기념패 스타일</p>
               <p class="text-gray-900">
                 <%= case @order.plaque_style
-                    when 'gold_metal' then '금속패 (골드)'
-                    when 'silver_metal' then '금속패 (실버)'
-                    when 'wood_classic' then '원목패 (클래식)'
-                    when 'crystal_premium' then '크리스탈패 (프리미엄)'
+                    when 'gold_metal' then '🥇 금속패 (골드)'
+                    when 'silver_metal' then '🥈 금속패 (실버)'
+                    when 'acrylic_cartoon' then '🎨 아크릴패 (카툰)'
+                    when 'acrylic_realistic' then '📸 아크릴패 (실사)'
                     else @order.plaque_style
                     end %>
               </p>
