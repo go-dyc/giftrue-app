@@ -196,7 +196,7 @@
     <div class="flex flex-col sm:flex-row gap-4">
       <% if @order.can_be_edited? %>
         <%= link_to "주문 수정하기", 
-              edit_order_path(@order.naver_order_number), 
+              edit_order_path(@order.naver_order_number, force_edit: true), 
               class: "btn-secondary flex-1 text-center" %>
       <% else %>
         <div class="bg-gray-100 text-gray-500 px-4 py-2 rounded-lg text-center flex-1">

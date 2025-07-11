@@ -21,8 +21,8 @@ class OrdersController < ApplicationController
       return
     end
     
-    # 주문이 완료된 경우 complete 페이지로 자동 리디렉션
-    if @order.completed?
+    # 주문이 완료된 경우 complete 페이지로 자동 리디렉션 (수정 의도가 명시적이지 않은 경우에만)
+    if @order.completed? && params[:force_edit] != 'true'
       redirect_to complete_order_path(@order.naver_order_number), notice: '주문이 완료되었습니다.'
       return
     end
