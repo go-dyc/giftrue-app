@@ -763,7 +763,11 @@ function initializePageFunctionality() {
     const imagesError = document.getElementById('main_images_error');
     
     if (imagesInput) {
-      const hasImages = imagesInput.files.length > 0;
+      // Check both new files and existing images
+      const hasNewImages = imagesInput.files.length > 0;
+      const hasExistingImages = document.querySelectorAll('.image-slot.border-blue-500').length > 0;
+      const hasImages = hasNewImages || hasExistingImages;
+      
       if (!hasImages) {
         imagesError.textContent = '메인 사진을 최소 1개 업로드해주세요.';
         imagesError.classList.remove('hidden');
