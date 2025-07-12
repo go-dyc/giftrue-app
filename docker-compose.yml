@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.simple
+    ports:
+      - "3000:3000"
+    environment:
+      - RAILS_ENV=development
+      - RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
+    volumes:
+      - .:/rails
+      - /rails/tmp
+      - /rails/log
+      - /rails/node_modules
+    depends_on:
+      - db
+    stdin_open: true
+    tty: true
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: giftrue
+      POSTGRES_DB: giftrue_development
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

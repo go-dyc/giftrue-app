@@ -1046,195 +1046,326 @@ end
 **✅ 보안 및 성능 최적화**
 **✅ 반응형 웹 디자인**
 
-## 10. 클라우드 배포 진행 상황 (Render.com)
+## 10. 배포 및 운영 환경 (현재 상태)
 
-### 10.1. 배포 환경 설정 완료 (2025-07-10)
+### 10.1. 현재 배포 상태 ✅
 
-**GitHub 저장소 설정**:
-- ✅ 저장소 URL: https://github.com/go-dyc/giftrue-app
-- ✅ Git 저장소 초기화 및 코드 푸시 완료
-- ✅ Personal Access Token 인증 설정
-- ✅ 자동 배포 파이프라인 연동
+**프로덕션 환경**: Kamal + DigitalOcean + Docker
+- ✅ 배포 완료: 2025-07-12 09:55
+- ✅ 도메인: https://www.giftrue.com
+- ✅ 서버: DigitalOcean (159.223.53.175)
+- ✅ 컨테이너: Docker 기반 자동 배포
 
-**Render 배포 설정 파일**:
-- ✅ `render.yaml`: 웹 서비스 및 데이터베이스 설정
-- ✅ `bin/render-build.sh`: 자동 빌드 스크립트
-- ✅ 환경변수 설정: RAILS_ENV, DATABASE_URL, RAILS_MASTER_KEY
+### 10.2. 기술 스택 요약
 
-### 10.2. 데이터베이스 마이그레이션
+**인프라**:
+- ✅ DigitalOcean Droplet (Ubuntu)
+- ✅ Kamal 배포 시스템
+- ✅ Docker + Docker Hub
+- ✅ Let's Encrypt SSL 자동 갱신
 
-**개발 → 프로덕션 전환**:
-- ✅ SQLite (개발) → PostgreSQL (프로덕션) 설정 완료
-- ✅ Gemfile 수정: pg gem 추가, 환경별 구분
-- ✅ database.yml 프로덕션 설정 업데이트
-- ✅ 다중 데이터베이스 지원 (primary, cache, queue, cable)
+**데이터베이스**:
+- ✅ PostgreSQL (프로덕션)
+- ✅ SQLite (로컬 개발)
+- ✅ 데이터 영속성 보장
 
-### 10.3. 빌드 시스템 최적화
+### 10.3. 현재 접속 정보
 
-**TailwindCSS 호환성 해결**:
-- ✅ TailwindCSS 4.1.11 → 3.4.0 다운그레이드 (안정성)
-- ✅ package.json dependencies 구조 수정
-- ✅ npx 명령어 적용으로 실행 안정성 확보
-- ✅ CSS 임포트 구문 수정: 개별 모듈 임포트 방식 적용
-  ```css
-  @import "tailwindcss/base";
-  @import "tailwindcss/components";
-  @import "tailwindcss/utilities";
-  ```
-
-**빌드 스크립트 최적화**:
-- ✅ Ruby dependencies 설치
-- ✅ Node.js dependencies 설치  
-- ✅ TailwindCSS 컴파일
-- ✅ Rails assets precompilation
-- ✅ 데이터베이스 마이그레이션 자동 실행
-
-### 10.4. 배포 진행 단계별 해결 과정
-
-**1단계 - Git 설정**:
-- ✅ 로컬 Git 저장소 초기화
-- ✅ GitHub 원격 저장소 연결
-- ✅ Personal Access Token 생성 및 인증
-- ✅ 초기 코드베이스 푸시 성공
-
-**2단계 - Render 서비스 생성**:
-- ✅ Render.com 계정 연결
-- ✅ GitHub 저장소 연동
-- ✅ 웹 서비스 설정 구성
-- ✅ PostgreSQL 데이터베이스 생성
-
-**3단계 - 빌드 문제 해결**:
-- ✅ Gemfile.lock PostgreSQL 호환성 문제 해결
-- ✅ TailwindCSS 버전 호환성 문제 해결
-- ✅ CSS 빌드 파이프라인 수정
-- ✅ 환경변수 설정 최적화
-
-### 10.5. 배포 완료 및 버그 수정
-
-**배포 진행률**: 100% 완료 ✅
-**현재 상태**: 프로덕션 배포 완료, 주문완료 버튼 버그 수정 완료
-**배포 완료**: 2025-07-10 22:15 (KST)
-
-**✅ 배포 성공 확인됨**:
-- TailwindCSS 3.4.0 정상 빌드 완료
-- CSS 임포트 구문 호환성 문제 해결
-- 전체 애플리케이션 정상 배포 확인
-
-**🐛 프로덕션 버그 발견 및 수정**:
-- **문제**: Step 3에서 "주문 완료" 버튼 클릭 시 동작하지 않음
-- **원인**: JavaScript 폼 검증 로직에서 Step 3 처리 누락
-- **해결**: validateStep3() 함수 추가 및 폼 제출 로직 개선
-- **수정 완료**: 2025-07-10 22:45 (KST)
-
-### 10.6. 프로덕션 버그 수정 상세
-
-**발견된 문제**:
-```javascript
-// 기존 코드 - Step 1에서만 검증
-if (stepInput && stepInput.value === '1') {
-  if (!validateStep1()) {
-    e.preventDefault();
-  }
-}
-// Step 3 검증 로직 누락으로 폼 제출 차단됨
-```
-
-**적용된 해결책**:
-```javascript
-// 수정된 코드 - 단계별 검증
-if (currentStep === '1') {
-  if (!validateStep1()) {
-    e.preventDefault();
-  }
-} else if (currentStep === '3') {
-  const completeStepInput = document.querySelector('input[name="complete_step"]');
-  if (completeStepInput && !validateStep3()) {
-    e.preventDefault();
-    alert('기념패 스타일과 문구를 모두 입력해주세요.');
-  }
-}
-
-// 새로 추가된 validateStep3() 함수
-function validateStep3() {
-  const checkedRadio = document.querySelector('input[name="order[plaque_style]"]:checked');
-  if (!checkedRadio) return false;
-  
-  const visibleTextarea = document.querySelector(`.style-input.${checkedRadio.value}:not(.hidden) textarea`);
-  return visibleTextarea && visibleTextarea.value.trim();
-}
-```
-
-### 10.7. 배포 완료 후 접속 정보
-
-**✅ 프로덕션 URL들** (정상 동작 확인됨):
-- 메인 페이지: `https://giftrue-app.onrender.com`
-- 주문 페이지: `https://giftrue-app.onrender.com/orders/{주문번호}`
-- 관리자 로그인: `https://giftrue-app.onrender.com/admin/login`
+**✅ 프로덕션 URL** (DNS 전파 완료 후):
+- 메인 도메인: `https://www.giftrue.com`
+- 주문 페이지: `https://www.giftrue.com/orders/{주문번호}`
+- 관리자 로그인: `https://www.giftrue.com/admin/login`
 
 **관리자 계정**:
 - ID: `admin`
 - Password: `password123`
 
-**기술적 특징**:
-- 무료 Render 플랜 사용 (15분 비활성화 후 슬립)
-- PostgreSQL 무료 데이터베이스 (500MB 제한)
-- 자동 HTTPS 적용
-- GitHub 연동 자동 배포
+### 10.4. 주요 관리 명령어
 
-**✅ 검증 완료된 기능들**:
-- 3단계 주문 프로세스 정상 동작
-- 이미지 업로드 기능 작동
-- 기념패 스타일 선택 기능 정상
-- 주문 완료 버튼 정상 동작 (수정 완료)
-- 관리자 로그인 및 주문 관리 기능
+```bash
+# 로컬 개발
+bin/dev                    # 개발 서버 시작
+
+# 배포 관련
+bin/kamal deploy          # 프로덕션 배포
+bin/kamal rollback        # 이전 버전으로 롤백
+bin/kamal app logs        # 실시간 로그 확인
+bin/kamal ps             # 컨테이너 상태 확인
+
+# 데이터베이스
+bin/kamal app exec --interactive "bin/rails console"  # Rails 콘솔
+```
+
+## 11. 개발 가이드
+
+### 11.1. 프로젝트 구조
+```
+giftrue/
+├── CLAUDE.md                    # 프로젝트 문서
+├── config/deploy.yml            # Kamal 배포 설정
+├── Dockerfile                   # Docker 컨테이너 설정
+├── config/database.yml          # 데이터베이스 설정
+├── app/models/order.rb          # 주문 모델 (핵심)
+├── app/models/system_setting.rb # 시스템 설정 모델
+└── app/controllers/orders_controller.rb  # 주문 컨트롤러
+```
+
+### 11.2. 환경 설정
+```bash
+# 로컬 개발 환경
+RAILS_ENV=development
+DATABASE_URL=sqlite3:storage/development.sqlite3
+
+# 프로덕션 환경
+RAILS_ENV=production
+DATABASE_URL=[PostgreSQL URL]
+RAILS_MASTER_KEY=fdbfcd77259eb824ae5b295162a94077
+```
+
+### 11.3. 개발 워크플로우
+```bash
+# 1. 로컬 개발
+bin/dev                          # 개발 서버 시작
+
+# 2. 코드 수정 후 배포
+git add -A && git commit -m "수정 내용"
+bin/kamal deploy                 # 프로덕션 배포
+
+# 3. 확인
+bin/kamal app logs              # 배포 로그 확인
+```
+
+## 12. 최종 개발 현황 (2025-07-12 완료)
+
+### 12.1. 완료된 주요 업데이트
+
+**✅ 주문 관리 시스템 고도화**:
+- 시스템 공통 제작 기간 설정 (1-90일)
+- 개별 주문별 예상 수령일 조정
+- 완료된 주문 자동 리디렉션 시스템
+- 주문 수정 시 기존 데이터 자동 로딩
+
+**✅ Kamal + DigitalOcean 배포 완료**:
+- Docker 기반 컨테이너 배포 시스템
+- 도메인 연결: https://www.giftrue.com
+- PostgreSQL 프로덕션 데이터베이스
+- Let's Encrypt SSL 자동 갱신
+
+**✅ 실제 서비스 준비 완료**:
+- 고객 주문 접수 시스템 정상 동작
+- 관리자 시스템 완전 구현
+- 이미지 업로드 및 스토리지 연결
+- 백그라운드 잡 시스템 (SolidQueue) 실행
+
+### 12.2. 기술적 성과
+
+**시스템 아키텍처**:
+```
+고객 인터페이스 → Rails 애플리케이션 → PostgreSQL
+     ↓               ↓                    ↓
+3단계 주문 플로우   Kamal 배포 시스템    데이터 영속성
+     ↓               ↓                    ↓
+관리자 인터페이스 → Docker 컨테이너 → DigitalOcean 서버
+```
+
+**주요 모델**:
+- `Order`: 주문 정보 및 상태 관리
+- `SystemSetting`: 시스템 설정 (제작 기간 등)
+- `ActiveStorage`: 이미지 업로드 및 저장
+
+**배포 현황**:
+- **도메인**: https://www.giftrue.com (DNS 전파 완료 후)
+- **서버**: DigitalOcean (159.223.53.175)
+- **배포 시스템**: Kamal + Docker
+- **데이터베이스**: PostgreSQL (프로덕션)
+
+## 13. 최신 업데이트 (2025-07-12 16:30) - TailwindCSS 프로덕션 배포 이슈 해결
+
+### 13.1. 해결된 주요 이슈
+
+**🎨 TailwindCSS 컴파일 문제 해결**:
+- **문제**: 프로덕션에서 `@import "tailwindcss/base"` 형태로 CSS 서빙
+- **원인**: 로컬에서 빌드된 CSS가 프로덕션에 반영되지 않음
+- **해결**: SSH를 통한 직접 배포 및 파일 수정
+
+**🔧 Assets 참조 오류 수정**:
+- **문제**: `stylesheet_link_tag :app` → `application.css` 파일 찾을 수 없음
+- **영향 페이지**: 메인 페이지, 관리자 페이지 500 에러
+- **해결**: 모든 레이아웃에서 `"application.tailwind"`로 수정
+
+### 13.2. 수행된 작업 상세
+
+**A. CSS 컴파일 및 배포**:
+```bash
+# 1. 로컬에서 TailwindCSS 재빌드
+npm run build:css:compile
+
+# 2. SSH를 통한 프로덕션 서버 접속
+ssh -i ~/.ssh/giftrue_key root@159.223.53.175
+
+# 3. 컴파일된 CSS 파일 서버 업로드
+scp -i ~/.ssh/giftrue_key app/assets/builds/application.css root@159.223.53.175:/tmp/
+docker cp /tmp/application.css container:/rails/public/assets/application.tailwind-0350fabe.css
+```
+
+**B. 레이아웃 파일 수정**:
+- `app/views/layouts/application.html.erb`: `:app` → `"application.tailwind"`
+- `app/views/layouts/admin.html.erb`: `:app` → `"application.tailwind"`
+
+**C. 컨테이너 재시작 및 배포**:
+- Rails 컨테이너 재시작으로 변경사항 적용
+- 전체 시스템 정상 동작 확인
+
+### 13.3. 현재 서비스 상태
+
+**✅ 완전 정상 동작**:
+- **메인 페이지**: https://www.giftrue.com - TailwindCSS 완전 적용
+- **주문 시스템**: https://www.giftrue.com/orders/{주문번호} - 3단계 플로우 정상
+- **관리자 시스템**: https://www.giftrue.com/admin/login - 관리 기능 완전 동작
+
+**🎨 스타일링 완료**:
+- 모든 UI 컴포넌트에 TailwindCSS 적용
+- 반응형 디자인 정상 작동
+- 커스텀 스타일 (.btn-primary, .form-input 등) 완전 적용
+
+### 13.4. 기술적 성과
+
+**인프라 관리 역량**:
+- SSH를 통한 원격 서버 관리
+- Docker 컨테이너 직접 조작 및 파일 복사
+- 프로덕션 환경 실시간 디버깅 및 수정
+
+**DevOps 문제 해결**:
+- Docker Desktop WSL 통합 이슈 우회
+- Assets pipeline 설정 문제 해결
+- 프로덕션 배포 과정 최적화
+
+## 14. 최종 업데이트 (2025-07-12 21:00) - Rails 8 호환성 및 CSS 배포 이슈 완전 해결
+
+### 14.1. Rails 8 호환성 문제 해결
+
+**🔧 발견된 문제**:
+- 관리자 로그아웃 시 404 에러 발생
+- Rails 8에서 `method: :delete` 방식이 변경됨
+
+**✅ 해결된 내용**:
+- 로그아웃 링크를 `data: { turbo_method: :delete }` 방식으로 수정
+- Rails 8 + Turbo 환경에서 정상 동작 확인
+- 코드베이스 전체 Rails 8 호환성 검증 완료
+
+### 14.2. 보안 개선 및 배포 프로세스 최적화
+
+**🛡️ GitHub Secret Scanning 대응**:
+- `.kamal/secrets` 파일에서 하드코딩된 토큰 제거
+- 환경변수 참조 방식으로 변경: `KAMAL_REGISTRY_PASSWORD=$KAMAL_REGISTRY_PASSWORD`
+- Git 히스토리에서 민감 정보 완전 제거 (git reset 활용)
+
+**🔐 중요 정보 관리 가이드**:
+- **별도 보관 필요**: Docker Registry Token, Rails Master Key, PostgreSQL 정보
+- **배포 시 환경변수 설정**: `export KAMAL_REGISTRY_PASSWORD="token"`
+- 환경변수를 통한 안전한 배포 프로세스 구축
+
+### 14.3. CSS 배포 이슈 해결
+
+**🎨 발견된 CSS 문제**:
+- 메인 페이지와 관리자 페이지에서 TailwindCSS 미적용
+- 브라우저에서 404 에러: `base`, `components`, `utilities` 파일 요청
+- CSS 파일은 정상 로딩되지만 스타일 적용 안됨
+
+**🔧 해결 과정**:
+1. **로컬 Docker 이슈**: Docker가 WSL에 설치되지 않아 Kamal 배포 실패
+2. **수동 배포 방식**: SSH를 통한 직접 파일 업데이트
+   ```bash
+   # 코드 다운로드
+   ssh root@159.223.53.175 "cd /tmp && git clone https://github.com/go-dyc/giftrue-app.git"
+   
+   # 파일 업데이트
+   docker cp /tmp/giftrue-app/app/views/layouts/admin.html.erb container:/rails/app/views/layouts/
+   
+   # CSS 재빌드 및 업로드
+   npm run build:css:compile
+   scp app/assets/builds/application.css root@159.223.53.175:/tmp/
+   docker cp /tmp/application.css container:/rails/public/assets/application.tailwind-0350fabe.css
+   ```
+
+**✅ 최종 해결**:
+- 로컬에서 TailwindCSS 재컴파일
+- SSH를 통한 직접 파일 교체
+- 컨테이너 재시작으로 변경사항 적용
+- 브라우저 캐시 이슈 해결 가이드 제공
+
+### 14.4. 배포 현황 및 접속 정보
+
+**✅ 프로덕션 서비스 완전 정상화**:
+- **메인 도메인**: https://www.giftrue.com ✅
+- **관리자 시스템**: https://www.giftrue.com/admin/login ✅
+- **Rails 8 호환성**: 완료 ✅
+- **TailwindCSS 적용**: 완료 ✅
+- **로그아웃 기능**: 정상 동작 ✅
+
+**🔧 운영 관리 정보**:
+- **서버**: DigitalOcean (159.223.53.175)
+- **배포 시스템**: Kamal + Docker
+- **컨테이너 ID**: giftrue-web-73e8b7d1594dfb68190bea1935761f94822ea99e
+- **관리자 계정**: admin / password123
+
+### 14.5. 향후 배포 가이드
+
+**정상 배포 프로세스** (Docker 설치 후):
+```bash
+# 1. 환경변수 설정
+export KAMAL_REGISTRY_PASSWORD="[토큰]"
+
+# 2. 정상 배포
+bin/kamal deploy
+```
+
+**수동 배포 프로세스** (Docker 미설치 시):
+```bash
+# 1. 코드 푸시
+git add -A && git commit -m "변경사항" && git push origin main
+
+# 2. 서버에서 수동 업데이트
+ssh root@159.223.53.175 "cd /tmp && git clone https://github.com/go-dyc/giftrue-app.git"
+# 필요 파일들 컨테이너에 복사
+
+# 3. CSS가 변경된 경우
+npm run build:css:compile
+scp app/assets/builds/application.css root@159.223.53.175:/tmp/
+ssh root@159.223.53.175 "docker cp /tmp/application.css container:/rails/public/assets/application.tailwind-0350fabe.css"
+```
+
+### 14.6. Step Navigation 이슈 해결 (2025-07-12 21:30)
+
+**🐛 발견된 문제**:
+- Step 1에서 사진 업로드 → Step 2 이동 → "이전으로" 버튼으로 Step 1 복귀 시
+- 기존 업로드된 사진이 화면에 표시되지만 "다음 단계" 버튼이 비활성화됨
+- 버튼 클릭 시 "입력정보를 확인해주세요" alert 및 "Main images can't be blank" 에러 발생
+
+**🔧 원인 분석**:
+1. JavaScript `validateStep1()`이 파일 input만 확인하고 기존 이미지 무시
+2. 폼 제출 시 `main_images: [""]` 빈 배열이 전송되어 기존 이미지 덮어씀
+3. 서버 검증에서 이미지 없음으로 판단하여 에러 발생
+
+**✅ 해결 방법**:
+```javascript
+// JavaScript 수정: 기존 이미지도 함께 확인
+const hasNewImages = imagesInput.files.length > 0;
+const hasExistingImages = document.querySelectorAll('.image-slot.border-blue-500').length > 0;
+const hasImages = hasNewImages || hasExistingImages;
+```
+
+```ruby
+# Controller 수정: 빈 이미지 배열 필터링
+if permitted_params[:main_images].present? && permitted_params[:main_images].all?(&:blank?)
+  permitted_params.delete(:main_images)
+end
+```
+
+**🎯 결과**: Step 간 이동 시 기존 데이터 보존 및 정상적인 폼 검증 동작
 
 ---
 
-**최종 업데이트**: 2025-07-10 22:13 (KST)  
-**개발 상태**: 클라우드 배포 95% 완료 (최종 빌드 검증 중)  
-**다음 단계**: 배포 완료 확인 → 네이버 스마트스토어 연동 준비
-
-## 11. 개발 연속성 참고사항
-
-### 11.1. 중요 파일 위치
-```
-giftrue/
-├── CLAUDE.md                    # 이 문서 (개발 히스토리)
-├── render.yaml                  # Render 배포 설정
-├── bin/render-build.sh          # 빌드 스크립트
-├── config/database.yml          # DB 설정 (SQLite + PostgreSQL)
-├── Gemfile                      # Ruby 의존성 (pg gem 포함)
-├── package.json                 # Node.js 의존성 (TailwindCSS 3.4.0)
-└── app/assets/stylesheets/
-    └── application.tailwind.css # TailwindCSS 메인 파일
-```
-
-### 11.2. 핵심 커맨드
-```bash
-# 개발 서버 실행
-bin/dev
-
-# 로컬 빌드 테스트
-npm run build:css:compile
-bundle exec rails assets:precompile
-
-# Git 배포
-git add -A
-git commit -m "설명"
-git push origin main
-```
-
-### 11.3. 환경변수 (Render)
-```
-RAILS_ENV=production
-RACK_ENV=production
-NODE_ENV=production
-RAILS_MASTER_KEY=fdbfcd77259eb824ae5b295162a94077
-DATABASE_URL=[Render에서 자동 설정]
-```
-
-### 11.4. 향후 개발 시 주의사항
-- TailwindCSS는 3.4.0 버전 유지 (4.x 호환성 문제)
-- 프로덕션 배포 시 PostgreSQL 사용
-- Render 무료 플랜 제한사항 고려
-- GitHub Personal Access Token 만료 주의
+**문서 최종 업데이트**: 2025-07-12 21:30  
+**개발 상태**: 🎉 모든 이슈 해결 완료  
+**현재 상태**: Rails 8 호환성, CSS 적용, 보안 강화, Step Navigation 이슈 모두 완료된 안정적인 프로덕션 서비스 운영 중

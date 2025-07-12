@@ -90,8 +90,8 @@ builder:
   #   - RAILS_MASTER_KEY
 
 # Use a different ssh user than root
-# ssh:
-#   user: app
+ssh:
+  keys: ["~/.ssh/giftrue_key"]
 
 # Use accessory services (secrets come from .kamal/secrets).
 accessories:
