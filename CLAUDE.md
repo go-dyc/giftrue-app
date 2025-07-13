@@ -58,7 +58,7 @@ Order 모델은 데이터베이스에 다음 속성(컬럼)들로 저장되어�
 
 **파일 첨부**:
 - `main_images`: 필수 첨부 파일. 고객이 올린 정면 사진들(최대 5개)을 저장합니다. (has_many_attached)
-- `optional_images`: 선택 첨부 파일. 고객이 올린 포즈 및 의상 참고 사진들(최대 5개)을 저장합니다. (has_many_attached)
+- `optional_images`: **필수 첨부 파일** (2025-07-13 변경). 고객이 올린 포즈 및 의상 참고 사진들(최대 5개)을 저장합니다. (has_many_attached)
 
 ### 2.2. 기술 스택 (Tech Stack)
 
@@ -1366,6 +1366,100 @@ end
 
 ---
 
-**문서 최종 업데이트**: 2025-07-12 21:30  
-**개발 상태**: 🎉 모든 이슈 해결 완료  
-**현재 상태**: Rails 8 호환성, CSS 적용, 보안 강화, Step Navigation 이슈 모두 완료된 안정적인 프로덕션 서비스 운영 중
+## 15. 최신 업데이트 (2025-07-13) - 2단계 이미지 업로드 필수화 및 UI 개선
+
+### 15.1. 주요 변경사항
+
+**🎯 2단계 이미지 업로드 필수화**:
+- 기존 선택사항이었던 `optional_images`를 필수 항목으로 변경
+- 비즈니스 요구사항: 제작 품질 향상을 위한 포즈/의상 정보 필수 수집
+
+**🎨 UI/UX 개선**:
+- 사진 라벨에서 "추가" 단어 제거로 더 간결한 인터페이스
+- 사용자 혼란 감소 및 직관성 향상
+
+### 15.2. 기술적 구현 상세
+
+#### A. Order 모델 검증 강화
+```ruby
+# 새로운 필수 검증 추가
+validates :optional_images, presence: true, if: :validate_step_2_or_complete?
+
+# 새로운 검증 컨텍스트 메서드
+def validate_step_2_or_complete?
+  @validating_step_2 || @validating_complete || optional_images.attached?
+end
+
+def validating_step_2!
+  @validating_step_2 = true
+end
+```
+
+#### B. 컨트롤러 검증 로직 개선
+```ruby
+when 2
+  @order.validating_step_2!
+  if @order.valid?
+    redirect_to edit_order_path(@order.naver_order_number, step: next_step)
+  else
+    @step = current_step
+    flash.now[:alert] = '포즈 및 의상 사진을 최소 1개 업로드해주세요.'
+    render :edit
+    return
+  end
+```
+
+#### C. JavaScript 검증 시스템 확장
+```javascript
+// 2단계 검증 함수 추가
+function validateStep2() {
+  const optionalImagesInput = document.getElementById('optional_images_input');
+  const hasNewImages = optionalImagesInput.files.length > 0;
+  const hasExistingImages = document.querySelectorAll('.optional-image-slot.border-green-500').length > 0;
+  const hasImages = hasNewImages || hasExistingImages;
+  
+  if (!hasImages) {
+    // 에러 메시지 표시
+    return false;
+  }
+  return true;
+}
+```
+
+### 15.3. 사용자 플로우 변화
+
+**변경 전** (선택사항):
+1. 1단계: 정면 사진 (필수)
+2. 2단계: 포즈/의상 사진 (선택)
+3. 3단계: 스타일/문구 (필수)
+
+**변경 후** (모든 단계 필수):
+1. 1단계: 정면 사진 (필수)
+2. **2단계: 포즈/의상 사진 (필수)** ⬅️ 변경
+3. 3단계: 스타일/문구 (필수)
+
+### 15.4. 비즈니스 가치
+
+**제작 품질 향상**:
+- 모든 주문에서 포즈/의상 정보 확보
+- 제작자의 이해도 증진 및 실수 감소
+
+**고객 만족도 개선**:
+- 더 정확한 피규어 제작
+- 고객 기대치와 결과물 일치도 향상
+
+**운영 효율성**:
+- 추가 정보 요청 횟수 감소
+- 제작 과정 표준화
+
+### 15.5. 배포 현황
+
+**배포 완료**: 2025-07-13 11:20 (KST)
+**커밋**: e85fbdf - "2단계 이미지 업로드를 필수항목으로 변경 및 UI 개선"
+**적용 환경**: 프로덕션 (https://www.giftrue.com)
+
+---
+
+**문서 최종 업데이트**: 2025-07-13 11:30 (KST)  
+**개발 상태**: ✅ 2단계 필수화 완료  
+**현재 상태**: 모든 주문 단계가 필수화되어 완전한 정보 수집이 가능한 안정적인 프로덕션 서비스 운영 중
