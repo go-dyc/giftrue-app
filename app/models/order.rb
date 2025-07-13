@@ -15,6 +15,7 @@ class Order < ApplicationRecord
   # Step-based validations
   validates :orderer_name, presence: true, if: :validate_step_1_or_complete?
   validates :main_images, presence: true, if: :validate_step_1_or_complete?
+  validates :optional_images, presence: true, if: :validate_step_2_or_complete?
   validates :plaque_style, presence: true, if: :validate_step_3_or_complete?
   # Remove old plaque_message validation - replaced with detailed field validations
   # validates :plaque_message, presence: true, if: :validate_step_3_or_complete?
@@ -40,6 +41,7 @@ class Order < ApplicationRecord
   validate :validate_main_images_content_type_and_size
   validate :validate_optional_images_content_type_and_size
   validate :validate_main_images_count
+  validate :validate_optional_images_count
   
   # Scopes
   scope :by_status, ->(status) { where(status: status) }
@@ -54,6 +56,7 @@ class Order < ApplicationRecord
     # 주문이 완료된 것으로 간주하는 조건: 모든 필수 정보가 입력되었고 저장되어 있는 경우
     return false if naver_order_number.blank? || orderer_name.blank? || plaque_style.blank?
     return false unless main_images.attached?
+    return false unless optional_images.attached?
     
     # 스타일별 세부 필드 확인
     case plaque_style
@@ -80,6 +83,11 @@ class Order < ApplicationRecord
     @validating_step_1 || @validating_complete || (orderer_name.present? || main_images.attached?)
   end
   
+  def validate_step_2_or_complete?
+    # Step 2 검증이 필요한 경우 또는 완전한 주문인 경우
+    @validating_step_2 || @validating_complete || optional_images.attached?
+  end
+  
   def validate_step_3_or_complete?
     # Step 3 검증이 필요한 경우 또는 완전한 주문인 경우
     @validating_step_3 || @validating_complete || plaque_style.present?
@@ -88,6 +96,10 @@ class Order < ApplicationRecord
   # Validation context setters
   def validating_step_1!
     @validating_step_1 = true
+  end
+  
+  def validating_step_2!
+    @validating_step_2 = true
   end
   
   def validating_step_3!
@@ -160,6 +172,14 @@ class Order < ApplicationRecord
 
     if main_images.count > 5
       errors.add(:main_images, '메인 사진은 최대 5개까지 업로드할 수 있습니다.')
+    end
+  end
+
+  def validate_optional_images_count
+    return unless optional_images.attached?
+
+    if optional_images.count > 5
+      errors.add(:optional_images, '포즈 및 의상 사진은 최대 5개까지 업로드할 수 있습니다.')
     end
   end
   

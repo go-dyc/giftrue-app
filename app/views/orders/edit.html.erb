@@ -45,7 +45,7 @@
           <div class="space-y-6">
             <div>
               <h2 class="text-xl font-semibold text-gray-900 mb-4">1단계: 정면 사진</h2>
-              <p class="text-sm text-gray-900 mb-3">얼굴이 잘 나온 사진을 올려주세요, 의상 및 포즈는 다음 페이지에서 참고할게요!</p>
+              <p class="text-sm text-gray-900 mb-3">이목구비가 잘 보이는 사진을 올려주세요, 의상 및 포즈는 다음 페이지에서 참고할게요!</p>
 
             </div>
             
@@ -138,7 +138,7 @@
             <ul class="text-sm text-gray-900 mb-3 list-disc pl-5 mt-4">
         <li class="mb-2"> - 1단계 사진과 동일한 경우, **같은 사진을 1장** 업로드 해주세요</li>
         <li> - 사진이 없는 경우, 아래 요청사항에 원하는 의상 및 포즈를 구체적으로 작성해주세요. <br>        </li>
-        <li class="italic text-gray-500">&nbsp;&nbsp;&nbsp;(예) OO항공 승무원복장으로 두손을 포개고있는 자세</li>
+        <li class="italic text-gray-500">&nbsp;&nbsp;&nbsp;(예) OO항공 승무원복장으로 두손을 포개고 서있는 자세</li>
 
     </ul>
             </div>
@@ -167,7 +167,7 @@
                         </div>
                       <% end %>
                       <div class="absolute top-1 right-1 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded">
-                        추가 <%= i + 1 %>
+                        <%= i + 1 %>
                       </div>
                     </div>
                   <% else %>
@@ -198,6 +198,8 @@
               <% if @order.errors[:optional_images].any? %>
                 <p class="text-red-500 text-sm mt-2"><%= @order.errors[:optional_images].first %></p>
               <% end %>
+              <!-- 클라이언트 사이드 에러 메시지 -->
+              <p id="optional_images_error" class="text-red-500 text-sm mt-2 hidden"></p>
             </div>
 
             <!-- Additional Requests -->
@@ -676,7 +678,7 @@ function initializePageFunctionality() {
           slot.innerHTML = `
             <img src="${e.target.result}" class="w-full h-full object-cover rounded-lg">
             <div class="absolute top-1 right-1 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded">
-              추가 ${index + 1}
+              ${index + 1}
             </div>
           `;
           slot.className = 'optional-image-slot aspect-square border-2 border-green-500 rounded-lg relative overflow-hidden cursor-pointer';
@@ -793,6 +795,32 @@ function initializePageFunctionality() {
     return isValid;
   }
   
+  // Step 2 validation functions
+  function validateStep2() {
+    let isValid = true;
+    
+    // Validate optional images
+    const optionalImagesInput = document.getElementById('optional_images_input');
+    const optionalImagesError = document.getElementById('optional_images_error');
+    
+    if (optionalImagesInput) {
+      // Check both new files and existing images
+      const hasNewImages = optionalImagesInput.files.length > 0;
+      const hasExistingImages = document.querySelectorAll('.optional-image-slot.border-green-500').length > 0;
+      const hasImages = hasNewImages || hasExistingImages;
+      
+      if (!hasImages) {
+        optionalImagesError.textContent = '포즈 및 의상 사진을 최소 1개 업로드해주세요.';
+        optionalImagesError.classList.remove('hidden');
+        isValid = false;
+      } else {
+        optionalImagesError.classList.add('hidden');
+      }
+    }
+    
+    return isValid;
+  }
+  
   // Real-time validation setup
   function setupRealTimeValidation() {
     // Name input validation
@@ -809,7 +837,7 @@ function initializePageFunctionality() {
       });
     }
     
-    // Images input validation
+    // Main images input validation
     const imagesInput = document.getElementById('main_images_input');
     if (imagesInput) {
       imagesInput.addEventListener('change', function() {
@@ -818,6 +846,18 @@ function initializePageFunctionality() {
           imagesError.classList.add('hidden');
         }
         validateStep1();
+      });
+    }
+    
+    // Optional images input validation
+    const optionalImagesInput = document.getElementById('optional_images_input');
+    if (optionalImagesInput) {
+      optionalImagesInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+          const optionalImagesError = document.getElementById('optional_images_error');
+          optionalImagesError.classList.add('hidden');
+        }
+        validateStep2();
       });
     }
   }
@@ -833,6 +873,16 @@ function initializePageFunctionality() {
         // Validate based on current step
         if (currentStep === '1') {
           if (!validateStep1()) {
+            e.preventDefault();
+            
+            // Scroll to first error
+            const firstError = document.querySelector('.text-red-500:not(.hidden)');
+            if (firstError) {
+              firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }
+        } else if (currentStep === '2') {
+          if (!validateStep2()) {
             e.preventDefault();
             
             // Scroll to first error

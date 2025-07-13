@@ -64,7 +64,15 @@ class OrdersController < ApplicationController
             return
           end
         when 2
-          redirect_to edit_order_path(@order.naver_order_number, step: next_step)
+          @order.validating_step_2!
+          if @order.valid?
+            redirect_to edit_order_path(@order.naver_order_number, step: next_step)
+          else
+            @step = current_step
+            flash.now[:alert] = '포즈 및 의상 사진을 최소 1개 업로드해주세요.'
+            render :edit
+            return
+          end
         when 3
           @order.validating_complete!
           if @order.valid?
@@ -137,7 +145,15 @@ class OrdersController < ApplicationController
             return
           end
         when 2
-          redirect_to edit_order_path(@order.naver_order_number, step: next_step)
+          @order.validating_step_2!
+          if @order.valid?
+            redirect_to edit_order_path(@order.naver_order_number, step: next_step)
+          else
+            @step = current_step
+            flash.now[:alert] = '포즈 및 의상 사진을 최소 1개 업로드해주세요.'
+            render :edit
+            return
+          end
         when 3
           @order.validating_complete!
           if @order.valid?
@@ -199,8 +215,8 @@ class OrdersController < ApplicationController
 
   def determine_current_step
     return 1 if @order.orderer_name.blank? || !@order.main_images.attached?
-    return 2 if @order.plaque_style.blank?
-    return 3 if @order.plaque_message.blank?
+    return 2 if !@order.optional_images.attached?
+    return 3 if @order.plaque_style.blank?
     3
   end
 
