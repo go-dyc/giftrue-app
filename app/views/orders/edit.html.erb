@@ -921,44 +921,62 @@ function initializePageFunctionality() {
   
   // Step 3 validation function
   function validateStep3() {
+    console.log('Starting validateStep3...');
+    
     // Check if style is selected
     const checkedRadio = document.querySelector('input[name="order[plaque_style]"]:checked');
+    console.log('Checked radio:', checkedRadio);
     if (!checkedRadio) {
+      console.log('No style selected');
       return false;
     }
     
     const style = checkedRadio.value;
-    const selectedStyleInput = document.querySelector(`.style-input.${style}:not(.hidden)`);
-    
-    if (!selectedStyleInput) {
-      return false;
-    }
+    console.log('Selected style:', style);
     
     // Check that at least one field is filled based on style
     let hasContent = false;
     
     if (style === 'gold_metal' || style === 'silver_metal') {
       // Metal plaques: at least one of title, name, or content must be filled
-      const titleInput = selectedStyleInput.querySelector('input[name="order[plaque_title]"]');
-      const nameInput = selectedStyleInput.querySelector('input[name="order[plaque_name]"]');
-      const contentInput = selectedStyleInput.querySelector('textarea[name="order[plaque_content]"]');
-      
-      if ((titleInput && titleInput.value.trim()) || 
-          (nameInput && nameInput.value.trim()) || 
-          (contentInput && contentInput.value.trim())) {
-        hasContent = true;
+      const styleSection = document.querySelector(`.style-input.${style}:not(.hidden)`);
+      if (styleSection) {
+        const titleInput = styleSection.querySelector(`input[name="order[plaque_title]"]`);
+        const nameInput = styleSection.querySelector(`input[name="order[plaque_name]"]`);
+        const contentInput = styleSection.querySelector(`textarea[name="order[plaque_content]"]`);
+        
+        console.log('Metal plaque inputs:', {
+          title: titleInput?.value,
+          name: nameInput?.value,
+          content: contentInput?.value
+        });
+        
+        if ((titleInput && titleInput.value.trim()) || 
+            (nameInput && nameInput.value.trim()) || 
+            (contentInput && contentInput.value.trim())) {
+          hasContent = true;
+        }
       }
     } else if (style === 'acrylic_cartoon' || style === 'acrylic_realistic') {
       // Acrylic plaques: at least one of top message or main message must be filled
-      const topInput = selectedStyleInput.querySelector('input[name="order[plaque_top_message]"]');
-      const mainInput = selectedStyleInput.querySelector('textarea[name="order[plaque_main_message]"]');
-      
-      if ((topInput && topInput.value.trim()) || 
-          (mainInput && mainInput.value.trim())) {
-        hasContent = true;
+      const styleSection = document.querySelector(`.style-input.${style}:not(.hidden)`);
+      if (styleSection) {
+        const topInput = styleSection.querySelector(`input[name="order[plaque_top_message]"]`);
+        const mainInput = styleSection.querySelector(`textarea[name="order[plaque_main_message]"]`);
+        
+        console.log('Acrylic plaque inputs:', {
+          top: topInput?.value,
+          main: mainInput?.value
+        });
+        
+        if ((topInput && topInput.value.trim()) || 
+            (mainInput && mainInput.value.trim())) {
+          hasContent = true;
+        }
       }
     }
     
+    console.log('hasContent:', hasContent);
     return hasContent;
   }
 
