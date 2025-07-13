@@ -9,8 +9,8 @@ class Order < ApplicationRecord
   validates :plaque_style, inclusion: { in: %w[gold_metal silver_metal acrylic_cartoon acrylic_realistic], allow_blank: true }
   validates :expected_delivery_days, presence: true, numericality: { greater_than: 0, less_than_or_equal_to: 90 }
   
-  # 새 주문 생성 시 시스템 기본값 적용
-  before_validation :set_default_delivery_days, on: :create
+  # 새 주문 생성 시 및 업데이트 시 시스템 기본값 적용
+  before_validation :set_default_delivery_days
   
   # Step-based validations
   validates :orderer_name, presence: true, if: :validate_step_1_or_complete?
