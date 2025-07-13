@@ -137,7 +137,7 @@
 
             <ul class="text-sm text-gray-900 mb-3 list-disc pl-5 mt-4">
         <li class="mb-2"> - 1단계 사진과 동일한 경우, **같은 사진을 1장** 업로드 해주세요</li>
-        <li> - 사진이 없는 경우, 아래 요청사항에 원하는 의상 및 포즈를 구체적으로 작성해주세요. <br>        </li>
+        <li> - 포즈 및 의상 사진은 **필수 업로드** 항목입니다. <br>        </li>
         <li class="italic text-gray-500">&nbsp;&nbsp;&nbsp;(예) OO항공 승무원복장으로 두손을 포개고 서있는 자세</li>
 
     </ul>
@@ -461,7 +461,7 @@
         <!-- Navigation Buttons -->
         <div class="flex justify-between items-center pt-6 border-t border-gray-200">
           <% if @step > 1 %>
-            <%= link_to "이전으로", edit_order_path(@order.naver_order_number, step: @step - 1), 
+            <%= link_to "이전으로", edit_order_path(@order.naver_order_number, step: @step - 1, force_edit: params[:force_edit]), 
                   class: "btn-secondary" %>
           <% else %>
             <div></div>
@@ -518,9 +518,14 @@ function initializePageFunctionality() {
           input.removeAttribute('required');
         });
         
-        // Hide all style inputs
+        // Hide all style inputs and disable their form fields
         styleInputs.forEach(input => {
           input.classList.add('hidden');
+          // Disable all form fields in hidden sections
+          const formFields = input.querySelectorAll('input, textarea, select');
+          formFields.forEach(field => {
+            field.disabled = true;
+          });
         });
         
         // Show the selected style input
@@ -531,6 +536,12 @@ function initializePageFunctionality() {
           console.log('Showing selected style input for:', this.value);
           selectedStyleInput.classList.remove('hidden');
           selectedStyleInput.classList.add('animate-fade-in');
+          
+          // Enable form fields in the visible section
+          const formFields = selectedStyleInput.querySelectorAll('input, textarea, select');
+          formFields.forEach(field => {
+            field.disabled = false;
+          });
           
           // Don't set individual fields as required anymore - we'll handle validation in JavaScript
           // const visibleInputs = selectedStyleInput.querySelectorAll('input[data-style="' + this.value + '"], textarea[data-style="' + this.value + '"]');

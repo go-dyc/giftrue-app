@@ -1,0 +1,63 @@
+<div class="min-h-screen bg-gray-50 py-12">
+  <div class="max-w-md mx-auto">
+    <div class="bg-white shadow-lg rounded-lg p-6">
+      <!-- Header -->
+      <div class="text-center mb-6">
+        <h1 class="text-2xl font-semibold text-gray-900 mb-2">주문 정보 확인</h1>
+        <p class="text-sm text-gray-600">
+          완료된 주문을 확인하려면<br>
+          주문자 성함을 입력해주세요
+        </p>
+      </div>
+
+      <!-- Order Info -->
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div class="flex items-center space-x-2">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <span class="text-sm font-medium text-blue-900">주문번호</span>
+        </div>
+        <p class="text-lg font-semibold text-blue-800 mt-1"><%= @order.naver_order_number %></p>
+      </div>
+
+      <!-- Verification Form -->
+      <%= form_with url: verify_order_path(@order.naver_order_number), method: :post, local: true, class: "space-y-4" do |form| %>
+        <div>
+          <%= form.label :orderer_name, "주문자 성함", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.text_field :orderer_name, 
+                placeholder: "주문 시 입력한 성함을 정확히 입력하세요",
+                class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                autocomplete: "off",
+                required: true %>
+        </div>
+
+        <!-- Error Message -->
+        <% if flash[:alert] %>
+          <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <div class="flex items-center">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <%= flash[:alert] %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Submit Button -->
+        <div class="pt-2">
+          <%= form.submit "주문 확인하기", 
+                class: "w-full btn-primary py-3 text-center" %>
+        </div>
+      <% end %>
+
+      <!-- Help Text -->
+      <div class="mt-6 pt-4 border-t border-gray-200">
+        <p class="text-xs text-gray-500 text-center">
+          💡 주문 시 입력하신 성함과 정확히 일치해야 합니다<br>
+          (띄어쓰기, 대소문자 포함)
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

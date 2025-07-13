@@ -1,17 +1,13 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  naver_order_number: MyString
-  orderer_name: MyString
-  plaque_style: MyString
-  plaque_message: MyText
-  additional_requests: MyText
-  status: MyString
+  naver_order_number: "TEST001"
+  orderer_name: "홍길동"
+  plaque_style: "gold_metal"
+  status: "주문접수"
 
 two:
-  naver_order_number: MyString
-  orderer_name: MyString
-  plaque_style: MyString
-  plaque_message: MyText
-  additional_requests: MyText
-  status: MyString
+  naver_order_number: "TEST002"
+  orderer_name: "김철수"
+  plaque_style: "silver_metal"
+  status: "주문접수"

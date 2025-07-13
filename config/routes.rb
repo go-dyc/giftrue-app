@@ -39,6 +39,8 @@ Rails.application.routes.draw do
   # Customer order routes - MUST come after admin routes
   resources :orders, param: :naver_order_number, only: [:show, :new, :create, :edit, :update] do
     member do
+      get :verify
+      post :verify
       get :complete
       patch :update_step
     end

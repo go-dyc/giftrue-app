@@ -1,5 +1,5 @@
 class OrdersController < ApplicationController
-  before_action :find_or_create_order, only: [:show, :edit, :update, :complete, :update_step]
+  before_action :find_or_create_order, only: [:show, :edit, :update, :complete, :update_step, :verify]
   
   def new
     # Root page - redirect to order form if naver_order_number is provided
@@ -56,7 +56,7 @@ class OrdersController < ApplicationController
         when 1
           @order.validating_step_1!
           if @order.valid?
-            redirect_to edit_order_path(@order.naver_order_number, step: next_step)
+            redirect_to edit_order_path(@order.naver_order_number, step: next_step, force_edit: params[:force_edit])
           else
             @step = current_step
             flash.now[:alert] = '성함과 메인 사진을 모두 입력해주세요.'
@@ -66,7 +66,7 @@ class OrdersController < ApplicationController
         when 2
           @order.validating_step_2!
           if @order.valid?
-            redirect_to edit_order_path(@order.naver_order_number, step: next_step)
+            redirect_to edit_order_path(@order.naver_order_number, step: next_step, force_edit: params[:force_edit])
           else
             @step = current_step
             flash.now[:alert] = '포즈 및 의상 사진을 최소 1개 업로드해주세요.'
@@ -76,7 +76,7 @@ class OrdersController < ApplicationController
         when 3
           @order.validating_complete!
           if @order.valid?
-            redirect_to complete_order_path(@order.naver_order_number), notice: '주문이 성공적으로 완료되었습니다.'
+            redirect_to verify_order_path(@order.naver_order_number), notice: '주문이 성공적으로 완료되었습니다.'
           else
             @step = current_step
             flash.now[:alert] = '기념패 스타일과 문구를 모두 입력해주세요.'
@@ -87,7 +87,7 @@ class OrdersController < ApplicationController
       elsif params[:complete_step].present?
         @order.validating_complete!
         if @order.valid?
-          redirect_to complete_order_path(@order.naver_order_number), notice: '주문이 성공적으로 완료되었습니다.'
+          redirect_to verify_order_path(@order.naver_order_number), notice: '주문이 성공적으로 완료되었습니다.'
         else
           @step = current_step
           flash.now[:alert] = '기념패 스타일과 문구를 모두 입력해주세요.'
@@ -137,7 +137,7 @@ class OrdersController < ApplicationController
         when 1
           @order.validating_step_1!
           if @order.valid?
-            redirect_to edit_order_path(@order.naver_order_number, step: next_step)
+            redirect_to edit_order_path(@order.naver_order_number, step: next_step, force_edit: params[:force_edit])
           else
             @step = current_step
             flash.now[:alert] = '성함과 메인 사진을 모두 입력해주세요.'
@@ -147,7 +147,7 @@ class OrdersController < ApplicationController
         when 2
           @order.validating_step_2!
           if @order.valid?
-            redirect_to edit_order_path(@order.naver_order_number, step: next_step)
+            redirect_to edit_order_path(@order.naver_order_number, step: next_step, force_edit: params[:force_edit])
           else
             @step = current_step
             flash.now[:alert] = '포즈 및 의상 사진을 최소 1개 업로드해주세요.'
@@ -157,7 +157,7 @@ class OrdersController < ApplicationController
         when 3
           @order.validating_complete!
           if @order.valid?
-            redirect_to complete_order_path(@order.naver_order_number), notice: '주문이 성공적으로 완료되었습니다.'
+            redirect_to verify_order_path(@order.naver_order_number), notice: '주문이 성공적으로 완료되었습니다.'
           else
             @step = current_step
             flash.now[:alert] = '기념패 스타일과 문구를 모두 입력해주세요.'
@@ -169,7 +169,7 @@ class OrdersController < ApplicationController
         Rails.logger.info "COMPLETE_STEP - Going to complete!"
         @order.validating_complete!
         if @order.valid?
-          redirect_to complete_order_path(@order.naver_order_number), notice: '주문이 성공적으로 완료되었습니다.'
+          redirect_to verify_order_path(@order.naver_order_number), notice: '주문이 성공적으로 완료되었습니다.'
         else
           @step = current_step
           flash.now[:alert] = '기념패 스타일과 문구를 모두 입력해주세요.'
@@ -194,9 +194,63 @@ class OrdersController < ApplicationController
     update
   end
 
+  def verify
+    # GET 요청: 성함 입력 폼 표시
+    if request.get?
+      unless @order.persisted? && @order.completed?
+        redirect_to edit_order_path(@order.naver_order_number)
+        return
+      end
+      # 이미 인증된 경우 바로 complete 페이지로
+      if session["verified_order_#{@order.naver_order_number}"] == true
+        redirect_to complete_order_path(@order.naver_order_number)
+        return
+      end
+    end
+    
+    # POST 요청: 성함 검증
+    if request.post?
+      orderer_name = params[:orderer_name].to_s.strip
+      
+      # Debug: 입력된 성함과 저장된 성함 비교
+      Rails.logger.info "=== VERIFY DEBUG ==="
+      Rails.logger.info "입력된 성함: '#{orderer_name}'"
+      Rails.logger.info "저장된 성함: '#{@order.orderer_name}'"
+      Rails.logger.info "일치 여부: #{orderer_name == @order.orderer_name}"
+      Rails.logger.info "====================="
+      
+      if orderer_name.present? && orderer_name == @order.orderer_name
+        # 인증 성공 - 세션에 저장 (1시간 유효)
+        session["verified_order_#{@order.naver_order_number}"] = true
+        session["verified_order_#{@order.naver_order_number}_expires"] = 1.hour.from_now
+        redirect_to complete_order_path(@order.naver_order_number), notice: '주문 정보를 확인합니다.'
+      else
+        # 인증 실패
+        Rails.logger.info "인증 실패 - 에러 메시지 표시"
+        flash.now[:alert] = '주문자 성함이 일치하지 않습니다. 정확히 입력해주세요.'
+        render :verify
+      end
+    end
+  end
+
   def complete
-    unless @order.persisted?
+    unless @order.persisted? && @order.completed?
       redirect_to edit_order_path(@order.naver_order_number)
+      return
+    end
+    
+    # 세션 기반 인증 확인
+    verified = session["verified_order_#{@order.naver_order_number}"]
+    expires_at = session["verified_order_#{@order.naver_order_number}_expires"]
+    
+    # 인증되지 않았거나 만료된 경우
+    if !verified || (expires_at && Time.current > expires_at.to_time)
+      # 만료된 세션 삭제
+      session.delete("verified_order_#{@order.naver_order_number}")
+      session.delete("verified_order_#{@order.naver_order_number}_expires")
+      
+      redirect_to verify_order_path(@order.naver_order_number)
+      return
     end
   end
 
