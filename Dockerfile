@@ -53,11 +53,14 @@ RUN npm ci
 # Copy application code
 COPY . .
 
+# Set executable permissions for bin files
+RUN chmod +x bin/rails bin/setup bin/docker-entrypoint
+
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+RUN SECRET_KEY_BASE_DUMMY=1 bin/rails assets:precompile
 
 
 RUN rm -rf node_modules
