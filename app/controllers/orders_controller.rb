@@ -22,7 +22,9 @@ class OrdersController < ApplicationController
     end
     
     # 주문이 완료된 경우 complete 페이지로 자동 리디렉션 (수정 의도가 명시적이지 않은 경우에만)
-    if @order.completed? && params[:force_edit] != 'true'
+    # step 파라미터가 있으면 수정 의도로 간주하여 force_edit=true로 처리
+    force_edit = params[:force_edit] == 'true' || params[:step].present?
+    if @order.completed? && !force_edit
       redirect_to complete_order_path(@order.naver_order_number), notice: '주문이 완료되었습니다.'
       return
     end
@@ -51,7 +53,7 @@ class OrdersController < ApplicationController
       if params[:next_step].present?
         next_step = params[:next_step].to_i
         
-        # 단계별 유효성 검사
+        # 단계별 유효성 검사 (1-2단계는 다음 단계로만 이동, 제출 안함)
         case current_step
         when 1
           @order.validating_step_1!
@@ -74,15 +76,9 @@ class OrdersController < ApplicationController
             return
           end
         when 3
-          @order.validating_complete!
-          if @order.valid?
-            redirect_to verify_order_path(@order.naver_order_number), notice: '주문이 성공적으로 완료되었습니다.'
-          else
-            @step = current_step
-            flash.now[:alert] = '기념패 스타일과 문구를 모두 입력해주세요.'
-            render :edit
-            return
-          end
+          # 3단계에서는 next_step이 아닌 complete_step으로만 주문 완료 처리
+          # next_step으로는 단순히 3단계로 이동만 처리
+          redirect_to edit_order_path(@order.naver_order_number, step: 3, force_edit: params[:force_edit])
         end
       elsif params[:complete_step].present?
         @order.validating_complete!
@@ -132,7 +128,7 @@ class OrdersController < ApplicationController
       if params[:next_step].present?
         next_step = params[:next_step].to_i
         
-        # 단계별 유효성 검사
+        # 단계별 유효성 검사 (1-2단계는 다음 단계로만 이동, 제출 안함)
         case current_step
         when 1
           @order.validating_step_1!
@@ -155,15 +151,9 @@ class OrdersController < ApplicationController
             return
           end
         when 3
-          @order.validating_complete!
-          if @order.valid?
-            redirect_to verify_order_path(@order.naver_order_number), notice: '주문이 성공적으로 완료되었습니다.'
-          else
-            @step = current_step
-            flash.now[:alert] = '기념패 스타일과 문구를 모두 입력해주세요.'
-            render :edit
-            return
-          end
+          # 3단계에서는 next_step이 아닌 complete_step으로만 주문 완료 처리
+          # next_step으로는 단순히 3단계로 이동만 처리
+          redirect_to edit_order_path(@order.naver_order_number, step: 3, force_edit: params[:force_edit])
         end
       elsif params[:complete_step].present?
         Rails.logger.info "COMPLETE_STEP - Going to complete!"
@@ -280,7 +270,7 @@ class OrdersController < ApplicationController
 
   def order_params
     # 모든 단계에서 모든 파라미터를 허용하여 데이터 유지
-    permitted_params = params.require(:order).permit(:orderer_name, :plaque_style, :plaque_message, :additional_requests, 
+    permitted_params = params.require(:order).permit(:orderer_name, :plaque_style, :plaque_message, :additional_requests, :plaque_additional_requests,
                                                     :plaque_title, :plaque_name, :plaque_content, :plaque_top_message, :plaque_main_message,
                                                     main_images: [], optional_images: [])
     
