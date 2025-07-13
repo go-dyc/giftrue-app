@@ -43,4 +43,7 @@ Rails.application.routes.draw do
       patch :update_step
     end
   end
+  
+  # Temporary ID-based route for testing
+  get '/orders/id/:id', to: 'orders#show', as: :order_by_id
 end

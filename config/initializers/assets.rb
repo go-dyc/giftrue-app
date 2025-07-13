@@ -5,8 +5,8 @@ Rails.application.config.assets.version = "1.0"
 
 # Add additional assets to the asset load path.
 # Rails.application.config.assets.paths << Emoji.images_path
-Rails.application.config.assets.paths << Rails.root.join("node_modules/bootstrap-icons/font")
-Rails.application.config.assets.paths << Rails.root.join("node_modules/bootstrap/dist/js")
-Rails.application.config.assets.paths << Rails.root.join("app/assets/builds")
-Rails.application.config.assets.precompile << "bootstrap.bundle.min.js"
+# Ensure builds directory takes precedence over stylesheets
+Rails.application.config.assets.paths.unshift Rails.root.join("app/assets/builds")
+
+# TailwindCSS configuration
 Rails.application.config.assets.precompile += %w( application.css )

@@ -48,7 +48,7 @@ RUN bundle install && \
 
 # Install node modules
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --omit=dev
 
 # Copy application code
 COPY . .
@@ -59,9 +59,11 @@ RUN chmod +x bin/rails bin/setup bin/docker-entrypoint bin/thrust
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
 
-# Build CSS first, then precompile assets for production
+# Build TailwindCSS first
 RUN npm run build:css:compile
-RUN SECRET_KEY_BASE_DUMMY=1 bin/rails assets:precompile
+
+# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
+RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
 
 RUN rm -rf node_modules

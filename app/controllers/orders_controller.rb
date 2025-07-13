@@ -205,9 +205,13 @@ class OrdersController < ApplicationController
   def find_or_create_order
     @order = Order.find_by(naver_order_number: params[:naver_order_number])
     if @order.nil?
-      @order = Order.new(naver_order_number: params[:naver_order_number], status: '주문접수')
-      # Step 1에서 최소한의 정보로 DB에 저장
-      if params[:action] == 'create' || params[:action] == 'update'
+      @order = Order.new(
+        naver_order_number: params[:naver_order_number], 
+        status: '주문접수',
+        orderer_name: '' # NOT NULL 제약조건을 위한 빈 값
+      )
+      # edit 액션에서도 주문을 생성하여 DB에 저장
+      if params[:action] == 'create' || params[:action] == 'update' || params[:action] == 'edit'
         @order.save(validate: false) # 검증 없이 일단 저장
       end
     end
