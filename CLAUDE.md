@@ -1460,6 +1460,131 @@ function validateStep2() {
 
 ---
 
-**문서 최종 업데이트**: 2025-07-13 11:30 (KST)  
-**개발 상태**: ✅ 2단계 필수화 완료  
-**현재 상태**: 모든 주문 단계가 필수화되어 완전한 정보 수집이 가능한 안정적인 프로덕션 서비스 운영 중
+## 16. CSS 미적용 문제 해결 가이드 (2025-07-13 추가) - 운영 필수 매뉴얼
+
+### 16.1. 문제 현상
+
+**🚨 발생 증상**:
+- 브라우저에서 TailwindCSS 스타일이 적용되지 않음
+- 개발자 도구에서 다음 404 오류 발생:
+  ```
+  GET https://www.giftrue.com/assets/tailwindcss/base net::ERR_ABORTED 404
+  GET https://www.giftrue.com/assets/tailwindcss/components net::ERR_ABORTED 404
+  GET https://www.giftrue.com/assets/tailwindcss/utilities net::ERR_ABORTED 404
+  ```
+- CSS 파일이 `@import` 형태로 로드됨 (컴파일되지 않은 상태)
+
+**🔍 근본 원인**:
+1. **컨테이너 재시작 시 파일 복원**: Docker 컨테이너 재시작 시 원본 이미지의 CSS 파일로 복원됨
+2. **브라우저 캐시**: 이전 버전의 CSS 파일이 브라우저에 캐시됨
+3. **빌드 프로세스**: Dockerfile에서 TailwindCSS 컴파일이 제대로 이루어지지 않음
+
+### 16.2. 즉시 해결 방법 (긴급 상황)
+
+#### A. 1차 해결: 브라우저 캐시 클리어
+```bash
+# 사용자 안내 사항
+1. Ctrl + Shift + R (Windows) / Cmd + Shift + R (Mac) - 강력한 새로고침
+2. F12 → Network 탭 → "Disable cache" 체크 → 새로고침
+3. 브라우저 캐시 수동 삭제
+```
+
+#### B. 2차 해결: 서버 CSS 파일 수동 교체
+```bash
+# 로컬에서 CSS 컴파일
+npm run build:css:compile
+
+# 서버로 업로드
+scp -i ~/.ssh/giftrue_key app/assets/builds/application.css root@159.223.53.175:/tmp/
+
+# 컨테이너 중지 후 파일 교체
+ssh -i ~/.ssh/giftrue_key root@159.223.53.175 "docker stop giftrue-web-[CONTAINER_ID]"
+ssh -i ~/.ssh/giftrue_key root@159.223.53.175 "docker cp /tmp/application.css giftrue-web-[CONTAINER_ID]:/rails/public/assets/application.tailwind-0350fabe.css"
+ssh -i ~/.ssh/giftrue_key root@159.223.53.175 "docker start giftrue-web-[CONTAINER_ID]"
+```
+
+### 16.3. 근본적 해결책
+
+#### A. Dockerfile 개선 (이미 적용됨)
+```dockerfile
+# TailwindCSS 컴파일을 assets:precompile 전에 실행
+RUN npm run build:css:compile
+RUN SECRET_KEY_BASE_DUMMY=1 bin/rails assets:precompile
+```
+
+#### B. 배포 자동화 스크립트 (권장)
+```bash
+#!/bin/bash
+# deploy-with-css.sh
+
+echo "🔄 CSS 컴파일 시작..."
+npm run build:css:compile
+
+echo "📤 코드 배포..."
+git add -A && git commit -m "Deploy with CSS fix" && git push origin main
+
+echo "🚀 프로덕션 배포..."
+# Kamal 배포 또는 수동 배포 로직
+```
+
+### 16.4. 예방책
+
+#### A. 배포 전 체크리스트
+- [ ] `npm run build:css:compile` 실행
+- [ ] 로컬에서 CSS 정상 적용 확인
+- [ ] `app/assets/builds/application.css` 파일 존재 확인
+- [ ] CSS 파일 첫 줄이 `*, ::before, ::after {` 형태인지 확인 (컴파일됨)
+
+#### B. 정기 모니터링
+```bash
+# CSS 상태 확인 명령어
+ssh -i ~/.ssh/giftrue_key root@159.223.53.175 "docker exec giftrue-web-[CONTAINER_ID] head -3 /rails/public/assets/application.tailwind-0350fabe.css"
+
+# 정상 출력 예시:
+# *, ::before, ::after {
+#   --tw-border-spacing-x: 0;
+#   --tw-border-spacing-y: 0;
+
+# 비정상 출력 예시:
+# @import "tailwindcss/base";
+# @import "tailwindcss/components";
+# @import "tailwindcss/utilities";
+```
+
+### 16.5. 운영 팀 대응 매뉴얼
+
+#### 🚨 CSS 미적용 신고 접수 시
+1. **1차 대응** (2분): 사용자에게 브라우저 캐시 클리어 안내
+2. **2차 대응** (5분): 서버 CSS 파일 상태 확인
+3. **3차 대응** (10분): 수동 CSS 파일 교체 실행
+4. **근본 해결** (30분): 배포 프로세스 점검 및 개선
+
+#### 📞 사용자 안내 템플릿
+```
+안녕하세요! CSS 스타일이 적용되지 않는 문제가 발생한 것 같습니다.
+
+다음 방법으로 해결해보세요:
+1. Ctrl + Shift + R (또는 Cmd + Shift + R)을 눌러 강력한 새로고침
+2. 브라우저를 완전히 닫았다가 다시 열어보세요
+3. 문제가 지속되면 잠시 후 다시 접속해주세요
+
+문제가 계속 발생하면 즉시 연락주세요!
+```
+
+### 16.6. 향후 개선 방향
+
+#### A. 기술적 개선
+- **Cache Busting**: CSS 파일명에 해시값 추가 자동화
+- **Health Check**: CSS 로딩 상태 모니터링 시스템
+- **Auto Recovery**: CSS 미적용 감지 시 자동 복구
+
+#### B. 프로세스 개선
+- **배포 자동화**: CSS 컴파일을 포함한 완전 자동 배포
+- **테스트 자동화**: 배포 후 CSS 적용 상태 자동 검증
+- **알림 시스템**: CSS 문제 발생 시 즉시 알림
+
+---
+
+**문서 최종 업데이트**: 2025-07-13 15:45 (KST)  
+**개발 상태**: ✅ CSS 문제 해결 매뉴얼 완성  
+**현재 상태**: CSS 미적용 문제에 대한 완전한 대응체계가 구축된 안정적인 프로덕션 서비스 운영 중
