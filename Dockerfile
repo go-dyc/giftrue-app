@@ -54,7 +54,7 @@ RUN npm ci
 COPY . .
 
 # Set executable permissions for bin files
-RUN chmod +x bin/rails bin/setup bin/docker-entrypoint
+RUN chmod +x bin/rails bin/setup bin/docker-entrypoint bin/thrust
 
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
