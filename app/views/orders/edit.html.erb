@@ -75,7 +75,7 @@
                 <% 5.times do |i| %>
                   <% if @order.main_images.attached? && @order.main_images[i] %>
                     <div class="image-slot aspect-square border-2 border-blue-500 rounded-lg relative overflow-hidden cursor-pointer" 
-                         data-slot="<%= i %>">
+                         data-slot="<%= i %>" data-has-image="true">
                       <% begin %>
                         <%= image_tag @order.main_images[i], class: "w-full h-full object-cover rounded-lg" %>
                       <% rescue => e %>
@@ -88,13 +88,18 @@
                           </div>
                         </div>
                       <% end %>
-                      <div class="absolute top-1 right-1 bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded">
+                      <div class="absolute top-1 left-1 bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded">
                         <%= i + 1 %>
                       </div>
+                      <!-- Delete button for uploaded images -->
+                      <button type="button" class="delete-image-btn absolute top-1 right-1 bg-blue-500 hover:bg-red-500 text-white text-sm w-6 h-6 rounded flex items-center justify-center transition-colors" 
+                              data-slot="<%= i %>" data-type="main">
+                        ×
+                      </button>
                     </div>
                   <% else %>
                     <div class="image-slot aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center hover:border-blue-400 transition-all cursor-pointer text-center p-2" 
-                         data-slot="<%= i %>">
+                         data-slot="<%= i %>" data-has-image="false">
                       <svg class="w-4 h-4 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                       </svg>
@@ -110,11 +115,18 @@
                     class: "hidden",
                     id: "main_images_input" %>
               
+              <!-- Hidden single file input for individual slot uploads -->
+              <input type="file" 
+                     accept="image/jpeg,image/png"
+                     class="hidden"
+                     id="main_single_image_input">
+              
               <div class="text-center">
                 <label for="main_images_input" class="btn-primary cursor-pointer">
-                  사진 선택하기
+                  사진 선택하기 (다중 업로드)
                 </label>
                 <p class="text-xs text-gray-500 mt-2">JPG, PNG 파일 | 개당 최대 10MB</p>
+                <p class="text-xs text-gray-400 mt-1">• 다중 선택: 위 버튼 클릭 • 개별 업로드: 숫자 박스 클릭</p>
               </div>
               
               <% if @order.errors[:main_images].any? %>
@@ -154,7 +166,7 @@
                 <% 5.times do |i| %>
                   <% if @order.optional_images.attached? && @order.optional_images[i] %>
                     <div class="optional-image-slot aspect-square border-2 border-green-500 rounded-lg relative overflow-hidden cursor-pointer" 
-                         data-slot="<%= i %>">
+                         data-slot="<%= i %>" data-has-image="true">
                       <% begin %>
                         <%= image_tag @order.optional_images[i], class: "w-full h-full object-cover rounded-lg" %>
                       <% rescue => e %>
@@ -167,13 +179,18 @@
                           </div>
                         </div>
                       <% end %>
-                      <div class="absolute top-1 right-1 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded">
+                      <div class="absolute top-1 left-1 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded">
                         <%= i + 1 %>
                       </div>
+                      <!-- Delete button for uploaded images -->
+                      <button type="button" class="delete-image-btn absolute top-1 right-1 bg-green-500 hover:bg-red-500 text-white text-sm w-6 h-6 rounded flex items-center justify-center transition-colors" 
+                              data-slot="<%= i %>" data-type="optional">
+                        ×
+                      </button>
                     </div>
                   <% else %>
                     <div class="optional-image-slot aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center hover:border-blue-400 transition-all cursor-pointer text-center p-2" 
-                         data-slot="<%= i %>">
+                         data-slot="<%= i %>" data-has-image="false">
                       <svg class="w-4 h-4 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                       </svg>
@@ -189,11 +206,18 @@
                     class: "hidden",
                     id: "optional_images_input" %>
               
+              <!-- Hidden single file input for individual slot uploads -->
+              <input type="file" 
+                     accept="image/jpeg,image/png"
+                     class="hidden"
+                     id="optional_single_image_input">
+              
               <div class="text-center">
                 <label for="optional_images_input" class="btn-primary cursor-pointer">
-                  사진 업로드
+                  사진 업로드 (다중 업로드)
                 </label>
                 <p class="text-xs text-gray-500 mt-2">JPG, PNG 파일 | 개당 최대 10MB</p>
+                <p class="text-xs text-gray-400 mt-1">• 다중 선택: 위 버튼 클릭 • 개별 업로드: 숫자 박스 클릭</p>
               </div>
               
               <% if @order.errors[:optional_images].any? %>
@@ -599,6 +623,7 @@ function initializePageFunctionality() {
   function setupImageSlots() {
     const imageSlots = document.querySelectorAll('.image-slot');
     const mainImagesInput = document.getElementById('main_images_input');
+    const mainSingleInput = document.getElementById('main_single_image_input');
     
     // Remove existing event listeners first to prevent duplicates
     imageSlots.forEach(slot => {
@@ -612,16 +637,46 @@ function initializePageFunctionality() {
     
     // Add click event listeners to refreshed slots
     refreshedImageSlots.forEach(slot => {
-      slot.addEventListener('click', function() {
-        mainImagesInput.click();
+      slot.addEventListener('click', function(e) {
+        // Prevent event if clicking delete button
+        if (e.target.classList.contains('delete-image-btn') || e.target.closest('.delete-image-btn')) {
+          return;
+        }
+        
+        const hasImage = slot.dataset.hasImage === 'true';
+        const slotIndex = parseInt(slot.dataset.slot);
+        
+        if (hasImage) {
+          // If slot has image, trigger single file input for replacement
+          if (mainSingleInput) {
+            mainSingleInput.dataset.targetSlot = slotIndex;
+            mainSingleInput.click();
+          }
+        } else {
+          // If empty slot, trigger single file input for that slot
+          if (mainSingleInput) {
+            mainSingleInput.dataset.targetSlot = slotIndex;
+            mainSingleInput.click();
+          }
+        }
       });
     });
+    
+    // Setup delete button functionality
+    setupDeleteButtons('main');
     
     if (mainImagesInput) {
       // Remove existing change listener
       mainImagesInput.removeEventListener('change', handleMainImageChange);
       // Add new change listener
       mainImagesInput.addEventListener('change', handleMainImageChange);
+    }
+    
+    if (mainSingleInput) {
+      // Remove existing change listener
+      mainSingleInput.removeEventListener('change', handleMainSingleImageChange);
+      // Add new change listener  
+      mainSingleInput.addEventListener('change', handleMainSingleImageChange);
     }
   }
   
@@ -639,11 +694,7 @@ function initializePageFunctionality() {
         <span class="text-xs text-gray-500 mt-1">${slot.dataset.slot * 1 + 1}</span>
       `;
       slot.className = 'image-slot aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center hover:border-blue-400 transition-all cursor-pointer text-center p-2';
-      
-      // Re-add click listener to cleared slot
-      slot.addEventListener('click', function() {
-        document.getElementById('main_images_input').click();
-      });
+      slot.dataset.hasImage = 'false';
     });
     
     // Show previews in slots
@@ -654,26 +705,32 @@ function initializePageFunctionality() {
           const slot = imageSlots[index];
           slot.innerHTML = `
             <img src="${e.target.result}" class="w-full h-full object-cover rounded-lg">
-            <div class="absolute top-1 right-1 bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded">
+            <div class="absolute top-1 left-1 bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded">
               ${index + 1}
             </div>
+            <button type="button" class="delete-image-btn absolute top-1 right-1 bg-blue-500 hover:bg-red-500 text-white text-sm w-6 h-6 rounded flex items-center justify-center transition-colors" 
+                    data-slot="${index}" data-type="main">
+              ×
+            </button>
           `;
           slot.className = 'image-slot aspect-square border-2 border-blue-500 rounded-lg relative overflow-hidden cursor-pointer';
-          
-          // Re-add click listener to image slot
-          slot.addEventListener('click', function() {
-            document.getElementById('main_images_input').click();
-          });
+          slot.dataset.hasImage = 'true';
         };
         reader.readAsDataURL(file);
       }
     });
+    
+    // Re-setup functionality after DOM changes
+    setTimeout(() => {
+      setupImageSlots();
+    }, 100);
   }
 
   // Optional images preview with slots
   function handleOptionalImages() {
     const optionalImageSlots = document.querySelectorAll('.optional-image-slot');
     const optionalImagesInput = document.getElementById('optional_images_input');
+    const optionalSingleInput = document.getElementById('optional_single_image_input');
     
     // Remove existing event listeners first to prevent duplicates
     optionalImageSlots.forEach(slot => {
@@ -687,16 +744,46 @@ function initializePageFunctionality() {
     
     // Add click event listeners to refreshed slots
     refreshedOptionalSlots.forEach(slot => {
-      slot.addEventListener('click', function() {
-        optionalImagesInput.click();
+      slot.addEventListener('click', function(e) {
+        // Prevent event if clicking delete button
+        if (e.target.classList.contains('delete-image-btn') || e.target.closest('.delete-image-btn')) {
+          return;
+        }
+        
+        const hasImage = slot.dataset.hasImage === 'true';
+        const slotIndex = parseInt(slot.dataset.slot);
+        
+        if (hasImage) {
+          // If slot has image, trigger single file input for replacement
+          if (optionalSingleInput) {
+            optionalSingleInput.dataset.targetSlot = slotIndex;
+            optionalSingleInput.click();
+          }
+        } else {
+          // If empty slot, trigger single file input for that slot
+          if (optionalSingleInput) {
+            optionalSingleInput.dataset.targetSlot = slotIndex;
+            optionalSingleInput.click();
+          }
+        }
       });
     });
+    
+    // Setup delete button functionality
+    setupDeleteButtons('optional');
     
     if (optionalImagesInput) {
       // Remove existing change listener
       optionalImagesInput.removeEventListener('change', handleOptionalImageChange);
       // Add new change listener
       optionalImagesInput.addEventListener('change', handleOptionalImageChange);
+    }
+    
+    if (optionalSingleInput) {
+      // Remove existing change listener
+      optionalSingleInput.removeEventListener('change', handleOptionalSingleImageChange);
+      // Add new change listener
+      optionalSingleInput.addEventListener('change', handleOptionalSingleImageChange);
     }
   }
   
@@ -714,11 +801,7 @@ function initializePageFunctionality() {
         <span class="text-xs text-gray-500 mt-1">${slot.dataset.slot * 1 + 1}</span>
       `;
       slot.className = 'optional-image-slot aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center hover:border-blue-400 transition-all cursor-pointer text-center p-2';
-      
-      // Re-add click listener to cleared slot
-      slot.addEventListener('click', function() {
-        document.getElementById('optional_images_input').click();
-      });
+      slot.dataset.hasImage = 'false';
     });
     
     // Show previews in slots
@@ -729,20 +812,103 @@ function initializePageFunctionality() {
           const slot = optionalImageSlots[index];
           slot.innerHTML = `
             <img src="${e.target.result}" class="w-full h-full object-cover rounded-lg">
-            <div class="absolute top-1 right-1 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded">
+            <div class="absolute top-1 left-1 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded">
               ${index + 1}
             </div>
+            <button type="button" class="delete-image-btn absolute top-1 right-1 bg-green-500 hover:bg-red-500 text-white text-sm w-6 h-6 rounded flex items-center justify-center transition-colors" 
+                    data-slot="${index}" data-type="optional">
+              ×
+            </button>
           `;
           slot.className = 'optional-image-slot aspect-square border-2 border-green-500 rounded-lg relative overflow-hidden cursor-pointer';
-          
-          // Re-add click listener to image slot
-          slot.addEventListener('click', function() {
-            document.getElementById('optional_images_input').click();
-          });
+          slot.dataset.hasImage = 'true';
         };
         reader.readAsDataURL(file);
       }
     });
+    
+    // Re-setup functionality after DOM changes
+    setTimeout(() => {
+      handleOptionalImages();
+    }, 100);
+  }
+  
+  // New function for single file upload to main images
+  function handleMainSingleImageChange(e) {
+    const file = e.target.files[0];
+    const targetSlot = parseInt(e.target.dataset.targetSlot);
+    
+    if (file && file.type.startsWith('image/') && targetSlot >= 0 && targetSlot <= 4) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const slot = document.querySelector(`.image-slot[data-slot="${targetSlot}"]`);
+        if (slot) {
+          slot.innerHTML = `
+            <img src="${e.target.result}" class="w-full h-full object-cover rounded-lg">
+            <div class="absolute top-1 left-1 bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded">
+              ${targetSlot + 1}
+            </div>
+            <button type="button" class="delete-image-btn absolute top-1 right-1 bg-blue-500 hover:bg-red-500 text-white text-sm w-6 h-6 rounded flex items-center justify-center transition-colors" 
+                    data-slot="${targetSlot}" data-type="main">
+              ×
+            </button>
+          `;
+          slot.className = 'image-slot aspect-square border-2 border-blue-500 rounded-lg relative overflow-hidden cursor-pointer';
+          slot.dataset.hasImage = 'true';
+          
+          // Update the main images input with new file
+          updateMainImagesInput(targetSlot, file);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    // Clear the input
+    e.target.value = '';
+    
+    // Re-setup functionality after DOM changes
+    setTimeout(() => {
+      setupImageSlots();
+    }, 100);
+  }
+  
+  // New function for single file upload to optional images
+  function handleOptionalSingleImageChange(e) {
+    const file = e.target.files[0];
+    const targetSlot = parseInt(e.target.dataset.targetSlot);
+    
+    if (file && file.type.startsWith('image/') && targetSlot >= 0 && targetSlot <= 4) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const slot = document.querySelector(`.optional-image-slot[data-slot="${targetSlot}"]`);
+        if (slot) {
+          slot.innerHTML = `
+            <img src="${e.target.result}" class="w-full h-full object-cover rounded-lg">
+            <div class="absolute top-1 left-1 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded">
+              ${targetSlot + 1}
+            </div>
+            <button type="button" class="delete-image-btn absolute top-1 right-1 bg-green-500 hover:bg-red-500 text-white text-sm w-6 h-6 rounded flex items-center justify-center transition-colors" 
+                    data-slot="${targetSlot}" data-type="optional">
+              ×
+            </button>
+          `;
+          slot.className = 'optional-image-slot aspect-square border-2 border-green-500 rounded-lg relative overflow-hidden cursor-pointer';
+          slot.dataset.hasImage = 'true';
+          
+          // Update the optional images input with new file
+          updateOptionalImagesInput(targetSlot, file);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    // Clear the input
+    e.target.value = '';
+    
+    // Re-setup functionality after DOM changes
+    setTimeout(() => {
+      handleOptionalImages();
+    }, 100);
   }
 
   // Character counter for all input fields
@@ -1030,6 +1196,154 @@ function initializePageFunctionality() {
     
     console.log('hasContent:', hasContent);
     return hasContent;
+  }
+  
+  // Setup delete button functionality
+  function setupDeleteButtons(type) {
+    const deleteButtons = document.querySelectorAll(`.delete-image-btn[data-type="${type}"]`);
+    
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.stopPropagation(); // Prevent slot click event
+        
+        const slot = parseInt(this.dataset.slot);
+        const imageType = this.dataset.type;
+        
+        if (confirm('이 사진을 삭제하시겠습니까?')) {
+          deleteImageFromSlot(slot, imageType);
+        }
+      });
+    });
+  }
+  
+  // Delete image from specific slot
+  function deleteImageFromSlot(slotIndex, type) {
+    const slotClass = type === 'main' ? 'image-slot' : 'optional-image-slot';
+    const slot = document.querySelector(`.${slotClass}[data-slot="${slotIndex}"]`);
+    
+    if (slot) {
+      // Reset slot to empty state
+      slot.innerHTML = `
+        <svg class="w-4 h-4 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        <span class="text-xs text-gray-500 mt-1">${slotIndex + 1}</span>
+      `;
+      slot.className = `${slotClass} aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center hover:border-blue-400 transition-all cursor-pointer text-center p-2`;
+      slot.dataset.hasImage = 'false';
+      
+      // Remove file from input
+      if (type === 'main') {
+        removeFileFromMainImages(slotIndex);
+      } else {
+        removeFileFromOptionalImages(slotIndex);
+      }
+    }
+    
+    // Re-setup functionality after DOM changes
+    setTimeout(() => {
+      if (type === 'main') {
+        setupImageSlots();
+      } else {
+        handleOptionalImages();
+      }
+    }, 100);
+  }
+  
+  // Update main images input with new file at specific slot
+  function updateMainImagesInput(slotIndex, newFile) {
+    const input = document.getElementById('main_images_input');
+    if (!input) return;
+    
+    // Create a new FileList with the new file at the specified index
+    const dt = new DataTransfer();
+    
+    // Add existing files (except the slot we're updating)
+    for (let i = 0; i < input.files.length; i++) {
+      if (i !== slotIndex) {
+        dt.items.add(input.files[i]);
+      }
+    }
+    
+    // Add new file at the correct position
+    const files = Array.from(dt.files);
+    while (files.length <= slotIndex) {
+      files.push(null);
+    }
+    files[slotIndex] = newFile;
+    
+    // Rebuild DataTransfer with ordered files
+    const newDt = new DataTransfer();
+    files.forEach(file => {
+      if (file) newDt.items.add(file);
+    });
+    
+    input.files = newDt.files;
+  }
+  
+  // Update optional images input with new file at specific slot
+  function updateOptionalImagesInput(slotIndex, newFile) {
+    const input = document.getElementById('optional_images_input');
+    if (!input) return;
+    
+    // Create a new FileList with the new file at the specified index
+    const dt = new DataTransfer();
+    
+    // Add existing files (except the slot we're updating)
+    for (let i = 0; i < input.files.length; i++) {
+      if (i !== slotIndex) {
+        dt.items.add(input.files[i]);
+      }
+    }
+    
+    // Add new file at the correct position
+    const files = Array.from(dt.files);
+    while (files.length <= slotIndex) {
+      files.push(null);
+    }
+    files[slotIndex] = newFile;
+    
+    // Rebuild DataTransfer with ordered files
+    const newDt = new DataTransfer();
+    files.forEach(file => {
+      if (file) newDt.items.add(file);
+    });
+    
+    input.files = newDt.files;
+  }
+  
+  // Remove file from main images input at specific slot
+  function removeFileFromMainImages(slotIndex) {
+    const input = document.getElementById('main_images_input');
+    if (!input) return;
+    
+    const dt = new DataTransfer();
+    
+    // Add all files except the one at slotIndex
+    for (let i = 0; i < input.files.length; i++) {
+      if (i !== slotIndex) {
+        dt.items.add(input.files[i]);
+      }
+    }
+    
+    input.files = dt.files;
+  }
+  
+  // Remove file from optional images input at specific slot
+  function removeFileFromOptionalImages(slotIndex) {
+    const input = document.getElementById('optional_images_input');
+    if (!input) return;
+    
+    const dt = new DataTransfer();
+    
+    // Add all files except the one at slotIndex
+    for (let i = 0; i < input.files.length; i++) {
+      if (i !== slotIndex) {
+        dt.items.add(input.files[i]);
+      }
+    }
+    
+    input.files = dt.files;
   }
 
   // Initialize required attributes on page load - no longer needed since we handle validation in JavaScript
