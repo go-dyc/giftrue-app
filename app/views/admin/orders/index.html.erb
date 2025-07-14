@@ -107,15 +107,18 @@
                     <% end %>
                   </td>
                   <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                    <div class="flex items-center justify-end space-x-2">
+                    <div class="flex items-center justify-end space-x-3">
                       <%= link_to "상세보기", admin_order_path(order), 
-                            class: "text-blue-600 hover:text-blue-900" %>
-                      <%= link_to "삭제", admin_order_path(order), 
+                            class: "inline-flex items-center px-3 py-1 border border-blue-300 rounded-md text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors" %>
+                      <%= link_to admin_order_path(order), 
                             method: :delete,
-                            class: "text-red-600 hover:text-red-900",
+                            class: "inline-flex items-center px-3 py-1 border border-red-300 rounded-md text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 transition-colors",
                             data: { 
-                              confirm: "정말로 주문 '#{order.naver_order_number}'을 삭제하시겠습니까?\n\n⚠️ 이 작업은 되돌릴 수 없습니다.\n- 주문 정보가 완전히 삭제됩니다\n- 첨부된 모든 이미지가 삭제됩니다\n- 같은 주문번호로 새 주문을 생성할 수 있게 됩니다" 
-                            } %>
+                              confirm: "정말로 주문 '#{order.naver_order_number}'을 삭제하시겠습니까?\n\n⚠️ 이 작업은 되돌릴 수 없습니다.\n\n삭제될 내용:\n• 주문자: #{order.orderer_name}\n• 첨부 이미지: #{order.main_images.count + order.optional_images.count}개\n• 기념패 정보 및 문구\n\n삭제 후 '#{order.naver_order_number}' 번호로 새 주문 생성 가능\n\n계속하시겠습니까?",
+                              turbo_method: :delete
+                            } do %>
+                        🗑️ 삭제
+                      <% end %>
                     </div>
                   </td>
                 </tr>

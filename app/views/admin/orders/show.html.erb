@@ -317,15 +317,24 @@
           <% end %>
           
           <!-- 위험한 작업 구분선 -->
-          <div class="border-t border-gray-200 pt-3 mt-4">
-            <p class="text-xs text-gray-500 mb-3 text-center">⚠️ 위험한 작업</p>
-            <%= link_to "주문 삭제", 
-                  admin_order_path(@order), 
+          <div class="border-t border-red-200 pt-4 mt-4 bg-red-50 rounded-lg p-4">
+            <div class="flex items-center mb-3">
+              <span class="text-red-600 text-lg mr-2">⚠️</span>
+              <p class="text-sm font-medium text-red-800">위험한 작업</p>
+            </div>
+            <%= link_to admin_order_path(@order), 
                   method: :delete,
-                  class: "block w-full text-center bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors",
+                  class: "flex items-center justify-center w-full bg-red-600 text-white px-4 py-3 rounded-md hover:bg-red-700 transition-colors font-medium text-sm border-2 border-red-600 hover:border-red-700",
                   data: { 
-                    confirm: "정말로 주문 '#{@order.naver_order_number}'을 삭제하시겠습니까?\n\n⚠️ 이 작업은 되돌릴 수 없습니다.\n\n삭제될 내용:\n- 주문 정보 (주문자: #{@order.orderer_name})\n- 첨부된 모든 이미지 (#{@order.main_images.count + @order.optional_images.count}개)\n- 기념패 문구 및 추가 요청사항\n\n삭제 후:\n- 같은 주문번호 '#{@order.naver_order_number}'로 새 주문을 생성할 수 있게 됩니다\n\n정말로 삭제하시겠습니까?" 
-                  } %>
+                    confirm: "🚨 주문 완전 삭제 확인\n\n주문번호: #{@order.naver_order_number}\n주문자: #{@order.orderer_name}\n\n삭제될 내용:\n• 모든 주문 정보\n• 첨부 이미지 #{@order.main_images.count + @order.optional_images.count}개\n• 기념패 문구 및 추가요청사항\n\n⚠️ 이 작업은 되돌릴 수 없습니다!\n\n삭제 후 '#{@order.naver_order_number}' 번호로\n새 주문을 생성할 수 있게 됩니다.\n\n정말로 완전히 삭제하시겠습니까?",
+                    turbo_method: :delete
+                  } do %>
+              <span class="mr-2">🗑️</span>
+              주문 완전 삭제
+            <% end %>
+            <p class="text-xs text-red-600 mt-2 text-center">
+              삭제 후 같은 주문번호로 새 주문 생성 가능
+            </p>
           </div>
         </div>
       </div>
