@@ -209,7 +209,7 @@ class OrdersController < ApplicationController
       Rails.logger.info "일치 여부: #{orderer_name == @order.orderer_name}"
       Rails.logger.info "====================="
       
-      if orderer_name.present? && orderer_name == @order.orderer_name
+      if orderer_name.present? && orderer_name == @order.orderer_name.to_s.strip
         # 인증 성공 - 세션에 저장 (1시간 유효)
         session["verified_order_#{@order.naver_order_number}"] = true
         session["verified_order_#{@order.naver_order_number}_expires"] = 1.hour.from_now
