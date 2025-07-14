@@ -12,6 +12,9 @@ class Order < ApplicationRecord
   # 새 주문 생성 시 및 업데이트 시 시스템 기본값 적용
   before_validation :set_default_delivery_days
   
+  # 주문 완료 시 슬랙 알림 발송
+  after_update :send_slack_notification_if_completed
+  
   # Step-based validations
   validates :orderer_name, presence: true, if: :validate_step_1_or_complete?
   validates :main_images, presence: true, if: :validate_step_1_or_complete?
@@ -186,5 +189,14 @@ class Order < ApplicationRecord
   # 새 주문 생성 시 시스템 기본값 설정
   def set_default_delivery_days
     self.expected_delivery_days ||= SystemSetting.default_delivery_days
+  end
+  
+  # 주문이 완료되었을 때 슬랙 알림 발송
+  def send_slack_notification_if_completed
+    # 주문이 새로 완료된 경우에만 알림 발송 (중복 방지)
+    if completed? && !@slack_notification_sent
+      SlackNotificationJob.perform_later(self)
+      @slack_notification_sent = true
+    end
   end
 end

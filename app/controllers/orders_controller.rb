@@ -244,6 +244,69 @@ class OrdersController < ApplicationController
     end
   end
 
+  def test_slack
+    require 'net/http'
+    require 'json'
+    
+    # 직접 URL 사용 (캐시 문제 해결)
+    webhook_url = "https://hooks.slack.com/services/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"
+    
+    begin
+      uri = URI(webhook_url)
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+      
+      message = { text: "🧪 컨트롤러에서 직접 테스트: Rails 연동 확인!" }
+      
+      response = http.post(uri.path, message.to_json, { 'Content-Type' => 'application/json' })
+      
+      success = response.code == '200' && response.body == 'ok'
+      
+      render json: { 
+        success: success,
+        message: success ? "Slack 테스트 알림 전송 성공" : "Slack 테스트 알림 전송 실패",
+        response_code: response.code,
+        response_body: response.body
+      }
+    rescue => e
+      render json: { 
+        success: false,
+        message: "Slack 테스트 알림 전송 실패: #{e.message}"
+      }
+    end
+  end
+
+  def test_order_notification
+    # Service 파일 로드
+    require_relative '../services/slack_notification_service'
+    
+    # 실제 주문 완료 알림 테스트 (더미 데이터 사용)
+    test_order = Order.new(
+      naver_order_number: "TEST-#{Time.current.strftime('%Y%m%d-%H%M%S')}",
+      orderer_name: "테스트 고객",
+      plaque_style: "gold_metal",
+      plaque_title: "축하합니다",
+      plaque_name: "홍길동",
+      plaque_content: "졸업을 축하드립니다!",
+      status: "주문접수",
+      expected_delivery_days: 7
+    )
+    
+    # 실제 주문 완료 알림 테스트
+    success = SlackNotificationService.send_order_completion_notification(test_order)
+    
+    render json: {
+      success: success,
+      message: success ? "주문 완료 알림 테스트 성공" : "주문 완료 알림 테스트 실패",
+      order_data: {
+        naver_order_number: test_order.naver_order_number,
+        orderer_name: test_order.orderer_name,
+        plaque_style: test_order.plaque_style,
+        completed: test_order.completed?
+      }
+    }
+  end
+
   private
 
   def find_or_create_order

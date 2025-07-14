@@ -43,6 +43,8 @@ Rails.application.routes.draw do
       post :verify
       get :complete
       patch :update_step
+      get :test_slack
+      get :test_order_notification
     end
   end
   

@@ -233,8 +233,74 @@ scp -i ~/.ssh/giftrue_key app/assets/builds/application.css root@159.223.53.175:
 ssh -i ~/.ssh/giftrue_key root@159.223.53.175 "docker cp /tmp/application.css giftrue-web-latest:/rails/public/assets/application.tailwind-0350fabe.css"
 ```
 
+## Slack 알림 시스템
+
+### 주문 완료 자동 알림 기능
+
+**목적**: 주문이 완료되는 즉시 관리자에게 Slack 알림을 보내어 신속한 제작 대응 가능
+
+#### 시스템 구성
+- **Order 모델**: `after_update` 콜백으로 완료 시점 감지
+- **SlackNotificationJob**: 백그라운드 작업으로 안정적인 알림 전송
+- **SlackNotificationService**: 재사용 가능한 Slack API 연동 서비스
+
+#### 설정 파일
+```bash
+# .env 파일
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
+```
+
+#### 자동 알림 발송 조건
+- 주문의 `completed?` 메서드가 `true`를 반환할 때
+- 모든 필수 정보 입력 완료 (성함, 사진, 기념패 스타일, 문구)
+- 중복 알림 방지 로직 내장
+
+#### 알림 내용
+- 🎉 새 주문 접수 메시지
+- 📋 주문번호, 고객명, 기념패 스타일
+- 📁 첨부 파일 개수 (정면사진, 포즈사진)
+- 📅 예상 배송일
+- 🔗 관리자 페이지 직접 링크 (원클릭 주문 확인)
+
+#### 코드 구조
+```ruby
+# app/models/order.rb
+after_update :send_slack_notification_if_completed
+
+# app/jobs/slack_notification_job.rb
+class SlackNotificationJob < ApplicationJob
+  def perform(order)
+    SlackNotificationService.send_order_completion_notification(order)
+  end
+end
+
+# app/services/slack_notification_service.rb
+class SlackNotificationService
+  def self.send_order_completion_notification(order)
+    # Slack API 연동 로직
+  end
+end
+```
+
+#### 테스트 URL
+- **간단 테스트**: `/orders/TEST-001/test_slack`
+- **주문 알림 테스트**: `/orders/TEST-001/test_order_notification`
+
+#### Slack 채널 설정
+- **채널명**: #order-notifications
+- **Webhook 앱**: Giftrue Order Notifications
+- **알림 형태**: 리치 메시지 (Blocks API 사용)
+
+#### 장점
+- ⚡ **즉시성**: 주문 완료 즉시 알림
+- 📱 **모바일 접근**: Slack 앱으로 어디서든 확인
+- 🔗 **원클릭 접근**: 알림에서 바로 관리자 페이지로 이동
+- 🛡️ **안정성**: Job 큐를 통한 백그라운드 처리
+- 🔄 **확장성**: 다른 알림 (상태 변경, 배송 등)도 쉽게 추가 가능
+
 ---
 
-**문서 최종 업데이트**: 2025-07-13  
-**개발 상태**: ✅ 프로덕션 배포 완료  
-**주요 URL**: `/orders/{naver_order_number}` (고객용), `/admin` (관리자용)
+**문서 최종 업데이트**: 2025-07-14  
+**개발 상태**: ✅ 프로덕션 배포 완료 + Slack 알림 시스템 추가  
+**주요 URL**: `/orders/{naver_order_number}` (고객용), `/admin` (관리자용)  
+**Slack 알림**: #order-notifications 채널에서 실시간 주문 알림 수신
