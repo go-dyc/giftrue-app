@@ -322,20 +322,112 @@
               <span class="text-red-600 text-lg mr-2">⚠️</span>
               <p class="text-sm font-medium text-red-800">위험한 작업</p>
             </div>
-            <%= link_to admin_order_path(@order), 
-                  method: :delete,
-                  class: "flex items-center justify-center w-full bg-red-600 text-white px-4 py-3 rounded-md hover:bg-red-700 transition-colors font-medium text-sm border-2 border-red-600 hover:border-red-700",
-                  data: { 
-                    confirm: "🚨 주문 완전 삭제 확인\n\n주문번호: #{@order.naver_order_number}\n주문자: #{@order.orderer_name}\n\n삭제될 내용:\n• 모든 주문 정보\n• 첨부 이미지 #{@order.main_images.count + @order.optional_images.count}개\n• 기념패 문구 및 추가요청사항\n\n⚠️ 이 작업은 되돌릴 수 없습니다!\n\n삭제 후 '#{@order.naver_order_number}' 번호로\n새 주문을 생성할 수 있게 됩니다.\n\n정말로 완전히 삭제하시겠습니까?",
-                    turbo_method: :delete
-                  } do %>
-              <span class="mr-2">🗑️</span>
-              주문 완전 삭제
-            <% end %>
-            <p class="text-xs text-red-600 mt-2 text-center">
-              삭제 후 같은 주문번호로 새 주문 생성 가능
-            </p>
+            
+            <!-- 삭제 확인 버튼 (처음에는 이것만 보임) -->
+            <div id="delete-step-1">
+              <button 
+                onclick="showDeleteConfirmation()"
+                class="flex items-center justify-center w-full bg-gray-400 text-white px-4 py-3 rounded-md hover:bg-gray-500 transition-colors font-medium text-sm border-2 border-gray-400 hover:border-gray-500">
+                <span class="mr-2">🗑️</span>
+                주문 삭제 (클릭해서 시작)
+              </button>
+              <p class="text-xs text-gray-600 mt-2 text-center">
+                안전을 위해 2단계 확인이 필요합니다
+              </p>
+            </div>
+
+            <!-- 삭제 확인 단계 (숨겨져 있음) -->
+            <div id="delete-step-2" style="display: none;">
+              <div class="bg-red-100 border border-red-300 rounded-lg p-4 mb-4">
+                <h4 class="font-bold text-red-800 mb-2">🚨 주문 완전 삭제 확인</h4>
+                <div class="text-sm text-red-700 space-y-1">
+                  <p><strong>주문번호:</strong> <%= @order.naver_order_number %></p>
+                  <p><strong>주문자:</strong> <%= @order.orderer_name %></p>
+                  <p><strong>삭제될 이미지:</strong> <%= @order.main_images.count + @order.optional_images.count %>개</p>
+                </div>
+              </div>
+              
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-red-800 mb-2">
+                  삭제하려면 주문번호를 정확히 입력하세요:
+                </label>
+                <input 
+                  type="text" 
+                  id="delete-confirmation-input"
+                  placeholder="<%= @order.naver_order_number %>"
+                  class="w-full px-3 py-2 border border-red-300 rounded-md focus:ring-red-500 focus:border-red-500 text-center font-mono">
+              </div>
+              
+              <div class="flex space-x-3">
+                <button 
+                  onclick="cancelDelete()"
+                  class="flex-1 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors font-medium text-sm">
+                  취소
+                </button>
+                <%= link_to admin_order_path(@order), 
+                      method: :delete,
+                      id: "final-delete-button",
+                      class: "flex-1 bg-red-600 text-white px-4 py-2 rounded-md text-center font-medium text-sm transition-colors cursor-not-allowed opacity-50",
+                      onclick: "return confirmFinalDelete(event)",
+                      data: { turbo_method: :delete } do %>
+                  🗑️ 완전 삭제
+                <% end %>
+              </div>
+            </div>
           </div>
+
+          <script>
+            function showDeleteConfirmation() {
+              document.getElementById('delete-step-1').style.display = 'none';
+              document.getElementById('delete-step-2').style.display = 'block';
+              document.getElementById('delete-confirmation-input').focus();
+            }
+
+            function cancelDelete() {
+              document.getElementById('delete-step-1').style.display = 'block';
+              document.getElementById('delete-step-2').style.display = 'none';
+              document.getElementById('delete-confirmation-input').value = '';
+              updateDeleteButton();
+            }
+
+            function updateDeleteButton() {
+              const input = document.getElementById('delete-confirmation-input');
+              const button = document.getElementById('final-delete-button');
+              const expectedValue = '<%= @order.naver_order_number %>';
+              
+              if (input.value === expectedValue) {
+                button.classList.remove('cursor-not-allowed', 'opacity-50', 'bg-red-600');
+                button.classList.add('bg-red-700', 'hover:bg-red-800');
+                button.style.pointerEvents = 'auto';
+              } else {
+                button.classList.add('cursor-not-allowed', 'opacity-50', 'bg-red-600');
+                button.classList.remove('bg-red-700', 'hover:bg-red-800');
+                button.style.pointerEvents = 'none';
+              }
+            }
+
+            function confirmFinalDelete(event) {
+              const input = document.getElementById('delete-confirmation-input');
+              const expectedValue = '<%= @order.naver_order_number %>';
+              
+              if (input.value !== expectedValue) {
+                event.preventDefault();
+                alert('주문번호가 일치하지 않습니다. 정확히 입력해주세요.');
+                return false;
+              }
+              
+              return confirm('⚠️ 마지막 확인\n\n정말로 이 주문을 완전히 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다!');
+            }
+
+            // 입력 필드 변화 감지
+            document.addEventListener('DOMContentLoaded', function() {
+              const input = document.getElementById('delete-confirmation-input');
+              if (input) {
+                input.addEventListener('input', updateDeleteButton);
+                input.addEventListener('paste', () => setTimeout(updateDeleteButton, 10));
+              }
+            });
+          </script>
         </div>
       </div>
     </div>
