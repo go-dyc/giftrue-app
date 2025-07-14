@@ -105,11 +105,22 @@
         </div>
 
         <!-- Additional Requests -->
-        <% if @order.additional_requests.present? %>
+        <% if @order.additional_requests.present? || @order.plaque_additional_requests.present? %>
           <div class="border-b border-gray-200 pb-4">
             <p class="text-sm font-medium text-gray-500 mb-2">추가 요청사항</p>
-            <div class="bg-gray-50 rounded-lg p-4">
-              <p class="text-gray-900 whitespace-pre-wrap"><%= @order.additional_requests %></p>
+            <div class="bg-gray-50 rounded-lg p-4 space-y-3">
+              <% if @order.additional_requests.present? %>
+                <div>
+                  <span class="text-sm font-medium text-gray-600">일반 요청사항:</span>
+                  <p class="text-gray-900 whitespace-pre-wrap"><%= @order.additional_requests %></p>
+                </div>
+              <% end %>
+              <% if @order.plaque_additional_requests.present? %>
+                <div>
+                  <span class="text-sm font-medium text-gray-600">기념패 추가 요청사항:</span>
+                  <p class="text-gray-900 whitespace-pre-wrap"><%= @order.plaque_additional_requests %></p>
+                </div>
+              <% end %>
             </div>
           </div>
         <% end %>
