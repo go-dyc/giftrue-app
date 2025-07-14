@@ -245,35 +245,15 @@ class OrdersController < ApplicationController
   end
 
   def test_slack
-    require 'net/http'
-    require 'json'
+    # Service 파일을 강제로 다시 로드
+    load Rails.root.join('app', 'services', 'slack_notification_service.rb')
     
-    # 환경변수에서 URL 읽기
-    webhook_url = ENV['SLACK_WEBHOOK_URL']
+    success = SlackNotificationService.send_test_notification("🧪 Controller에서 Service 재로드: Rails 연동 확인!")
     
-    begin
-      uri = URI(webhook_url)
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
-      
-      message = { text: "🧪 컨트롤러에서 직접 테스트: Rails 연동 확인!" }
-      
-      response = http.post(uri.path, message.to_json, { 'Content-Type' => 'application/json' })
-      
-      success = response.code == '200' && response.body == 'ok'
-      
-      render json: { 
-        success: success,
-        message: success ? "Slack 테스트 알림 전송 성공" : "Slack 테스트 알림 전송 실패",
-        response_code: response.code,
-        response_body: response.body
-      }
-    rescue => e
-      render json: { 
-        success: false,
-        message: "Slack 테스트 알림 전송 실패: #{e.message}"
-      }
-    end
+    render json: { 
+      success: success,
+      message: success ? "Slack 테스트 알림 전송 성공" : "Slack 테스트 알림 전송 실패"
+    }
   end
 
   def test_order_notification
