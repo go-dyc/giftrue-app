@@ -8,7 +8,7 @@ class SlackNotificationService
   end
 
   def initialize
-    @webhook_url = "https://hooks.slack.com/services/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"
+    @webhook_url = ENV['SLACK_WEBHOOK_URL']
   end
 
   def send_order_completion_notification(order)

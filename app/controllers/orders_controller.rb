@@ -248,8 +248,8 @@ class OrdersController < ApplicationController
     require 'net/http'
     require 'json'
     
-    # 직접 URL 사용 (캐시 문제 해결)
-    webhook_url = "https://hooks.slack.com/services/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"
+    # 환경변수에서 URL 읽기
+    webhook_url = ENV['SLACK_WEBHOOK_URL']
     
     begin
       uri = URI(webhook_url)
