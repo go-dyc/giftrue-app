@@ -1,7 +1,7 @@
 class Admin::OrdersController < ApplicationController
   layout 'admin'
   before_action :require_admin_login
-  before_action :set_order, only: [:show, :update, :update_status, :update_delivery_days]
+  before_action :set_order, only: [:show, :update, :update_status, :update_delivery_days, :destroy]
 
   def index
     @status_filter = params[:status] || '주문접수'
@@ -42,6 +42,19 @@ class Admin::OrdersController < ApplicationController
       redirect_to admin_order_path(@order), notice: '예상 수령일이 변경되었습니다.'
     else
       redirect_to admin_order_path(@order), alert: '예상 수령일 변경에 실패했습니다.'
+    end
+  end
+
+  def destroy
+    order_number = @order.naver_order_number
+    
+    begin
+      # Active Storage 첨부파일들도 함께 삭제됨 (dependent: :purge)
+      @order.destroy!
+      redirect_to admin_orders_path, notice: "주문 '#{order_number}'이 성공적으로 삭제되었습니다."
+    rescue => e
+      Rails.logger.error "Order deletion failed: #{e.message}"
+      redirect_to admin_order_path(@order), alert: '주문 삭제에 실패했습니다. 다시 시도해주세요.'
     end
   end
 

@@ -315,6 +315,18 @@
               수정 불가 (시안확정됨)
             </div>
           <% end %>
+          
+          <!-- 위험한 작업 구분선 -->
+          <div class="border-t border-gray-200 pt-3 mt-4">
+            <p class="text-xs text-gray-500 mb-3 text-center">⚠️ 위험한 작업</p>
+            <%= link_to "주문 삭제", 
+                  admin_order_path(@order), 
+                  method: :delete,
+                  class: "block w-full text-center bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors",
+                  data: { 
+                    confirm: "정말로 주문 '#{@order.naver_order_number}'을 삭제하시겠습니까?\n\n⚠️ 이 작업은 되돌릴 수 없습니다.\n\n삭제될 내용:\n- 주문 정보 (주문자: #{@order.orderer_name})\n- 첨부된 모든 이미지 (#{@order.main_images.count + @order.optional_images.count}개)\n- 기념패 문구 및 추가 요청사항\n\n삭제 후:\n- 같은 주문번호 '#{@order.naver_order_number}'로 새 주문을 생성할 수 있게 됩니다\n\n정말로 삭제하시겠습니까?" 
+                  } %>
+          </div>
         </div>
       </div>
     </div>

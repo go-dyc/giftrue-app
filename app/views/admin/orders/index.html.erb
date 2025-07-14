@@ -107,8 +107,16 @@
                     <% end %>
                   </td>
                   <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                    <%= link_to "상세보기", admin_order_path(order), 
-                          class: "text-blue-600 hover:text-blue-900" %>
+                    <div class="flex items-center justify-end space-x-2">
+                      <%= link_to "상세보기", admin_order_path(order), 
+                            class: "text-blue-600 hover:text-blue-900" %>
+                      <%= link_to "삭제", admin_order_path(order), 
+                            method: :delete,
+                            class: "text-red-600 hover:text-red-900",
+                            data: { 
+                              confirm: "정말로 주문 '#{order.naver_order_number}'을 삭제하시겠습니까?\n\n⚠️ 이 작업은 되돌릴 수 없습니다.\n- 주문 정보가 완전히 삭제됩니다\n- 첨부된 모든 이미지가 삭제됩니다\n- 같은 주문번호로 새 주문을 생성할 수 있게 됩니다" 
+                            } %>
+                    </div>
                   </td>
                 </tr>
               <% end %>

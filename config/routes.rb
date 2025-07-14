@@ -28,7 +28,7 @@ Rails.application.routes.draw do
     get "settings", to: "settings#index"
     patch "settings", to: "settings#update"
     
-    resources :orders, only: [:index, :show, :update] do
+    resources :orders, only: [:index, :show, :update, :destroy] do
       member do
         patch :update_status
         patch :update_delivery_days
