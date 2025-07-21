@@ -39,6 +39,7 @@ env:
     - RAILS_MASTER_KEY
     - DATABASE_URL
     - SLACK_WEBHOOK_URL
+    - SECRET_KEY_BASE
   clear:
     RAILS_ENV: production
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
