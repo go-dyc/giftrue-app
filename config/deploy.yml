@@ -95,6 +95,7 @@ builder:
 
 # Use a different ssh user than root
 ssh:
+  user: root
   keys: ["~/.ssh/giftrue_key"]
 
 # Use accessory services (secrets come from .kamal/secrets).
