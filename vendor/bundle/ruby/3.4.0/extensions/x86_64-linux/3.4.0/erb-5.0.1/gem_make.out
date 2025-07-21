@@ -1,0 +1,18 @@
+current directory: /home/doyoung/giftrue-app/vendor/bundle/ruby/3.4.0/gems/erb-5.0.1/ext/erb/escape
+/home/doyoung/.rvm/rubies/ruby-3.4.2/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /home/doyoung/giftrue-app/vendor/bundle/ruby/3.4.0/gems/erb-5.0.1/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20250721-6892-8gzqfu sitelibdir\=./.gem.20250721-6892-8gzqfu clean
+
+current directory: /home/doyoung/giftrue-app/vendor/bundle/ruby/3.4.0/gems/erb-5.0.1/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20250721-6892-8gzqfu sitelibdir\=./.gem.20250721-6892-8gzqfu
+compiling escape.c
+linking shared-object erb/escape.so
+
+current directory: /home/doyoung/giftrue-app/vendor/bundle/ruby/3.4.0/gems/erb-5.0.1/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20250721-6892-8gzqfu sitelibdir\=./.gem.20250721-6892-8gzqfu install
+/usr/bin/install -m 0755 escape.so ./.gem.20250721-6892-8gzqfu/erb
+
+current directory: /home/doyoung/giftrue-app/vendor/bundle/ruby/3.4.0/gems/erb-5.0.1/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20250721-6892-8gzqfu sitelibdir\=./.gem.20250721-6892-8gzqfu clean

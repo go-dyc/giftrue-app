@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  app:
+    image: ruby:3.4.2-slim
+    working_dir: /rails
+    ports:
+      - "3000:3000"
+    environment:
+      - RAILS_ENV=development
+      - DATABASE_URL=sqlite3:storage/development.sqlite3
+    volumes:
+      - .:/rails
+    command: >
+      bash -c "
+        apt-get update -qq &&
+        apt-get install --no-install-recommends -y build-essential curl git libvips sqlite3 nodejs npm &&
+        bundle install &&
+        npm ci &&
+        bundle exec rails db:migrate &&
+        bundle exec rails server -b 0.0.0.0
+      "
+    stdin_open: true
+    tty: true

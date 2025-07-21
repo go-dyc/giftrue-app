@@ -1,0 +1,18 @@
+current directory: /home/doyoung/giftrue-app/vendor/bundle/ruby/3.4.0/gems/racc-1.8.1/ext/racc/cparse
+/home/doyoung/.rvm/rubies/ruby-3.4.2/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /home/doyoung/giftrue-app/vendor/bundle/ruby/3.4.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20250721-6892-wasvfo sitelibdir\=./.gem.20250721-6892-wasvfo clean
+
+current directory: /home/doyoung/giftrue-app/vendor/bundle/ruby/3.4.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20250721-6892-wasvfo sitelibdir\=./.gem.20250721-6892-wasvfo
+compiling cparse.c
+linking shared-object racc/cparse.so
+
+current directory: /home/doyoung/giftrue-app/vendor/bundle/ruby/3.4.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20250721-6892-wasvfo sitelibdir\=./.gem.20250721-6892-wasvfo install
+/usr/bin/install -m 0755 cparse.so ./.gem.20250721-6892-wasvfo/racc
+
+current directory: /home/doyoung/giftrue-app/vendor/bundle/ruby/3.4.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20250721-6892-wasvfo sitelibdir\=./.gem.20250721-6892-wasvfo clean

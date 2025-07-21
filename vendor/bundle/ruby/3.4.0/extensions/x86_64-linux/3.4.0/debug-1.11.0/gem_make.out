@@ -1,0 +1,19 @@
+current directory: /home/doyoung/giftrue-app/vendor/bundle/ruby/3.4.0/gems/debug-1.11.0/ext/debug
+/home/doyoung/.rvm/rubies/ruby-3.4.2/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /home/doyoung/giftrue-app/vendor/bundle/ruby/3.4.0/gems/debug-1.11.0/ext/debug
+make DESTDIR\= sitearchdir\=./.gem.20250721-6892-u212vx sitelibdir\=./.gem.20250721-6892-u212vx clean
+
+current directory: /home/doyoung/giftrue-app/vendor/bundle/ruby/3.4.0/gems/debug-1.11.0/ext/debug
+make DESTDIR\= sitearchdir\=./.gem.20250721-6892-u212vx sitelibdir\=./.gem.20250721-6892-u212vx
+compiling debug.c
+compiling iseq_collector.c
+linking shared-object debug/debug.so
+
+current directory: /home/doyoung/giftrue-app/vendor/bundle/ruby/3.4.0/gems/debug-1.11.0/ext/debug
+make DESTDIR\= sitearchdir\=./.gem.20250721-6892-u212vx sitelibdir\=./.gem.20250721-6892-u212vx install
+/usr/bin/install -m 0755 debug.so ./.gem.20250721-6892-u212vx/debug
+
+current directory: /home/doyoung/giftrue-app/vendor/bundle/ruby/3.4.0/gems/debug-1.11.0/ext/debug
+make DESTDIR\= sitearchdir\=./.gem.20250721-6892-u212vx sitelibdir\=./.gem.20250721-6892-u212vx clean

@@ -1,0 +1,468 @@
+<div class="px-4 sm:px-6 lg:px-8">
+  <!-- Header -->
+  <div class="sm:flex sm:items-center sm:justify-between">
+    <div class="sm:flex-auto">
+      <h1 class="text-2xl font-semibold text-gray-900">주문 상세</h1>
+      <p class="mt-2 text-sm text-gray-700">
+        주문번호: <%= @order.naver_order_number %>
+      </p>
+    </div>
+    <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+      <%= link_to "목록으로", admin_orders_path, 
+            class: "btn-secondary" %>
+    </div>
+  </div>
+
+  <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Content -->
+    <div class="lg:col-span-2">
+      <!-- Order Information -->
+      <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">주문 정보</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p class="text-sm font-medium text-gray-500">주문자</p>
+            <p class="text-lg text-gray-900"><%= @order.orderer_name %></p>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-500">주문일시</p>
+            <p class="text-lg text-gray-900"><%= @order.created_at.strftime("%Y년 %m월 %d일 %H:%M") %></p>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-500">기념패 스타일</p>
+            <p class="text-lg text-gray-900">
+              <%= case @order.plaque_style
+                  when 'gold_metal' then '🥇 금속패 (골드)'
+                  when 'silver_metal' then '🥈 금속패 (실버)'
+                  when 'acrylic_cartoon' then '🎨 아크릴패 (카툰)'
+                  when 'acrylic_realistic' then '📸 아크릴패 (실사)'
+                  else @order.plaque_style
+                  end %>
+            </p>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-500">예상 수령일</p>
+            <p class="text-lg text-gray-900"><%= @order.expected_delivery_date.strftime("%Y년 %m월 %d일") %></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plaque Message -->
+      <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">기념패 문구</h2>
+        <div class="bg-gray-50 rounded-lg p-4">
+          <% case @order.plaque_style %>
+          <% when 'gold_metal', 'silver_metal' %>
+            <!-- 금속패 필드들 -->
+            <% if @order.plaque_title.present? %>
+              <div class="mb-3">
+                <span class="text-sm font-semibold text-gray-700 block">제목</span>
+                <span class="text-gray-900"><%= @order.plaque_title %></span>
+              </div>
+            <% end %>
+            <% if @order.plaque_name.present? %>
+              <div class="mb-3">
+                <span class="text-sm font-semibold text-gray-700 block">성함</span>
+                <span class="text-gray-900"><%= @order.plaque_name %></span>
+              </div>
+            <% end %>
+            <% if @order.plaque_content.present? %>
+              <div class="mb-3">
+                <span class="text-sm font-semibold text-gray-700 block">본문</span>
+                <p class="text-gray-900 whitespace-pre-wrap"><%= @order.plaque_content %></p>
+              </div>
+            <% end %>
+          <% when 'acrylic_cartoon', 'acrylic_realistic' %>
+            <!-- 아크릴패 필드들 -->
+            <% if @order.plaque_top_message.present? %>
+              <div class="mb-3">
+                <span class="text-sm font-semibold text-gray-700 block">상단문구</span>
+                <span class="text-gray-900"><%= @order.plaque_top_message %></span>
+              </div>
+            <% end %>
+            <% if @order.plaque_main_message.present? %>
+              <div class="mb-3">
+                <span class="text-sm font-semibold text-gray-700 block">메시지</span>
+                <span class="text-gray-900"><%= @order.plaque_main_message %></span>
+              </div>
+            <% end %>
+          <% else %>
+            <!-- 레거시 호환성을 위한 fallback -->
+            <% if @order.plaque_message.present? %>
+              <p class="text-gray-900 whitespace-pre-wrap"><%= @order.plaque_message %></p>
+            <% else %>
+              <p class="text-gray-500 italic">입력된 문구가 없습니다.</p>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Additional Requests -->
+      <% if @order.additional_requests.present? %>
+        <div class="bg-white shadow rounded-lg p-6 mb-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">추가 요청사항</h2>
+          <div class="bg-gray-50 rounded-lg p-4">
+            <p class="text-gray-900 whitespace-pre-wrap"><%= @order.additional_requests %></p>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Images -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">첨부 이미지</h2>
+        
+        <!-- Main Images -->
+        <% if @order.main_images.attached? %>
+          <div class="mb-6">
+            <h3 class="text-md font-medium text-gray-700 mb-3">메인 사진</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <% @order.main_images.each_with_index do |image, index| %>
+                <div class="relative">
+                  <% begin %>
+                    <%= image_tag image, class: "w-full h-24 object-cover rounded-lg border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer" %>
+                  <% rescue => e %>
+                    <div class="w-full h-24 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                      <div class="text-center">
+                        <svg class="w-8 h-8 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <p class="text-xs text-gray-500">이미지 오류</p>
+                      </div>
+                    </div>
+                  <% end %>
+                  <div class="absolute top-1 right-1 bg-black bg-opacity-70 text-white text-xs px-1.5 py-0.5 rounded">
+                    <%= index + 1 %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Optional Images -->
+        <% if @order.optional_images.attached? %>
+          <div>
+            <h3 class="text-md font-medium text-gray-700 mb-3">추가 사진</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <% @order.optional_images.each_with_index do |image, index| %>
+                <div class="relative">
+                  <% begin %>
+                    <%= image_tag image, class: "w-full h-24 object-cover rounded-lg border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer" %>
+                  <% rescue => e %>
+                    <div class="w-full h-24 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                      <div class="text-center">
+                        <svg class="w-8 h-8 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <p class="text-xs text-gray-500">이미지 오류</p>
+                      </div>
+                    </div>
+                  <% end %>
+                  <div class="absolute top-1 right-1 bg-black bg-opacity-70 text-white text-xs px-1.5 py-0.5 rounded">
+                    추가 <%= index + 1 %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1">
+      <!-- Status Management -->
+      <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">주문 상태 관리</h2>
+        
+        <!-- Current Status -->
+        <div class="mb-4">
+          <p class="text-sm font-medium text-gray-500 mb-2">현재 상태</p>
+          <span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium 
+            <%= case @order.status
+                when '주문접수' then 'bg-blue-100 text-blue-800'
+                when '시안확정' then 'bg-yellow-100 text-yellow-800'
+                when '제작중' then 'bg-purple-100 text-purple-800'
+                when '배송중' then 'bg-orange-100 text-orange-800'
+                when '배송완료' then 'bg-green-100 text-green-800'
+                else 'bg-gray-100 text-gray-800'
+                end %>">
+            <%= @order.status %>
+          </span>
+        </div>
+
+        <!-- Status Change Form -->
+        <% unless @order.cancelled? %>
+          <%= form_with url: update_status_admin_order_path(@order), 
+                method: :patch, local: true, class: "space-y-4" do |form| %>
+            <div>
+              <%= form.label :status, "상태 변경", class: "form-label" %>
+              <%= form.select :status, 
+                    options_for_select([
+                      ['주문접수', '주문접수'],
+                      ['시안확정', '시안확정'],
+                      ['제작중', '제작중'],
+                      ['배송중', '배송중'],
+                      ['배송완료', '배송완료'],
+                      ['주문취소', '주문취소']
+                    ], @order.status),
+                    {},
+                    { class: "form-input", id: "status_select" } %>
+            </div>
+            
+            <!-- 취소 사유 입력 필드 (주문취소 선택 시에만 표시) -->
+            <div id="cancellation_reason_field" style="display: none;">
+              <%= form.label :cancellation_reason, "취소 사유", class: "form-label" %>
+              <%= form.text_area :cancellation_reason, 
+                    placeholder: "주문 취소 사유를 입력해주세요...",
+                    class: "form-input",
+                    rows: 3 %>
+            </div>
+            
+            <div>
+              <%= form.submit "상태 변경", class: "btn-primary w-full" %>
+            </div>
+          <% end %>
+          
+          <script>
+            document.getElementById('status_select').addEventListener('change', function() {
+              const cancelReasonField = document.getElementById('cancellation_reason_field');
+              if (this.value === '주문취소') {
+                cancelReasonField.style.display = 'block';
+              } else {
+                cancelReasonField.style.display = 'none';
+              }
+            });
+          </script>
+        <% else %>
+          <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p class="text-sm text-red-800 font-medium">❌ 취소된 주문</p>
+            <% if @order.cancelled_at %>
+              <p class="text-xs text-red-600 mt-1">취소일시: <%= @order.cancelled_at.strftime('%Y년 %m월 %d일 %H:%M') %></p>
+            <% end %>
+            <% if @order.cancellation_reason.present? %>
+              <p class="text-xs text-red-600 mt-1">취소사유: <%= @order.cancellation_reason %></p>
+            <% end %>
+          </div>
+        <% end %>
+
+        <!-- Warning for 시안확정 -->
+        <% if @order.status == '주문접수' %>
+          <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+            <p class="text-sm text-yellow-800">
+              <strong>알림:</strong> 시안확정으로 변경하면 고객이 더 이상 주문을 수정할 수 없습니다.
+            </p>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Delivery Date Management -->
+      <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">예상 수령일 관리</h2>
+        
+        <!-- Current Delivery Date -->
+        <div class="mb-4">
+          <p class="text-sm font-medium text-gray-500 mb-2">현재 예상 수령일</p>
+          <div class="flex items-center space-x-2">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <span class="text-lg font-semibold text-gray-900">
+              <%= @order.expected_delivery_date.strftime("%Y년 %m월 %d일") %>
+            </span>
+          </div>
+          <p class="text-xs text-gray-500 mt-1">
+            주문일로부터 <%= @order.expected_delivery_days || 15 %>일 후
+          </p>
+        </div>
+
+        <!-- Delivery Days Change Form -->
+        <%= form_with url: update_delivery_days_admin_order_path(@order), 
+              method: :patch, local: true, class: "space-y-4" do |form| %>
+          <div>
+            <%= form.label :expected_delivery_days, "제작 기간 (일)", class: "form-label" %>
+            <%= form.number_field :expected_delivery_days, 
+                  value: @order.expected_delivery_days || 15,
+                  min: 1, max: 90, step: 1,
+                  class: "form-input", 
+                  placeholder: "15" %>
+            <p class="text-xs text-gray-500 mt-1">
+              1일~90일 사이로 설정 가능합니다
+            </p>
+          </div>
+          
+          <div>
+            <%= form.submit "수령일 변경", class: "btn-primary w-full" %>
+          </div>
+        <% end %>
+
+        <!-- Delivery Date Preview -->
+        <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
+          <p class="text-sm text-blue-800">
+            <strong>미리보기:</strong> 
+            <span id="delivery-preview">
+              <%= (@order.created_at + (@order.expected_delivery_days || 15).days).strftime("%Y년 %m월 %d일") %>
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          const daysInput = document.querySelector('input[name="expected_delivery_days"]');
+          const previewElement = document.getElementById('delivery-preview');
+          const orderDate = new Date('<%= @order.created_at.iso8601 %>');
+          
+          if (daysInput && previewElement) {
+            daysInput.addEventListener('input', function() {
+              const days = parseInt(this.value) || 15;
+              const deliveryDate = new Date(orderDate);
+              deliveryDate.setDate(deliveryDate.getDate() + days);
+              
+              const year = deliveryDate.getFullYear();
+              const month = String(deliveryDate.getMonth() + 1).padStart(2, '0');
+              const day = String(deliveryDate.getDate()).padStart(2, '0');
+              
+              previewElement.textContent = `${year}년 ${month}월 ${day}일`;
+            });
+          }
+        });
+      </script>
+
+      <!-- Quick Actions -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">빠른 작업</h2>
+        <div class="space-y-3">
+          <%= link_to "고객 주문 페이지 보기", 
+                complete_order_path(@order.naver_order_number), 
+                target: "_blank",
+                class: "block w-full text-center btn-secondary" %>
+          
+          <% if @order.can_be_edited? %>
+            <%= link_to "주문 수정 페이지", 
+                  edit_order_path(@order.naver_order_number), 
+                  target: "_blank",
+                  class: "block w-full text-center btn-secondary" %>
+          <% else %>
+            <div class="block w-full text-center bg-gray-100 text-gray-500 px-4 py-2 rounded">
+              수정 불가 (시안확정됨)
+            </div>
+          <% end %>
+          
+          <!-- 위험한 작업 구분선 -->
+          <div class="border-t border-red-200 pt-4 mt-4 bg-red-50 rounded-lg p-4">
+            <div class="flex items-center mb-3">
+              <span class="text-red-600 text-lg mr-2">⚠️</span>
+              <p class="text-sm font-medium text-red-800">위험한 작업</p>
+            </div>
+            
+            <!-- 삭제 확인 버튼 (처음에는 이것만 보임) -->
+            <div id="delete-step-1">
+              <button 
+                onclick="showDeleteConfirmation()"
+                class="flex items-center justify-center w-full bg-gray-400 text-white px-4 py-3 rounded-md hover:bg-gray-500 transition-colors font-medium text-sm border-2 border-gray-400 hover:border-gray-500">
+                <span class="mr-2">🗑️</span>
+                주문 삭제 (클릭해서 시작)
+              </button>
+              <p class="text-xs text-gray-600 mt-2 text-center">
+                안전을 위해 2단계 확인이 필요합니다
+              </p>
+            </div>
+
+            <!-- 삭제 확인 단계 (숨겨져 있음) -->
+            <div id="delete-step-2" style="display: none;">
+              <div class="bg-red-100 border border-red-300 rounded-lg p-4 mb-4">
+                <h4 class="font-bold text-red-800 mb-2">🚨 주문 완전 삭제 확인</h4>
+                <div class="text-sm text-red-700 space-y-1">
+                  <p><strong>주문번호:</strong> <%= @order.naver_order_number %></p>
+                  <p><strong>주문자:</strong> <%= @order.orderer_name %></p>
+                  <p><strong>삭제될 이미지:</strong> <%= @order.main_images.count + @order.optional_images.count %>개</p>
+                </div>
+              </div>
+              
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-red-800 mb-2">
+                  삭제하려면 주문번호를 정확히 입력하세요:
+                </label>
+                <input 
+                  type="text" 
+                  id="delete-confirmation-input"
+                  placeholder="<%= @order.naver_order_number %>"
+                  class="w-full px-3 py-2 border border-red-300 rounded-md focus:ring-red-500 focus:border-red-500 text-center font-mono">
+              </div>
+              
+              <div class="flex space-x-3">
+                <button 
+                  onclick="cancelDelete()"
+                  class="flex-1 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors font-medium text-sm">
+                  취소
+                </button>
+                <%= link_to admin_order_path(@order), 
+                      method: :delete,
+                      id: "final-delete-button",
+                      class: "flex-1 bg-red-600 text-white px-4 py-2 rounded-md text-center font-medium text-sm transition-colors cursor-not-allowed opacity-50",
+                      onclick: "return confirmFinalDelete(event)",
+                      data: { turbo_method: :delete } do %>
+                  🗑️ 완전 삭제
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <script>
+            function showDeleteConfirmation() {
+              document.getElementById('delete-step-1').style.display = 'none';
+              document.getElementById('delete-step-2').style.display = 'block';
+              document.getElementById('delete-confirmation-input').focus();
+            }
+
+            function cancelDelete() {
+              document.getElementById('delete-step-1').style.display = 'block';
+              document.getElementById('delete-step-2').style.display = 'none';
+              document.getElementById('delete-confirmation-input').value = '';
+              updateDeleteButton();
+            }
+
+            function updateDeleteButton() {
+              const input = document.getElementById('delete-confirmation-input');
+              const button = document.getElementById('final-delete-button');
+              const expectedValue = '<%= @order.naver_order_number %>';
+              
+              if (input.value === expectedValue) {
+                button.classList.remove('cursor-not-allowed', 'opacity-50', 'bg-red-600');
+                button.classList.add('bg-red-700', 'hover:bg-red-800');
+                button.style.pointerEvents = 'auto';
+              } else {
+                button.classList.add('cursor-not-allowed', 'opacity-50', 'bg-red-600');
+                button.classList.remove('bg-red-700', 'hover:bg-red-800');
+                button.style.pointerEvents = 'none';
+              }
+            }
+
+            function confirmFinalDelete(event) {
+              const input = document.getElementById('delete-confirmation-input');
+              const expectedValue = '<%= @order.naver_order_number %>';
+              
+              if (input.value !== expectedValue) {
+                event.preventDefault();
+                alert('주문번호가 일치하지 않습니다. 정확히 입력해주세요.');
+                return false;
+              }
+              
+              return confirm('⚠️ 마지막 확인\n\n정말로 이 주문을 완전히 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다!');
+            }
+
+            // 입력 필드 변화 감지
+            document.addEventListener('DOMContentLoaded', function() {
+              const input = document.getElementById('delete-confirmation-input');
+              if (input) {
+                input.addEventListener('input', updateDeleteButton);
+                input.addEventListener('paste', () => setTimeout(updateDeleteButton, 10));
+              }
+            });
+          </script>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+{
+  "name": "app",
+  "private": "true",
+  "scripts": {
+    "build:css": "npx tailwindcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css --watch",
+    "build:css:compile": "npx tailwindcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css",
+    "watch:css": "npx tailwindcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css --watch"
+  },
+  "browserslist": [
+    "defaults"
+  ],
+  "dependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

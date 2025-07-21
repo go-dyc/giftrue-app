@@ -1,0 +1,149 @@
+<div class="px-4 sm:px-6 lg:px-8">
+  <div class="sm:flex sm:items-center">
+    <div class="sm:flex-auto">
+      <h1 class="text-2xl font-semibold text-gray-900">네이버 API 테스트</h1>
+      <p class="mt-2 text-sm text-gray-700">
+        네이버 커머스 API 연동 상태를 확인하고 테스트할 수 있습니다.
+      </p>
+    </div>
+  </div>
+
+  <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- API 연결 테스트 -->
+    <div class="bg-white shadow rounded-lg p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">🔌 API 연결 테스트</h3>
+      <p class="text-sm text-gray-600 mb-4">환경변수 설정 및 서비스 초기화를 확인합니다.</p>
+      
+      <button id="test-connection" class="btn-primary w-full mb-4">
+        연결 테스트 실행
+      </button>
+      
+      <div id="connection-result" class="hidden">
+        <div class="bg-gray-50 rounded-lg p-4">
+          <pre id="connection-output" class="text-sm text-gray-800 whitespace-pre-wrap"></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- 토큰 발급 테스트 -->
+    <div class="bg-white shadow rounded-lg p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">🔑 토큰 발급 테스트</h3>
+      <p class="text-sm text-gray-600 mb-4">OAuth2 Access Token 발급을 테스트합니다.</p>
+      
+      <button id="test-token" class="btn-primary w-full mb-4">
+        토큰 발급 테스트
+      </button>
+      
+      <div id="token-result" class="hidden">
+        <div class="bg-gray-50 rounded-lg p-4">
+          <pre id="token-output" class="text-sm text-gray-800 whitespace-pre-wrap"></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- 주문 조회 테스트 -->
+    <div class="bg-white shadow rounded-lg p-6 lg:col-span-2">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">📦 주문 조회 테스트</h3>
+      <p class="text-sm text-gray-600 mb-4">실제 주문번호로 상태 조회를 테스트합니다.</p>
+      
+      <div class="flex gap-4 mb-4">
+        <input type="text" id="order-number" placeholder="주문번호 입력" 
+               value="test1" class="form-input flex-1">
+        <button id="test-order" class="btn-primary px-6">
+          주문 조회 테스트
+        </button>
+      </div>
+      
+      <div id="order-result" class="hidden">
+        <div class="bg-gray-50 rounded-lg p-4">
+          <pre id="order-output" class="text-sm text-gray-800 whitespace-pre-wrap"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 실시간 로그 -->
+  <div class="mt-8 bg-white shadow rounded-lg p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">📋 실시간 로그</h3>
+    <div id="live-log" class="bg-black text-green-400 rounded-lg p-4 font-mono text-sm h-64 overflow-y-auto">
+      <div class="text-gray-500">로그가 여기에 표시됩니다...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const logElement = document.getElementById('live-log');
+  
+  function addLog(message) {
+    const timestamp = new Date().toLocaleTimeString();
+    const logLine = document.createElement('div');
+    logLine.textContent = `[${timestamp}] ${message}`;
+    logElement.appendChild(logLine);
+    logElement.scrollTop = logElement.scrollHeight;
+  }
+  
+  function showResult(resultId, outputId, data) {
+    document.getElementById(resultId).classList.remove('hidden');
+    document.getElementById(outputId).textContent = JSON.stringify(data, null, 2);
+  }
+  
+  // 연결 테스트
+  document.getElementById('test-connection').addEventListener('click', async function() {
+    addLog('API 연결 테스트 시작...');
+    this.disabled = true;
+    this.textContent = '테스트 중...';
+    
+    try {
+      const response = await fetch('/admin/api_test/connection');
+      const data = await response.json();
+      showResult('connection-result', 'connection-output', data);
+      addLog(`연결 테스트 완료: ${data.status}`);
+    } catch (error) {
+      addLog(`연결 테스트 오류: ${error.message}`);
+    } finally {
+      this.disabled = false;
+      this.textContent = '연결 테스트 실행';
+    }
+  });
+  
+  // 토큰 테스트
+  document.getElementById('test-token').addEventListener('click', async function() {
+    addLog('토큰 발급 테스트 시작...');
+    this.disabled = true;
+    this.textContent = '테스트 중...';
+    
+    try {
+      const response = await fetch('/admin/api_test/token');
+      const data = await response.json();
+      showResult('token-result', 'token-output', data);
+      addLog(`토큰 테스트 완료: ${data.status}`);
+    } catch (error) {
+      addLog(`토큰 테스트 오류: ${error.message}`);
+    } finally {
+      this.disabled = false;
+      this.textContent = '토큰 발급 테스트';
+    }
+  });
+  
+  // 주문 조회 테스트
+  document.getElementById('test-order').addEventListener('click', async function() {
+    const orderNumber = document.getElementById('order-number').value;
+    addLog(`주문 조회 테스트 시작: ${orderNumber}`);
+    this.disabled = true;
+    this.textContent = '테스트 중...';
+    
+    try {
+      const response = await fetch(`/admin/api_test/order_check?order_number=${orderNumber}`);
+      const data = await response.json();
+      showResult('order-result', 'order-output', data);
+      addLog(`주문 조회 완료: ${data.status}`);
+    } catch (error) {
+      addLog(`주문 조회 오류: ${error.message}`);
+    } finally {
+      this.disabled = false;
+      this.textContent = '주문 조회 테스트';
+    }
+  });
+});
+</script>

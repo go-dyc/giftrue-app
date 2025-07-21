@@ -1,0 +1,226 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-2xl mx-auto px-4">
+    <!-- Success Message -->
+    <div class="text-center mb-8">
+      <div class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+      </div>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">주문이 성공적으로 접수되었습니다.</h1>
+      <p class="text-gray-600">주문 내역을 확인해주세요</p>
+    </div>
+
+    <!-- Order Summary Card -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-6">주문 내역 요약</h2>
+      
+      <div class="space-y-6">
+        <!-- Order Info -->
+        <div class="border-b border-gray-200 pb-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-sm font-medium text-gray-500">주문번호</p>
+              <p class="text-lg font-semibold text-gray-900"><%= @order.naver_order_number %></p>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-500">주문자</p>
+              <p class="text-lg font-semibold text-gray-900"><%= @order.orderer_name %></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Plaque Details -->
+        <div class="border-b border-gray-200 pb-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-sm font-medium text-gray-500">기념패 스타일</p>
+              <p class="text-gray-900">
+                <%= case @order.plaque_style
+                    when 'gold_metal' then '🥇 금속패 (골드)'
+                    when 'silver_metal' then '🥈 금속패 (실버)'
+                    when 'acrylic_cartoon' then '🎨 아크릴패 (카툰)'
+                    when 'acrylic_realistic' then '📸 아크릴패 (실사)'
+                    else @order.plaque_style
+                    end %>
+              </p>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-500">주문 상태</p>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <%= @order.status %>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Plaque Message -->
+        <div class="border-b border-gray-200 pb-4">
+          <p class="text-sm font-medium text-gray-500 mb-2">기념패 문구</p>
+          <div class="bg-gray-50 rounded-lg p-4">
+            <% case @order.plaque_style %>
+            <% when 'gold_metal', 'silver_metal' %>
+              <!-- 금속패 필드들 -->
+              <% if @order.plaque_title.present? %>
+                <div class="mb-2">
+                  <span class="text-sm font-medium text-gray-600">제목:</span>
+                  <span class="text-gray-900"><%= @order.plaque_title %></span>
+                </div>
+              <% end %>
+              <% if @order.plaque_name.present? %>
+                <div class="mb-2">
+                  <span class="text-sm font-medium text-gray-600">성함:</span>
+                  <span class="text-gray-900"><%= @order.plaque_name %></span>
+                </div>
+              <% end %>
+              <% if @order.plaque_content.present? %>
+                <div class="mb-2">
+                  <span class="text-sm font-medium text-gray-600">본문:</span>
+                  <p class="text-gray-900 whitespace-pre-wrap"><%= @order.plaque_content %></p>
+                </div>
+              <% end %>
+            <% when 'acrylic_cartoon', 'acrylic_realistic' %>
+              <!-- 아크릴패 필드들 -->
+              <% if @order.plaque_top_message.present? %>
+                <div class="mb-2">
+                  <span class="text-sm font-medium text-gray-600">상단문구:</span>
+                  <span class="text-gray-900"><%= @order.plaque_top_message %></span>
+                </div>
+              <% end %>
+              <% if @order.plaque_main_message.present? %>
+                <div class="mb-2">
+                  <span class="text-sm font-medium text-gray-600">메시지:</span>
+                  <span class="text-gray-900"><%= @order.plaque_main_message %></span>
+                </div>
+              <% end %>
+            <% else %>
+              <!-- 레거시 호환성을 위한 fallback -->
+              <% if @order.plaque_message.present? %>
+                <p class="text-gray-900 whitespace-pre-wrap"><%= @order.plaque_message %></p>
+              <% else %>
+                <p class="text-gray-500 italic">입력된 문구가 없습니다.</p>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Additional Requests -->
+        <% if @order.additional_requests.present? || @order.plaque_additional_requests.present? %>
+          <div class="border-b border-gray-200 pb-4">
+            <p class="text-sm font-medium text-gray-500 mb-2">추가 요청사항</p>
+            <div class="bg-gray-50 rounded-lg p-4 space-y-3">
+              <% if @order.additional_requests.present? %>
+                <div>
+                  <span class="text-sm font-medium text-gray-600">일반 요청사항:</span>
+                  <p class="text-gray-900 whitespace-pre-wrap"><%= @order.additional_requests %></p>
+                </div>
+              <% end %>
+              <% if @order.plaque_additional_requests.present? %>
+                <div>
+                  <span class="text-sm font-medium text-gray-600">기념패 추가 요청사항:</span>
+                  <p class="text-gray-900 whitespace-pre-wrap"><%= @order.plaque_additional_requests %></p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Images -->
+        <div>
+          <p class="text-sm font-medium text-gray-500 mb-4">첨부된 사진</p>
+          
+          <!-- Main Images -->
+          <% if @order.main_images.attached? %>
+            <div class="mb-4">
+              <p class="text-sm font-medium text-gray-700 mb-2">메인 사진</p>
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <% @order.main_images.each_with_index do |image, index| %>
+                  <div class="relative">
+                    <% begin %>
+                      <%= image_tag image, class: "w-full h-32 object-cover rounded-lg border border-gray-200" %>
+                    <% rescue => e %>
+                      <div class="w-full h-32 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                        <div class="text-center">
+                          <svg class="w-8 h-8 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                          </svg>
+                          <p class="text-xs text-gray-500">이미지 로딩 실패</p>
+                        </div>
+                      </div>
+                    <% end %>
+                    <div class="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                      <%= index + 1 %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Optional Images -->
+          <% if @order.optional_images.attached? %>
+            <div>
+              <p class="text-sm font-medium text-gray-700 mb-2">추가 사진</p>
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <% @order.optional_images.each_with_index do |image, index| %>
+                  <div class="relative">
+                    <% begin %>
+                      <%= image_tag image, class: "w-full h-32 object-cover rounded-lg border border-gray-200" %>
+                    <% rescue => e %>
+                      <div class="w-full h-32 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                        <div class="text-center">
+                          <svg class="w-8 h-8 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                          </svg>
+                          <p class="text-xs text-gray-500">이미지 로딩 실패</p>
+                        </div>
+                      </div>
+                    <% end %>
+                    <div class="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                      추가 <%= index + 1 %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expected Delivery Date -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+      <div class="flex items-center">
+        <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        <div>
+          <p class="text-sm font-medium text-blue-800">예상 수령일</p>
+          <p class="text-lg font-semibold text-blue-900">
+            <%= @order.expected_delivery_date.strftime("%Y년 %m월 %d일") %>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row gap-4">
+      <% if @order.can_be_edited? %>
+        <%= link_to "주문 수정하기", 
+              edit_order_path(@order.naver_order_number, force_edit: true), 
+              class: "btn-secondary flex-1 text-center" %>
+      <% else %>
+        <div class="bg-gray-100 text-gray-500 px-4 py-2 rounded-lg text-center flex-1">
+          시안 확정으로 인해 수정이 불가능합니다
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Information -->
+    <div class="mt-8 p-4 bg-gray-100 rounded-lg">
+      <p class="text-sm text-gray-600 text-center">
+        처음에 받으신 알림톡의 링크로 다시 들어오시면 주문 내용을 다시 확인하실 수 있습니다.
+      </p>
+    </div>
+  </div>
+</div>
