@@ -230,14 +230,64 @@ npm run watch:css
 
 ### 배포 가이드
 
-**정상 배포 프로세스** (Docker 토큰 설정 필요):
+**정상 배포 프로세스**:
 ```bash
-# 1. 환경변수 설정
-export KAMAL_REGISTRY_PASSWORD="[Docker Hub 토큰]"
-
-# 2. 정상 배포
 bin/kamal deploy
 ```
+
+**배포 실패 시 문제 해결 가이드**:
+
+#### 1. SECRET_KEY_BASE 누락 에러
+```
+ArgumentError: Missing `secret_key_base` for 'production' environment
+```
+
+**해결 방법**:
+1. **Secret key 생성**:
+   ```bash
+   ruby -e "require 'securerandom'; puts SecureRandom.hex(64)"
+   ```
+
+2. **deploy.yml에 환경변수 추가**:
+   ```yaml
+   env:
+     secret:
+       - SECRET_KEY_BASE  # 이 라인 추가
+   ```
+
+3. **.kamal/secrets 파일에 값 추가**:
+   ```
+   SECRET_KEY_BASE=[생성된_64자리_키]
+   ```
+
+#### 2. SSH 인증 실패 에러
+```
+ERROR (Errno::ENOTTY): Inappropriate ioctl for device
+root@159.223.53.175's password:
+```
+
+**원인**: SSH key가 서버에 등록되지 않아 패스워드 인증을 시도하지만 터미널에서 입력받을 수 없음
+
+**해결 방법**:
+1. **DigitalOcean 웹 콘솔에서 서버 접속**
+2. **SSH public key 등록**:
+   ```bash
+   # 로컬에서 public key 확인
+   cat ~/.ssh/giftrue_key.pub
+   
+   # 서버 콘솔에서 실행
+   mkdir -p ~/.ssh
+   echo "ssh-rsa AAAAB3NzaC1yc2E..." >> ~/.ssh/authorized_keys
+   chmod 600 ~/.ssh/authorized_keys
+   chmod 700 ~/.ssh
+   ```
+
+3. **다시 배포 실행**: `bin/kamal deploy`
+
+#### 3. 배포 성공 확인
+- "First web container is healthy" 메시지 확인
+- "Finished all in XX seconds" 메시지로 완료 확인
+- https://giftrue.com 접속하여 정상 동작 확인
 
 **수동 배포 프로세스** (Docker 미설치 시):
 ```bash
@@ -376,3 +426,8 @@ def cancel!(reason = nil) # 수동 취소 처리
 
 **현재 커밋**: `9a1ad51` (2025-07-21 WSL 재설치 후 복구)
 **GitHub 저장소**: https://github.com/go-dyc/giftrue-app
+
+**최신 환경 설정** (2025-07-22):
+- 🔧 **권한 문제 해결**: bin/ 폴더 실행 권한 수정, .bashrc PATH 최적화
+- 💎 **Rails 8.0.2**: WSL 내부 설치 완료 (Ruby 3.4.2와 호환)
+- 🛠️ **개발환경 통합**: Ruby/Rails 모두 WSL 내부로 통일
