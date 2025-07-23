@@ -283,9 +283,51 @@
               <% end %>
             </div>
 
+
             <!-- Style-specific Input Fields -->
             <div class="<%= 'hidden' unless @order.plaque_style.present? %>" id="message_section">
               
+              <!-- 테두리 선택 (금속패 전용) -->
+              <div id="borderSelectionPanel" style="display: none;" class="mb-6 border border-gray-200 rounded-lg p-4">
+                <h4 class="text-md font-semibold text-gray-900 mb-3">
+                  🎭 테두리 스타일 
+                  <span class="ml-2 bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded-full">금속패 전용</span>
+                </h4>
+                <div class="grid grid-cols-3 gap-3">
+                  <% [
+                    { value: 'type_a', name: 'A형', description: '액자형 테두리' },
+                    { value: 'type_b', name: 'B형', description: '우측 상단 꽃장식' },
+                    { value: 'type_c', name: '테두리 없음', description: '테두리 선택 안함' }
+                  ].each do |border| %>
+                    <div class="relative">
+                      <%= form.radio_button :border_type, border[:value], 
+                            { checked: (@order.border_type == border[:value] || (border[:value] == 'type_c' && @order.border_type.blank?)),
+                              class: "hidden peer",
+                              id: "border_#{border[:value]}" } %>
+                      <label for="border_<%= border[:value] %>" 
+                             class="block cursor-pointer border-2 border-gray-200 rounded-lg p-3 hover:border-blue-400 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all">
+                        <div class="text-center">
+                          <div class="w-16 h-16 mx-auto mb-2 bg-gray-100 rounded flex items-center justify-center">
+                            <% if border[:value] == 'type_a' || border[:value] == 'type_b' %>
+                              <img src="/images/borders/thumb_<%= border[:value] %>.png" 
+                                   alt="<%= border[:name] %>" 
+                                   class="w-12 h-12 object-contain"
+                                   onerror="this.style.display='none'; this.parentNode.innerHTML='<span class=&quot;text-gray-400 text-xs&quot;><%= border[:name] %></span>';" />
+                            <% else %>
+                              <div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
+                                <span class="text-gray-400 text-xs">없음</span>
+                              </div>
+                            <% end %>
+                          </div>
+                          <div class="text-sm font-medium"><%= border[:name] %></div>
+                          <div class="text-xs text-gray-500"><%= border[:description] %></div>
+                        </div>
+                      </label>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+
               <!-- Gold Metal Style -->
               <div class="style-input gold_metal <%= 'hidden' unless @order.plaque_style == 'gold_metal' %>">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">🥇 금속패 (골드) 제작 정보</h3>
@@ -325,12 +367,12 @@
                   <%= form.label :plaque_content, "본문 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
                   <div class="relative">
                     <%= form.text_area :plaque_content,
-                          class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none",
-                          rows: 4,
+                          class: "w-full px-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none min-h-[120px]",
+                          rows: 6,
                           placeholder: "예: 오랜 시간 동안 헌신적으로 일해주신 노고에 깊이 감사드리며, 앞으로도 건강하고 행복한 나날 보내시길 바랍니다.",
                           maxlength: 150,
                           data: { style: 'gold_metal', counter: 'content' } %>
-                    <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                    <div class="absolute bottom-2 right-2 text-xs text-gray-400 bg-white bg-opacity-80 px-1 rounded">
                       <span id="content_counter_gold">0</span>/150자
                     </div>
                   </div>
@@ -347,7 +389,7 @@
                 </div>
 
                 <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                  <p class="text-sm text-yellow-800">💡 금속패 팁: 하하하</p>
+                  <p class="text-sm text-yellow-800">💡 고급스러움은 골드패가 안성맞춤!</p>
                 </div>
               </div>
 
@@ -390,12 +432,12 @@
                   <%= form.label :plaque_content, "본문 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
                   <div class="relative">
                     <%= form.text_area :plaque_content,
-                          class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none",
-                          rows: 4,
-                          placeholder: "예: 하하핫",
+                          class: "w-full px-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none min-h-[120px]",
+                          rows: 6,
+                          placeholder: "예: 오랜 시간 동안 헌신적으로 일해주신 노고에 깊이 감사드리며, 앞으로도 건강하고 행복한 나날 보내시길 바랍니다.",
                           maxlength: 150,
                           data: { style: 'silver_metal', counter: 'content' } %>
-                    <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                    <div class="absolute bottom-2 right-2 text-xs text-gray-400 bg-white bg-opacity-80 px-1 rounded">
                       <span id="content_counter_silver">0</span>/150자
                     </div>
                   </div>
@@ -412,7 +454,7 @@
                 </div>
 
                 <div class="p-3 bg-gray-50 border border-gray-200 rounded-md">
-                  <p class="text-sm text-gray-700">💡 실버패 팁: ㅋㅋㅋ</p>
+                  <p class="text-sm text-gray-700">💡 깔끔한 디자인엔 실버패가 딱이에요</p>
                 </div>
               </div>
 
@@ -462,7 +504,7 @@
                 </div>
 
                 <div class="p-3 bg-pink-50 border border-pink-200 rounded-md">
-                  <p class="text-sm text-pink-800">💡 카툰패 팁: 밝고 따뜻한 표현과 이모티콘을 활용해보세요</p>
+                  <p class="text-sm text-pink-800">💡 아기자기한 매력이 돋보이는 카툰 스타일!</p>
                 </div>
               </div>
 
@@ -512,7 +554,7 @@
                 </div>
 
                 <div class="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                  <p class="text-sm text-blue-800">💡 실사패 팁: ㅎㅎㅎ</p>
+                  <p class="text-sm text-blue-800">💡캐주얼한 분위기 UP</p>
                 </div>
               </div>
 
@@ -578,6 +620,7 @@ function initializePageFunctionality() {
           messageSection.classList.add('animate-fade-in');
         }
         
+        
         // Remove required from all inputs first
         document.querySelectorAll('input[data-style], textarea[data-style]').forEach(input => {
           input.removeAttribute('required');
@@ -615,9 +658,23 @@ function initializePageFunctionality() {
           //   console.log('Added required to input for style:', this.value);
           // });
         }
+        
+        // 테두리 선택 패널 표시/숨김 처리
+        const borderPanel = document.getElementById('borderSelectionPanel');
+        if (borderPanel) {
+          const isMetalPlaque = this.value === 'gold_metal' || this.value === 'silver_metal';
+          if (isMetalPlaque) {
+            console.log('Showing border panel for metal plaque:', this.value);
+            borderPanel.style.display = 'block';
+          } else {
+            console.log('Hiding border panel for acrylic plaque:', this.value);
+            borderPanel.style.display = 'none';
+          }
+        }
       }
     }
   }
+
 
   // Image slot functionality for main images
   function setupImageSlots() {
@@ -1379,6 +1436,7 @@ function initializePageFunctionality() {
     });
   }
 
+
   // Initialize all functionality
   initializeRequiredAttributes();
   setupStyleSelection();
@@ -1403,6 +1461,7 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 </script>
+
 
 <style>
 @keyframes fade-in {

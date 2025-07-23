@@ -342,7 +342,7 @@ class OrdersController < ApplicationController
   def order_params
     # 모든 단계에서 모든 파라미터를 허용하여 데이터 유지
     permitted_params = params.require(:order).permit(:orderer_name, :plaque_style, :plaque_message, :additional_requests, :plaque_additional_requests,
-                                                    :plaque_title, :plaque_name, :plaque_content, :plaque_top_message, :plaque_main_message,
+                                                    :plaque_title, :plaque_name, :plaque_content, :plaque_top_message, :plaque_main_message, :border_type,
                                                     main_images: [], optional_images: [])
     
     # 빈 이미지 배열 필터링 (기존 이미지가 있을 때 빈 값으로 덮어쓰지 않도록)

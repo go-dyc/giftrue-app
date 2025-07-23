@@ -7,7 +7,7 @@
 - **프레임워크**: Ruby on Rails 8.0.2
 - **Ruby 버전**: 3.4.2
 - **CSS 프레임워크**: TailwindCSS 3.4.0
-- **데이터베이스**: SQLite (개발), PostgreSQL (프로덕션)
+- **데이터베이스**: SQLite (테스트), PostgreSQL (개발/프로덕션)
 - **배포**: DigitalOcean + Kamal + Docker
 
 ## 핵심 개념
@@ -49,6 +49,9 @@
 **선택적 필드**:
 - `additional_requests`: text, 추가 요청사항
 - `expected_delivery_days`: integer, 예상 배송일 (시스템 기본값 적용)
+- `border_type`: string, 테두리 타입 (기본값: 'type_c', 금속패 전용)
+  - 허용값: 'type_a', 'type_b', 'type_c' (테두리 없음)
+
 
 ### SystemSetting 모델
 - `key`: 설정 키 (예: default_delivery_days)
@@ -71,12 +74,14 @@
 - 프로그레스 바: 2/3 (66.7%)
 
 ### 3단계: 기념패 스타일 선택 및 입력
-**목표**: 기념패 디자인 스타일 결정 및 세분화된 제작 정보 수집
+**목표**: 기념패 디자인 스타일 결정 및 실시간 미리보기를 통한 세분화된 제작 정보 수집
 - **4가지 기념패 스타일** (2x2 그리드, 실제 이미지 포함):
   - 🥇 금속패 (골드): 고급스러운 골드 금속패
   - 🥈 금속패 (실버): 깔끔한 실버 금속패  
   - 🎨 아크릴패 (카툰): 귀여운 카툰스타일
   - 📸 아크릴패 (실사): 생생한 실사스타일
+
+
 - **동적 세분화 입력**: 선택한 스타일에 따라 맞춤형 입력 필드 표시
 - **실시간 문자 카운터**: 각 필드별 제한 표시
 - 프로그레스 바: 3/3 (100%)
@@ -121,7 +126,7 @@
 
 **백엔드**: Ruby on Rails 8.0.2, Ruby 3.4.2, Active Storage
 **프론트엔드**: TailwindCSS 3.4.0, JavaScript (ES6+), 반응형 디자인
-**데이터베이스**: SQLite (개발), PostgreSQL (프로덕션)
+**데이터베이스**: SQLite (테스트), PostgreSQL (개발/프로덕션)
 **배포**: DigitalOcean + Kamal + Docker
 
 ### 핵심 검증 시스템
@@ -137,12 +142,32 @@
 
 ## 주요 명령어
 
-### 개발 환경
+### 환경별 명령어
+
+**🧪 테스트 환경**
 ```bash
-bin/dev                    # 개발 서버 실행 (Foreman)
-npm run build:css:compile  # TailwindCSS 컴파일
-rails test                 # 테스트 실행
-rails db:migrate          # 마이그레이션
+RAILS_ENV=test rails test                    # 단위/통합 테스트 (SQLite)
+RAILS_ENV=test rails db:migrate             # 테스트 DB 마이그레이션
+# 플레이라이트 테스트는 기본적으로 test 환경 사용
+```
+
+**🔧 개발 환경** 
+```bash
+# PostgreSQL 컨테이너 시작
+docker-compose up -d db
+
+# Rails 개발 서버 
+bin/dev                                      # 개발 서버 실행 (Foreman)
+RAILS_ENV=development rails server           # 수동 서버 실행
+
+# 데이터베이스 작업
+RAILS_ENV=development rails db:create        # 개발 DB 생성
+RAILS_ENV=development rails db:migrate       # 개발 DB 마이그레이션
+RAILS_ENV=development rails db:seed          # 샘플 데이터 생성
+
+# CSS 컴파일
+npm run build:css:compile                    # TailwindCSS 컴파일
+npm run watch:css                           # TailwindCSS 워치 모드
 ```
 
 ### 배포 관련
@@ -167,9 +192,23 @@ bin/kamal ps             # 컨테이너 상태 확인
 
 ## 운영 및 배포
 
-### 배포 환경
-- **개발**: WSL2 Ubuntu + SQLite
-- **프로덕션**: DigitalOcean + PostgreSQL
+### 3단계 환경 구성
+
+**🧪 테스트 환경**: SQLite
+- 빠른 테스트 실행 및 플레이라이트 호환성
+- 파일 기반 DB: `storage/test.sqlite3`
+- 용도: 단위 테스트, 통합 테스트, 브라우저 자동화 테스트
+
+**🔧 개발 환경**: PostgreSQL 
+- 운영환경과 동일한 DB 엔진으로 일관성 보장
+- Docker 컨테이너: `postgres:16-alpine` (localhost:5432)
+- 데이터베이스: `giftrue_development`
+- 설정: `config/database.yml` development 섹션
+
+**🚀 운영 환경**: PostgreSQL
+- DigitalOcean + Kamal + Docker 기반 배포
+- 멀티 DB 구성: primary, cache, queue, cable
+- 설정: 환경변수 `DATABASE_URL` 사용
 
 ### 현재 배포 상태
 **프로덕션 환경**: Kamal + DigitalOcean + Docker
@@ -403,13 +442,96 @@ def cancelled? # 취소 여부 확인
 def cancel!(reason = nil) # 수동 취소 처리
 ```
 
+## 데이터베이스 설정 가이드
+
+### 초기 설정 (새 개발환경)
+
+**1. PostgreSQL 개발 의존성 설치**
+```bash
+sudo apt update && sudo apt install -y libpq-dev
+```
+
+**2. Ruby Gem 설치**
+```bash
+bundle install
+```
+
+**3. PostgreSQL Docker 컨테이너 시작**
+```bash
+docker-compose up -d db
+```
+
+**4. 개발 데이터베이스 생성 및 설정**
+```bash
+RAILS_ENV=development rails db:create
+RAILS_ENV=development rails db:migrate
+RAILS_ENV=development rails db:seed  # 선택사항
+```
+
+**5. 연결 테스트**
+```bash
+RAILS_ENV=development rails runner "puts 'DB: ' + ActiveRecord::Base.connection.adapter_name"
+# 출력: DB: PostgreSQL
+```
+
+### 환경별 데이터베이스 구성
+
+| 환경 | 어댑터 | 위치 | 용도 |
+|------|--------|------|------|
+| 🧪 test | sqlite3 | `storage/test.sqlite3` | 빠른 테스트, 플레이라이트 |
+| 🔧 development | postgresql | Docker (localhost:5432) | 운영환경 일치 |
+| 🚀 production | postgresql | DigitalOcean | 실제 서비스 |
+
+### 문제 해결
+
+**개발환경에서 DATABASE_URL 충돌**
+```bash
+# .env 파일에서 DATABASE_URL 주석 처리
+# DATABASE_URL=postgresql://...
+```
+
+**Docker PostgreSQL 재시작**
+```bash
+docker-compose down
+docker-compose up -d db
+```
+
+**마이그레이션 동기화**
+```bash
+# 개발환경 마이그레이션
+RAILS_ENV=development rails db:migrate
+
+# 테스트환경 마이그레이션  
+RAILS_ENV=test rails db:migrate
+```
+
 ---
 
-**문서 최종 업데이트**: 2025-07-21  
-**개발 상태**: ✅ 프로덕션 배포 완료 + WSL 재설치 후 Git 저장소 복구 완료  
+**문서 최종 업데이트**: 2025-07-23  
+**개발 상태**: ✅ 미리보기 시스템 제거 완료  
 **주요 URL**: `/orders/{naver_order_number}` (고객용), `/admin` (관리자용), `/admin/api_test` (API 테스트)
 
-**최신 개선사항** (2025-07-21):
+**최신 개선사항** (2025-07-23):
+- ❌ **미리보기 및 서체 시스템 제거**: 기능 복잡도 감소를 위한 단순화
+  - ✅ HTML5 Canvas 미리보기 시스템 제거
+  - ✅ 폰트 선택 시스템 제거 (elegant, modern, classic, friendly)
+  - ✅ 관련 DB 필드 제거 (font_style, border_scale)
+  - ✅ JavaScript 드래그앤드롭 시스템 제거
+- 🎭 **테두리 선택 시스템 복구**: 미리보기 없이 선택만 가능
+  - ✅ border_type 필드 복구 (type_a, type_b, type_c)
+  - ✅ 금속패 전용 테두리 선택 UI 복구
+  - ✅ 이미지 기반 테두리 썸네일 (thumb_type_a.png, thumb_type_b.png)
+  - ✅ 관리자 페이지에서 테두리 타입 표시
+  - ✅ Orders 컨트롤러에 border_type 파라미터 허용
+- 🗄️ **데이터베이스 환경**: 3-tier 구성 완료 (Test/Dev/Prod)
+
+**진행 상황** (2025-07-23):
+- ✅ **Backend**: border_type 필드 복구 완료
+- ✅ **Frontend**: 테두리 선택 UI 복구 완료 (미리보기 제외)
+- ✅ **JavaScript**: 금속패 선택 시 테두리 패널 표시 로직 복구
+- 📱 **현재 상태**: 단순화된 3단계 폼 + 테두리 선택 기능
+
+**이전 개선사항** (2025-07-21):
 - 🔄 **시스템 복구**: WSL 재설치로 인한 Git 저장소 손상 복구 완료
 - 🐙 **Git 재설정**: GitHub 저장소 재초기화 및 전체 코드 업로드 완료
 - 🔐 **인증 복구**: GitHub Personal Access Token 재설정 완료
@@ -431,3 +553,20 @@ def cancel!(reason = nil) # 수동 취소 처리
 - 🔧 **권한 문제 해결**: bin/ 폴더 실행 권한 수정, .bashrc PATH 최적화
 - 💎 **Rails 8.0.2**: WSL 내부 설치 완료 (Ruby 3.4.2와 호환)
 - 🛠️ **개발환경 통합**: Ruby/Rails 모두 WSL 내부로 통일
+- 🎭 **MCP Playwright**: Claude Code 브라우저 자동화 도구 연동 완료
+
+**데이터베이스 환경 통합** (2025-07-23 오전):
+- 🗄️ **3단계 DB 구성**: 테스트(SQLite), 개발(PostgreSQL), 운영(PostgreSQL)
+- 🐘 **PostgreSQL 개발환경**: Docker 기반 개발용 PostgreSQL 설정 완료
+- 🔧 **libpq-dev 설치**: WSL에서 pg gem 네이티브 컴파일 지원
+- ⚖️ **환경 일치성**: 개발/운영 DB 일치로 버그 예방, 테스트는 SQLite로 속도 최적화
+- 📝 **설정 가이드**: 초기 설정부터 문제 해결까지 완전한 가이드 작성
+
+**미리보기 시스템 제거** (2025-07-23 오후):
+- ❌ **Canvas 미리보기 제거**: HTML5 기반 실시간 기념패 렌더링 시스템 제거
+- ❌ **폰트 시스템 제거**: 4가지 한글 웹폰트 (우아한, 현대적, 고전적, 친근한) 제거
+- ❌ **테두리 시스템 제거**: 금속패 전용 3종 테두리 (A형, B형, 없음) + 실시간 크기 조정 제거
+- ❌ **조건부 UI 제거**: 아크릴패에서 테두리 옵션 자동 숨김 처리 제거
+- ❌ **반응형 Canvas 제거**: 모바일/데스크톱 환경별 최적화된 미리보기 제거
+- 🗄️ **DB 단순화**: font_style, border_type, border_scale 필드 제거
+- ⚡ **코드 단순화**: JavaScript 미리보기 관련 함수 및 이벤트 리스너 제거

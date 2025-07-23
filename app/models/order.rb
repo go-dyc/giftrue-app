@@ -7,6 +7,7 @@ class Order < ApplicationRecord
   validates :naver_order_number, presence: true, uniqueness: true
   validates :status, presence: true, inclusion: { in: %w[주문접수 시안확정 제작중 배송중 배송완료 주문취소] }
   validates :plaque_style, inclusion: { in: %w[gold_metal silver_metal acrylic_cartoon acrylic_realistic], allow_blank: true }
+  validates :border_type, inclusion: { in: %w[type_a type_b type_c], allow_blank: true }
   validates :expected_delivery_days, presence: true, numericality: { greater_than: 0, less_than_or_equal_to: 90 }
   
   # 새 주문 생성 시 및 업데이트 시 시스템 기본값 적용

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_20_010336) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_23_144313) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -58,6 +58,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_20_010336) do
     t.datetime "cancelled_at"
     t.text "cancellation_reason"
     t.datetime "last_api_polled_at"
+    t.string "border_type", default: "type_c"
+    t.index ["border_type"], name: "index_orders_on_border_type"
     t.index ["cancelled_at"], name: "index_orders_on_cancelled_at"
     t.index ["last_api_polled_at"], name: "index_orders_on_last_api_polled_at"
     t.index ["naver_order_number"], name: "index_orders_on_naver_order_number", unique: true

@@ -40,6 +40,19 @@
                   end %>
             </p>
           </div>
+          <% if @order.border_type.present? && (@order.plaque_style == 'gold_metal' || @order.plaque_style == 'silver_metal') %>
+          <div>
+            <p class="text-sm font-medium text-gray-500">테두리 스타일</p>
+            <p class="text-lg text-gray-900">
+              <%= case @order.border_type
+                  when 'type_a' then '🎭 A형 (장식적인 테두리)'
+                  when 'type_b' then '⭕ B형 (단순한 테두리)'
+                  when 'type_c' then '❌ 테두리 없음'
+                  else @order.border_type
+                  end %>
+            </p>
+          </div>
+          <% end %>
           <div>
             <p class="text-sm font-medium text-gray-500">예상 수령일</p>
             <p class="text-lg text-gray-900"><%= @order.expected_delivery_date.strftime("%Y년 %m월 %d일") %></p>
