@@ -49,6 +49,9 @@ gem "thruster", require: false
 # HTTP client for API calls
 gem "httparty"
 
+# Google Gemini AI API
+gem "gemini-ai"
+
 # Load environment variables from .env file
 gem "dotenv-rails", groups: [:development, :test]
 

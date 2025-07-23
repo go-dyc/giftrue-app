@@ -362,16 +362,125 @@
                   </div>
                 </div>
 
+                <!-- 문구 자동 생성 (기본적으로 열린 상태) -->
+                <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div class="flex items-center justify-between cursor-pointer" onclick="toggleAiSettings('gold')">
+                    <div class="flex items-center space-x-2">
+                      <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                      </svg>
+                      <h4 class="text-sm font-semibold text-blue-800">문구 자동 생성</h4>
+                      <span class="text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">AI 지원</span>
+                    </div>
+                    <svg id="ai_settings_arrow_gold" class="w-4 h-4 text-blue-600 transform transition-transform duration-200 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </div>
+                  
+                  <div id="ai_settings_gold" class="mt-4 space-y-4">
+                    <!-- 관계 설정 -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">관계</label>
+                      <select name="order[relationship]" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">선택하지 않음</option>
+                        <option value="superior_to_subordinate">상사 → 부하직원</option>
+                        <option value="colleague_to_colleague">동료 → 동료</option>
+                        <option value="subordinate_to_superior">부하직원 → 상사</option>
+                        <option value="family_to_family">가족 → 가족</option>
+                        <option value="friend_to_friend">친구 → 친구</option>
+                        <option value="organization_to_individual">기관 → 개인</option>
+                      </select>
+                    </div>
+                    
+                    <!-- 목적/상황 설정 -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">목적/상황</label>
+                      <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center">
+                          <input type="radio" name="order[purpose]" value="retirement" class="mr-2 text-blue-600">
+                          <span class="text-sm">퇴직/전역</span>
+                        </label>
+                        <label class="flex items-center">
+                          <input type="radio" name="order[purpose]" value="promotion" class="mr-2 text-blue-600">
+                          <span class="text-sm">승진/임명</span>
+                        </label>
+                        <label class="flex items-center">
+                          <input type="radio" name="order[purpose]" value="graduation" class="mr-2 text-blue-600">
+                          <span class="text-sm">졸업/수료</span>
+                        </label>
+                        <label class="flex items-center">
+                          <input type="radio" name="order[purpose]" value="award" class="mr-2 text-blue-600">
+                          <span class="text-sm">수상/표창</span>
+                        </label>
+                        <label class="flex items-center">
+                          <input type="radio" name="order[purpose]" value="appreciation" class="mr-2 text-blue-600">
+                          <span class="text-sm">감사 표현</span>
+                        </label>
+                        <label class="flex items-center">
+                          <input type="radio" name="order[purpose]" value="anniversary" class="mr-2 text-blue-600">
+                          <span class="text-sm">기념일</span>
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <!-- 톤앤매너 설정 -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">문구 스타일</label>
+                      <div class="flex space-x-4">
+                        <label class="flex items-center">
+                          <input type="radio" name="order[tone]" value="formal" class="mr-2 text-blue-600" checked>
+                          <span class="text-sm">격식있고 공식적</span>
+                        </label>
+                        <label class="flex items-center">
+                          <input type="radio" name="order[tone]" value="warm" class="mr-2 text-blue-600">
+                          <span class="text-sm">따뜻하고 인간적</span>
+                        </label>
+                        <label class="flex items-center">
+                          <input type="radio" name="order[tone]" value="concise" class="mr-2 text-blue-600">
+                          <span class="text-sm">간결하고 깔끔</span>
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <!-- 특별한 공로/특징 -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">특별한 공로나 특징 <span class="text-xs text-gray-500">(선택사항)</span></label>
+                      <input type="text" name="order[special_note]" 
+                             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                             placeholder="예: 20년간 성실근무, 팀워크 뛰어남, 신입 교육 담당 등"
+                             maxlength="50">
+                      <p class="text-xs text-gray-500 mt-1">더 정확한 문구를 위해 간단히 적어주세요 (최대 50자)</p>
+                    </div>
+                    
+                    <!-- 자동 생성 버튼 -->
+                    <div class="pt-2 border-t border-blue-200">
+                      <button type="button" 
+                              id="generate_content_gold" 
+                              class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center space-x-2"
+                              data-style="gold_metal">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        <span>AI로 문구 자동생성하기</span>
+                      </button>
+                      <p class="text-xs text-blue-600 mt-2 text-center">위 설정을 바탕으로 맞춤형 문구를 생성합니다</p>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- 본문 입력 -->
                 <div class="mb-4">
-                  <%= form.label :plaque_content, "본문 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                  <div class="mb-2">
+                    <%= form.label :plaque_content, "본문 *", class: "text-sm font-medium text-gray-700" %>
+                  </div>
                   <div class="relative">
                     <%= form.text_area :plaque_content,
                           class: "w-full px-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none min-h-[120px]",
                           rows: 6,
                           placeholder: "예: 오랜 시간 동안 헌신적으로 일해주신 노고에 깊이 감사드리며, 앞으로도 건강하고 행복한 나날 보내시길 바랍니다.",
                           maxlength: 150,
-                          data: { style: 'gold_metal', counter: 'content' } %>
+                          data: { style: 'gold_metal', counter: 'content' },
+                          id: "plaque_content_gold" %>
                     <div class="absolute bottom-2 right-2 text-xs text-gray-400 bg-white bg-opacity-80 px-1 rounded">
                       <span id="content_counter_gold">0</span>/150자
                     </div>
@@ -427,16 +536,125 @@
                   </div>
                 </div>
 
+                <!-- 문구 자동 생성 (기본적으로 열린 상태) -->
+                <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div class="flex items-center justify-between cursor-pointer" onclick="toggleAiSettings('silver')">
+                    <div class="flex items-center space-x-2">
+                      <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                      </svg>
+                      <h4 class="text-sm font-semibold text-blue-800">문구 자동 생성</h4>
+                      <span class="text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">AI 지원</span>
+                    </div>
+                    <svg id="ai_settings_arrow_silver" class="w-4 h-4 text-blue-600 transform transition-transform duration-200 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </div>
+                  
+                  <div id="ai_settings_silver" class="mt-4 space-y-4">
+                    <!-- 관계 설정 -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">관계</label>
+                      <select name="order[relationship]" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">선택하지 않음</option>
+                        <option value="superior_to_subordinate">상사 → 부하직원</option>
+                        <option value="colleague_to_colleague">동료 → 동료</option>
+                        <option value="subordinate_to_superior">부하직원 → 상사</option>
+                        <option value="family_to_family">가족 → 가족</option>
+                        <option value="friend_to_friend">친구 → 친구</option>
+                        <option value="organization_to_individual">기관 → 개인</option>
+                      </select>
+                    </div>
+                    
+                    <!-- 목적/상황 설정 -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">목적/상황</label>
+                      <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center">
+                          <input type="radio" name="order[purpose]" value="retirement" class="mr-2 text-blue-600">
+                          <span class="text-sm">퇴직/전역</span>
+                        </label>
+                        <label class="flex items-center">
+                          <input type="radio" name="order[purpose]" value="promotion" class="mr-2 text-blue-600">
+                          <span class="text-sm">승진/임명</span>
+                        </label>
+                        <label class="flex items-center">
+                          <input type="radio" name="order[purpose]" value="graduation" class="mr-2 text-blue-600">
+                          <span class="text-sm">졸업/수료</span>
+                        </label>
+                        <label class="flex items-center">
+                          <input type="radio" name="order[purpose]" value="award" class="mr-2 text-blue-600">
+                          <span class="text-sm">수상/표창</span>
+                        </label>
+                        <label class="flex items-center">
+                          <input type="radio" name="order[purpose]" value="appreciation" class="mr-2 text-blue-600">
+                          <span class="text-sm">감사 표현</span>
+                        </label>
+                        <label class="flex items-center">
+                          <input type="radio" name="order[purpose]" value="anniversary" class="mr-2 text-blue-600">
+                          <span class="text-sm">기념일</span>
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <!-- 톤앤매너 설정 -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">문구 스타일</label>
+                      <div class="flex space-x-4">
+                        <label class="flex items-center">
+                          <input type="radio" name="order[tone]" value="formal" class="mr-2 text-blue-600" checked>
+                          <span class="text-sm">격식있고 공식적</span>
+                        </label>
+                        <label class="flex items-center">
+                          <input type="radio" name="order[tone]" value="warm" class="mr-2 text-blue-600">
+                          <span class="text-sm">따뜻하고 인간적</span>
+                        </label>
+                        <label class="flex items-center">
+                          <input type="radio" name="order[tone]" value="concise" class="mr-2 text-blue-600">
+                          <span class="text-sm">간결하고 깔끔</span>
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <!-- 특별한 공로/특징 -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">특별한 공로나 특징 <span class="text-xs text-gray-500">(선택사항)</span></label>
+                      <input type="text" name="order[special_note]" 
+                             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                             placeholder="예: 20년간 성실근무, 팀워크 뛰어남, 신입 교육 담당 등"
+                             maxlength="50">
+                      <p class="text-xs text-gray-500 mt-1">더 정확한 문구를 위해 간단히 적어주세요 (최대 50자)</p>
+                    </div>
+                    
+                    <!-- 자동 생성 버튼 -->
+                    <div class="pt-2 border-t border-blue-200">
+                      <button type="button" 
+                              id="generate_content_silver" 
+                              class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center space-x-2"
+                              data-style="silver_metal">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        <span>AI로 문구 자동생성하기</span>
+                      </button>
+                      <p class="text-xs text-blue-600 mt-2 text-center">위 설정을 바탕으로 맞춤형 문구를 생성합니다</p>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- 본문 입력 -->
                 <div class="mb-4">
-                  <%= form.label :plaque_content, "본문 *", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                  <div class="mb-2">
+                    <%= form.label :plaque_content, "본문 *", class: "text-sm font-medium text-gray-700" %>
+                  </div>
                   <div class="relative">
                     <%= form.text_area :plaque_content,
                           class: "w-full px-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none min-h-[120px]",
                           rows: 6,
                           placeholder: "예: 오랜 시간 동안 헌신적으로 일해주신 노고에 깊이 감사드리며, 앞으로도 건강하고 행복한 나날 보내시길 바랍니다.",
                           maxlength: 150,
-                          data: { style: 'silver_metal', counter: 'content' } %>
+                          data: { style: 'silver_metal', counter: 'content' },
+                          id: "plaque_content_silver" %>
                     <div class="absolute bottom-2 right-2 text-xs text-gray-400 bg-white bg-opacity-80 px-1 rounded">
                       <span id="content_counter_silver">0</span>/150자
                     </div>
@@ -1437,6 +1655,132 @@ function initializePageFunctionality() {
   }
 
 
+  // AI 문구 생성 기능
+  function setupAIContentGeneration() {
+    const generateButtons = document.querySelectorAll('[id^="generate_content_"]');
+    
+    generateButtons.forEach(button => {
+      button.addEventListener('click', async function(event) {
+        // this 컨텍스트를 변수에 저장
+        const clickedButton = event.target.closest('button');
+        const style = clickedButton.dataset.style;
+        const isGold = style === 'gold_metal';
+        const isSilver = style === 'silver_metal';
+        
+        if (!isGold && !isSilver) return;
+        
+        // 중복 클릭 방지
+        if (clickedButton.disabled) return;
+        
+        // 현재 스타일 섹션에서 제목과 성함 가져오기
+        const styleSection = document.querySelector(`.style-input.${style}:not(.hidden)`);
+        if (!styleSection) return;
+        
+        const titleInput = styleSection.querySelector('input[name="order[plaque_title]"]');
+        const nameInput = styleSection.querySelector('input[name="order[plaque_name]"]');
+        const contentTextarea = styleSection.querySelector('textarea[name="order[plaque_content]"]');
+        
+        const title = titleInput ? titleInput.value.trim() : '';
+        const name = nameInput ? nameInput.value.trim() : '';
+        
+        // AI 맞춤 설정 정보 수집
+        const relationshipSelect = styleSection.querySelector('select[name="order[relationship]"]');
+        const purposeRadio = styleSection.querySelector('input[name="order[purpose]"]:checked');
+        const toneRadio = styleSection.querySelector('input[name="order[tone]"]:checked');
+        const specialNoteInput = styleSection.querySelector('input[name="order[special_note]"]');
+        
+        const relationship = relationshipSelect ? relationshipSelect.value : '';
+        const purpose = purposeRadio ? purposeRadio.value : '';
+        const tone = toneRadio ? toneRadio.value : 'formal';
+        const specialNote = specialNoteInput ? specialNoteInput.value.trim() : '';
+        
+        // 로딩 상태 표시
+        const originalText = clickedButton.innerHTML;
+        clickedButton.disabled = true;
+        clickedButton.innerHTML = `
+          <svg class="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <span>생성중...</span>
+        `;
+        
+        try {
+          // API 호출
+          const response = await fetch('/orders/generate_content', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+              title: title,
+              name: name,
+              style: style,
+              relationship: relationship,
+              purpose: purpose,
+              tone: tone,
+              special_note: specialNote
+            })
+          });
+          
+          // 응답 상태 확인
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          console.log('API 응답:', data); // 디버깅용
+          
+          if (data.success && data.content) {
+            // 생성된 내용을 textarea에 삽입
+            if (contentTextarea) {
+              contentTextarea.value = data.content;
+              // 문자 카운터 업데이트
+              const event = new Event('input', { bubbles: true });
+              contentTextarea.dispatchEvent(event);
+              
+              // 성공 애니메이션
+              contentTextarea.classList.add('ring-2', 'ring-green-500');
+              setTimeout(() => {
+                contentTextarea.classList.remove('ring-2', 'ring-green-500');
+              }, 2000);
+            }
+          } else {
+            console.error('API 오류:', data); // 디버깅용
+            alert(data.error || '문구 생성에 실패했습니다. 다시 시도해주세요.');
+          }
+        } catch (error) {
+          console.error('AI 문구 생성 오류:', error);
+          alert('문구 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        } finally {
+          // 로딩 상태 해제 - 항상 실행됨
+          console.log('로딩 상태 해제:', clickedButton); // 디버깅용
+          clickedButton.disabled = false;
+          clickedButton.innerHTML = originalText;
+        }
+      });
+    });
+  }
+
+  // AI 설정 토글 기능
+  function setupAiSettingsToggle() {
+    // toggleAiSettings 함수를 전역으로 정의
+    window.toggleAiSettings = function(style) {
+      const settingsDiv = document.getElementById(`ai_settings_${style}`);
+      const arrow = document.getElementById(`ai_settings_arrow_${style}`);
+      
+      if (settingsDiv && arrow) {
+        if (settingsDiv.classList.contains('hidden')) {
+          settingsDiv.classList.remove('hidden');
+          arrow.classList.add('rotate-180');
+        } else {
+          settingsDiv.classList.add('hidden');
+          arrow.classList.remove('rotate-180');
+        }
+      }
+    };
+  }
+
   // Initialize all functionality
   initializeRequiredAttributes();
   setupStyleSelection();
@@ -1445,6 +1789,8 @@ function initializePageFunctionality() {
   setupCharacterCounter();
   setupRealTimeValidation();
   setupButtonValidation();
+  setupAIContentGeneration();
+  setupAiSettingsToggle();
   initializeExistingData();
 }
 

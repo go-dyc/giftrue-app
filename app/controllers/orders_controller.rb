@@ -315,6 +315,56 @@ class OrdersController < ApplicationController
     # 취소된 주문 안내 페이지
   end
 
+  def generate_content
+    begin
+      title = params[:title].to_s.strip
+      name = params[:name].to_s.strip
+      style = params[:style].to_s.strip
+      relationship = params[:relationship].to_s.strip
+      purpose = params[:purpose].to_s.strip
+      tone = params[:tone].to_s.strip
+      special_note = params[:special_note].to_s.strip
+      
+      # 스타일 검증
+      unless ['gold_metal', 'silver_metal'].include?(style)
+        render json: { success: false, error: '지원하지 않는 스타일입니다.' }
+        return
+      end
+      
+      # Gemini API를 통한 문구 생성 (맥락 정보 추가)
+      generated_content = GeminiService.generate_plaque_content(
+        title: title,
+        name: name,
+        style: style,
+        relationship: relationship,
+        purpose: purpose,
+        tone: tone,
+        special_note: special_note
+      )
+      
+      if generated_content.present?
+        render json: { 
+          success: true, 
+          content: generated_content 
+        }
+      else
+        render json: { 
+          success: false, 
+          error: '문구 생성에 실패했습니다. 다시 시도해주세요.' 
+        }
+      end
+      
+    rescue => e
+      Rails.logger.error "문구 생성 오류: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      
+      render json: { 
+        success: false, 
+        error: '문구 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' 
+      }
+    end
+  end
+
   private
 
   def find_or_create_order
@@ -340,9 +390,10 @@ class OrdersController < ApplicationController
   end
 
   def order_params
-    # 모든 단계에서 모든 파라미터를 허용하여 데이터 유지
+    # 모든 단계에서 모든 파라미터를 허용하여 데이터 유지 (AI 맥락 정보 포함)
     permitted_params = params.require(:order).permit(:orderer_name, :plaque_style, :plaque_message, :additional_requests, :plaque_additional_requests,
                                                     :plaque_title, :plaque_name, :plaque_content, :plaque_top_message, :plaque_main_message, :border_type,
+                                                    :relationship, :purpose, :tone, :special_note,
                                                     main_images: [], optional_images: [])
     
     # 빈 이미지 배열 필터링 (기존 이미지가 있을 때 빈 값으로 덮어쓰지 않도록)
