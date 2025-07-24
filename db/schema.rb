@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_23_221342) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_24_180547) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -66,6 +66,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_23_221342) do
     t.string "purpose"
     t.string "tone"
     t.text "special_note"
+    t.integer "reference_image_index"
     t.index ["border_type"], name: "index_orders_on_border_type"
     t.index ["cancelled_at"], name: "index_orders_on_cancelled_at"
     t.index ["last_api_polled_at"], name: "index_orders_on_last_api_polled_at"

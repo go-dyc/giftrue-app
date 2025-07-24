@@ -4,7 +4,7 @@
 
 /* Custom styles */
 .btn-primary {
-  @apply inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors;
+  @apply inline-flex items-center px-6 py-3 sm:px-4 sm:py-2 bg-blue-600 text-white font-medium text-base sm:text-sm rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors w-full sm:w-auto justify-center;
 }
 
 .btn-secondary {
@@ -12,7 +12,7 @@
 }
 
 .form-input {
-  @apply block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors;
+  @apply block w-full px-4 py-3 sm:px-3 sm:py-2 text-base sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors;
 }
 
 .form-label {

@@ -41,6 +41,10 @@ class Order < ApplicationRecord
   validates :plaque_top_message, length: { maximum: 10 }, if: :validate_acrylic_plaque_fields?
   validates :plaque_main_message, length: { maximum: 25 }, if: :validate_acrylic_plaque_fields?
   
+  # Reference image validation for acrylic plaques
+  validates :reference_image_index, presence: true, if: :validate_acrylic_plaque_fields?
+  validates :reference_image_index, inclusion: { in: 0..4 }, if: :validate_acrylic_plaque_fields?
+  
   # Custom validation for file types and sizes
   validate :validate_main_images_content_type_and_size
   validate :validate_optional_images_content_type_and_size
@@ -85,7 +89,7 @@ class Order < ApplicationRecord
     when 'gold_metal', 'silver_metal'
       !(plaque_title.blank? && plaque_name.blank? && plaque_content.blank?)
     when 'acrylic_cartoon', 'acrylic_realistic'
-      !(plaque_top_message.blank? && plaque_main_message.blank?)
+      !(plaque_top_message.blank? && plaque_main_message.blank?) && reference_image_index.present?
     else
       false
     end
