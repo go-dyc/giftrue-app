@@ -866,19 +866,19 @@
         <% end %>
 
         <!-- Navigation Buttons -->
-        <div class="flex justify-between items-center pt-6 border-t border-gray-200">
-          <% if @step > 1 %>
-            <%= link_to "이전으로", edit_order_path(@order.naver_order_number, step: @step - 1, force_edit: params[:force_edit]), 
-                  class: "btn-secondary" %>
-          <% else %>
-            <div></div>
-          <% end %>
+        <div class="pt-6 border-t border-gray-200">
+          <div class="flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center">
+            <% if @step > 1 %>
+              <%= link_to "← 이전으로", edit_order_path(@order.naver_order_number, step: @step - 1, force_edit: params[:force_edit]), 
+                    class: "btn-secondary order-2 sm:order-1 flex-1 sm:flex-none" %>
+            <% end %>
 
-          <% if @step < 3 %>
-            <%= form.submit "다음 단계", class: "btn-primary" %>
-          <% else %>
-            <%= form.submit "주문 완료", class: "btn-primary" %>
-          <% end %>
+            <% if @step < 3 %>
+              <%= form.submit "다음 단계 →", class: "btn-primary order-1 sm:order-2 flex-1 sm:flex-none" %>
+            <% else %>
+              <%= form.submit "주문 완료 ✓", class: "btn-primary order-1 sm:order-2 flex-1 sm:flex-none" %>
+            <% end %>
+          </div>
         </div>
       <% end %>
     </div>

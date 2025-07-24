@@ -1,0 +1,51 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - RAILS_ENV=test
+      - DATABASE_URL=postgresql://giftrue:password@db:5432/giftrue_test
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=password123
+    depends_on:
+      - db
+    ports:
+      - "3001:3000"
+    volumes:
+      - .:/rails
+    command: >
+      bash -c "
+        rails db:create db:migrate &&
+        rails server -b 0.0.0.0 -p 3000
+      "
+
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.54.1-focal
+    working_dir: /app
+    environment:
+      - RAILS_ENV=test
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=password123
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - app
+    command: >
+      bash -c "
+        cd /app &&
+        npm ci &&
+        npm run build:css:compile &&
+        sleep 10 &&
+        npm run test:e2e
+      "
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=giftrue_test
+      - POSTGRES_USER=giftrue
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5433:5432"

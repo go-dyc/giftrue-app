@@ -41,6 +41,8 @@ env:
     - SLACK_WEBHOOK_URL
     - SECRET_KEY_BASE
     - GEMINI_API_KEY
+    - ADMIN_USERNAME
+    - ADMIN_PASSWORD
   clear:
     RAILS_ENV: production
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.

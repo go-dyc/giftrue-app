@@ -4,12 +4,19 @@
   "scripts": {
     "build:css": "npx tailwindcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css --watch",
     "build:css:compile": "npx tailwindcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css",
-    "watch:css": "npx tailwindcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css --watch"
+    "watch:css": "npx tailwindcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css --watch",
+    "test:e2e": "npx playwright test",
+    "test:e2e:ui": "npx playwright test --ui",
+    "test:e2e:debug": "npx playwright test --debug",
+    "test:e2e:report": "npx playwright show-report"
   },
   "browserslist": [
     "defaults"
   ],
   "dependencies": {
     "tailwindcss": "^3.4.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.1"
   }
 }

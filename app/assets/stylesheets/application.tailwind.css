@@ -4,11 +4,11 @@
 
 /* Custom styles */
 .btn-primary {
-  @apply inline-flex items-center px-6 py-3 sm:px-4 sm:py-2 bg-blue-600 text-white font-medium text-base sm:text-sm rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors w-full sm:w-auto justify-center;
+  @apply inline-flex items-center justify-center px-6 py-3 sm:px-4 sm:py-2 bg-blue-600 text-white font-medium text-base sm:text-sm rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors;
 }
 
 .btn-secondary {
-  @apply inline-flex items-center px-6 py-3 sm:px-4 sm:py-2 bg-gray-500 text-white font-medium text-base sm:text-sm rounded-md hover:bg-gray-600 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors;
+  @apply inline-flex items-center justify-center px-6 py-3 sm:px-4 sm:py-2 bg-gray-500 text-white font-medium text-base sm:text-sm rounded-md hover:bg-gray-600 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors;
 }
 
 .btn-upload {

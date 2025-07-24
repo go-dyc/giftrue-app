@@ -1,0 +1,34 @@
+# Playwright E2E 테스트용 Docker 이미지
+FROM mcr.microsoft.com/playwright:v1.54.1-focal
+
+# 작업 디렉토리 설정
+WORKDIR /app
+
+# Ruby 설치
+RUN apt-get update && apt-get install -y \
+    ruby \
+    ruby-dev \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Node.js는 이미 playwright 이미지에 포함됨
+
+# 의존성 파일 복사
+COPY package*.json ./
+COPY Gemfile* ./
+
+# Gem과 npm 의존성 설치
+RUN gem install bundler && bundle install
+RUN npm ci
+
+# 애플리케이션 코드 복사
+COPY . .
+
+# 브라우저는 이미 playwright 이미지에 포함됨
+
+# CSS 컴파일
+RUN npm run build:css:compile
+
+# 테스트 실행
+CMD ["npm", "run", "test:e2e"]

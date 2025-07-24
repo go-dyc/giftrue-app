@@ -99,6 +99,24 @@
                 <span class="text-gray-900"><%= @order.plaque_main_message %></span>
               </div>
             <% end %>
+            
+            <!-- 아크릴패 참조 사진 정보 -->
+            <% if @order.reference_image_index.present? && @order.main_images.attached? %>
+              <div class="mb-3">
+                <span class="text-sm font-semibold text-gray-700 block">참조 사진</span>
+                <div class="flex items-center space-x-3">
+                  <% if @order.main_images[@order.reference_image_index] %>
+                    <%= image_tag @order.main_images[@order.reference_image_index], 
+                          class: "w-16 h-16 object-cover rounded-lg border-2 border-blue-300" %>
+                    <span class="text-sm text-gray-600">
+                      메인 사진 <%= @order.reference_image_index + 1 %>번 선택됨
+                    </span>
+                  <% else %>
+                    <span class="text-sm text-red-600">⚠️ 참조 사진 인덱스 오류 (#{@order.reference_image_index + 1}번)</span>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
           <% else %>
             <!-- 레거시 호환성을 위한 fallback -->
             <% if @order.plaque_message.present? %>
@@ -109,6 +127,76 @@
           <% end %>
         </div>
       </div>
+
+      <!-- AI 문구 생성 정보 (금속패 전용) -->
+      <% if (@order.plaque_style == 'gold_metal' || @order.plaque_style == 'silver_metal') && 
+            [@order.relationship, @order.purpose, @order.tone, @order.special_note].any?(&:present?) %>
+        <div class="bg-white shadow rounded-lg p-6 mb-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">🤖 AI 문구 생성 정보</h2>
+          <div class="bg-blue-50 rounded-lg p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <% if @order.relationship.present? %>
+                <div>
+                  <span class="text-sm font-semibold text-blue-700 block">관계</span>
+                  <span class="text-blue-900">
+                    <%= case @order.relationship
+                        when 'superior_to_subordinate' then '👔 상사 → 부하'
+                        when 'colleague_to_colleague' then '🤝 동료 → 동료'
+                        when 'subordinate_to_superior' then '📈 부하 → 상사'
+                        when 'family_to_family' then '👨‍👩‍👧‍👦 가족 → 가족'
+                        when 'friend_to_friend' then '👫 친구 → 친구'
+                        when 'organization_to_individual' then '🏢 기관 → 개인'
+                        when 'other' then '🔄 기타'
+                        else @order.relationship
+                        end %>
+                  </span>
+                </div>
+              <% end %>
+              
+              <% if @order.purpose.present? %>
+                <div>
+                  <span class="text-sm font-semibold text-blue-700 block">목적/상황</span>
+                  <span class="text-blue-900">
+                    <%= case @order.purpose
+                        when 'retirement' then '👋 퇴직/전역'
+                        when 'promotion' then '🎉 승진/임명'
+                        when 'graduation' then '🎓 졸업/수료'
+                        when 'award' then '🏆 수상/표창'
+                        when 'gratitude' then '🙏 감사 표현'
+                        when 'anniversary' then '🎂 기념일'
+                        when 'other' then '🔄 기타'
+                        else @order.purpose
+                        end %>
+                  </span>
+                </div>
+              <% end %>
+              
+              <% if @order.tone.present? %>
+                <div>
+                  <span class="text-sm font-semibold text-blue-700 block">문구 스타일</span>
+                  <span class="text-blue-900">
+                    <%= case @order.tone
+                        when 'formal' then '📜 격식있고 공식적'
+                        when 'warm' then '💝 따뜻하고 인간적'
+                        when 'concise' then '✂️ 간결하고 깔끔'
+                        else @order.tone
+                        end %>
+                  </span>
+                </div>
+              <% end %>
+            </div>
+            
+            <% if @order.special_note.present? %>
+              <div class="mt-4 pt-4 border-t border-blue-200">
+                <span class="text-sm font-semibold text-blue-700 block mb-2">특별 메모</span>
+                <p class="text-blue-900 bg-white rounded-md p-3 border border-blue-200">
+                  <%= @order.special_note %>
+                </p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
 
       <!-- Additional Requests -->
       <% if @order.additional_requests.present? %>
