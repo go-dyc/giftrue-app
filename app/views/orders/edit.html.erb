@@ -122,7 +122,7 @@
                      id="main_single_image_input">
               
               <div class="text-center">
-                <label for="main_images_input" class="btn-primary cursor-pointer">
+                <label for="main_images_input" class="btn-upload cursor-pointer">
                   사진 선택하기 (다중 업로드)
                 </label>
                 <p class="text-xs text-gray-500 mt-2">JPG, PNG 파일 | 개당 최대 10MB</p>
@@ -213,7 +213,7 @@
                      id="optional_single_image_input">
               
               <div class="text-center">
-                <label for="optional_images_input" class="btn-primary cursor-pointer">
+                <label for="optional_images_input" class="btn-upload cursor-pointer">
                   사진 업로드 (다중 업로드)
                 </label>
                 <p class="text-xs text-gray-500 mt-2">JPG, PNG 파일 | 개당 최대 10MB</p>
@@ -293,7 +293,7 @@
                   🎭 테두리 스타일 
                   <span class="ml-2 bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded-full">금속패 전용</span>
                 </h4>
-                <div class="grid grid-cols-3 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-3">
                   <% [
                     { value: 'type_a', name: 'A형', description: '액자형 테두리' },
                     { value: 'type_b', name: 'B형', description: '우측 상단 꽃장식' },
@@ -305,16 +305,16 @@
                               class: "hidden peer",
                               id: "border_#{border[:value]}" } %>
                       <label for="border_<%= border[:value] %>" 
-                             class="block cursor-pointer border-2 border-gray-200 rounded-lg p-3 hover:border-blue-400 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all">
+                             class="block cursor-pointer border-2 border-gray-200 rounded-lg p-4 sm:p-3 hover:border-blue-400 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all">
                         <div class="text-center">
-                          <div class="w-20 h-20 sm:w-16 sm:h-16 mx-auto mb-2 bg-gray-100 rounded flex items-center justify-center">
+                          <div class="w-24 h-24 sm:w-20 sm:h-20 mx-auto mb-2 bg-gray-100 rounded flex items-center justify-center">
                             <% if border[:value] == 'type_a' || border[:value] == 'type_b' %>
                               <img src="/images/borders/thumb_<%= border[:value] %>.png" 
                                    alt="<%= border[:name] %>" 
-                                   class="w-16 h-16 sm:w-12 sm:h-12 object-contain"
+                                   class="w-20 h-20 sm:w-16 sm:h-16 object-contain"
                                    onerror="this.style.display='none'; this.parentNode.innerHTML='<span class=&quot;text-gray-400 text-xs&quot;><%= border[:name] %></span>';" />
                             <% else %>
-                              <div class="w-16 h-16 sm:w-12 sm:h-12 bg-gray-200 rounded flex items-center justify-center">
+                              <div class="w-20 h-20 sm:w-16 sm:h-16 bg-gray-200 rounded flex items-center justify-center">
                                 <span class="text-gray-400 text-xs">없음</span>
                               </div>
                             <% end %>
@@ -389,6 +389,7 @@
                         <option value="family_to_family">가족 → 가족</option>
                         <option value="friend_to_friend">친구 → 친구</option>
                         <option value="organization_to_individual">기관 → 개인</option>
+                        <option value="other">기타</option>
                       </select>
                     </div>
                     
@@ -419,6 +420,10 @@
                         <label class="flex items-center">
                           <input type="radio" name="order[purpose]" value="anniversary" class="mr-2 text-blue-600">
                           <span class="text-sm">기념일</span>
+                        </label>
+                        <label class="flex items-center">
+                          <input type="radio" name="order[purpose]" value="other" class="mr-2 text-blue-600">
+                          <span class="text-sm">기타</span>
                         </label>
                       </div>
                     </div>
@@ -475,8 +480,8 @@
                   </div>
                   <div class="relative">
                     <%= form.text_area :plaque_content,
-                          class: "w-full px-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none min-h-[120px]",
-                          rows: 6,
+                          class: "w-full px-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none min-h-[160px]",
+                          rows: 8,
                           placeholder: "예: 오랜 시간 동안 헌신적으로 일해주신 노고에 깊이 감사드리며, 앞으로도 건강하고 행복한 나날 보내시길 바랍니다.",
                           maxlength: 150,
                           data: { style: 'gold_metal', counter: 'content' },
@@ -563,6 +568,7 @@
                         <option value="family_to_family">가족 → 가족</option>
                         <option value="friend_to_friend">친구 → 친구</option>
                         <option value="organization_to_individual">기관 → 개인</option>
+                        <option value="other">기타</option>
                       </select>
                     </div>
                     
@@ -593,6 +599,10 @@
                         <label class="flex items-center">
                           <input type="radio" name="order[purpose]" value="anniversary" class="mr-2 text-blue-600">
                           <span class="text-sm">기념일</span>
+                        </label>
+                        <label class="flex items-center">
+                          <input type="radio" name="order[purpose]" value="other" class="mr-2 text-blue-600">
+                          <span class="text-sm">기타</span>
                         </label>
                       </div>
                     </div>
@@ -649,8 +659,8 @@
                   </div>
                   <div class="relative">
                     <%= form.text_area :plaque_content,
-                          class: "w-full px-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none min-h-[120px]",
-                          rows: 6,
+                          class: "w-full px-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none min-h-[160px]",
+                          rows: 8,
                           placeholder: "예: 오랜 시간 동안 헌신적으로 일해주신 노고에 깊이 감사드리며, 앞으로도 건강하고 행복한 나날 보내시길 바랍니다.",
                           maxlength: 150,
                           data: { style: 'silver_metal', counter: 'content' },
@@ -691,12 +701,12 @@
                                 class: "hidden peer",
                                 id: "ref_img_cartoon_#{index}" %>
                           <label for="ref_img_cartoon_<%= index %>" 
-                                 class="block cursor-pointer border-2 border-gray-300 rounded-lg overflow-hidden hover:border-blue-400 peer-checked:border-blue-500 peer-checked:ring-2 peer-checked:ring-blue-200 transition-all">
+                                 class="block cursor-pointer border-2 border-gray-300 rounded-lg overflow-hidden hover:border-blue-400 transition-all">
                             <div class="aspect-square relative">
                               <%= image_tag image, class: "w-full h-full object-cover" %>
-                              <div class="absolute inset-0 bg-black bg-opacity-0 peer-checked:bg-opacity-20 transition-all"></div>
-                              <div class="absolute top-2 left-2 w-6 h-6 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-blue-500 peer-checked:bg-blue-500 transition-all">
-                                <div class="w-2 h-2 bg-blue-500 rounded-full peer-checked:bg-white hidden peer-checked:block"></div>
+                              <div class="reference-overlay absolute inset-0 bg-black bg-opacity-0 transition-all"></div>
+                              <div class="reference-radio-outer absolute top-2 left-2 w-6 h-6 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center transition-all">
+                                <div class="reference-radio-inner w-2 h-2 bg-blue-500 rounded-full hidden"></div>
                               </div>
                               <div class="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
                                 사진 <%= index + 1 %>
@@ -777,12 +787,12 @@
                                 class: "hidden peer",
                                 id: "ref_img_realistic_#{index}" %>
                           <label for="ref_img_realistic_<%= index %>" 
-                                 class="block cursor-pointer border-2 border-gray-300 rounded-lg overflow-hidden hover:border-blue-400 peer-checked:border-blue-500 peer-checked:ring-2 peer-checked:ring-blue-200 transition-all">
+                                 class="block cursor-pointer border-2 border-gray-300 rounded-lg overflow-hidden hover:border-blue-400 transition-all">
                             <div class="aspect-square relative">
                               <%= image_tag image, class: "w-full h-full object-cover" %>
-                              <div class="absolute inset-0 bg-black bg-opacity-0 peer-checked:bg-opacity-20 transition-all"></div>
-                              <div class="absolute top-2 left-2 w-6 h-6 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-blue-500 peer-checked:bg-blue-500 transition-all">
-                                <div class="w-2 h-2 bg-blue-500 rounded-full peer-checked:bg-white hidden peer-checked:block"></div>
+                              <div class="reference-overlay absolute inset-0 bg-black bg-opacity-0 transition-all"></div>
+                              <div class="reference-radio-outer absolute top-2 left-2 w-6 h-6 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center transition-all">
+                                <div class="reference-radio-inner w-2 h-2 bg-blue-500 rounded-full hidden"></div>
                               </div>
                               <div class="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
                                 사진 <%= index + 1 %>
@@ -1773,8 +1783,13 @@ function initializePageFunctionality() {
           <svg class="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
           </svg>
-          <span>생성중...</span>
+          <span>AI 문구 생성중...</span>
         `;
+        
+        // 본문 영역에도 로딩 표시
+        const originalPlaceholder = contentTextarea.placeholder;
+        contentTextarea.placeholder = '🤖 AI가 맞춤 문구를 생성하고 있습니다...';
+        contentTextarea.classList.add('bg-blue-50', 'border-blue-300');
         
         try {
           // API 호출
@@ -1804,17 +1819,26 @@ function initializePageFunctionality() {
           console.log('API 응답:', data); // 디버깅용
           
           if (data.success && data.content) {
-            // 생성된 내용을 textarea에 삽입
+            // 생성된 내용을 textarea에 삽입 (문단 나누기 적용)
             if (contentTextarea) {
-              contentTextarea.value = data.content;
+              // 문단 나누기: 문장 단위로 나누어 적절히 줄바꿈 추가
+              const formattedContent = data.content
+                .replace(/\. /g, '.\n\n')  // 마침표 후 문단 나누기
+                .replace(/! /g, '!\n\n')  // 느낌표 후 문단 나누기
+                .replace(/\? /g, '?\n\n')  // 물음표 후 문단 나누기
+                .replace(/\n\n\n+/g, '\n\n')  // 연속된 줄바꿈 정리
+                .trim();
+              
+              contentTextarea.value = formattedContent;
               // 문자 카운터 업데이트
               const event = new Event('input', { bubbles: true });
               contentTextarea.dispatchEvent(event);
               
               // 성공 애니메이션
-              contentTextarea.classList.add('ring-2', 'ring-green-500');
+              contentTextarea.classList.remove('bg-blue-50', 'border-blue-300');
+              contentTextarea.classList.add('ring-2', 'ring-green-500', 'bg-green-50');
               setTimeout(() => {
-                contentTextarea.classList.remove('ring-2', 'ring-green-500');
+                contentTextarea.classList.remove('ring-2', 'ring-green-500', 'bg-green-50');
               }, 2000);
             }
           } else {
@@ -1829,6 +1853,10 @@ function initializePageFunctionality() {
           console.log('로딩 상태 해제:', clickedButton); // 디버깅용
           clickedButton.disabled = false;
           clickedButton.innerHTML = originalText;
+          
+          // 본문 영역 로딩 상태 해제
+          contentTextarea.placeholder = originalPlaceholder;
+          contentTextarea.classList.remove('bg-blue-50', 'border-blue-300');
         }
       });
     });

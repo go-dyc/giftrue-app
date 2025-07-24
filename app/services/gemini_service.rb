@@ -109,6 +109,7 @@ class GeminiService
       when 'family_to_family' then '가족이 가족에게'
       when 'friend_to_friend' then '친구가 친구에게'
       when 'organization_to_individual' then '기관이 개인에게'
+      when 'other' then '특별한 관계에서'
       else ''
       end
     end
@@ -122,6 +123,7 @@ class GeminiService
       when 'award' then '수상/표창 축하'
       when 'appreciation' then '감사 표현'
       when 'anniversary' then '기념일 축하'
+      when 'other' then '특별한 목적'
       else ''
       end
     end
@@ -164,6 +166,8 @@ class GeminiService
         get_appreciation_template(relationship, tone, special_note, name)
       when 'anniversary'
         get_anniversary_template(relationship, tone, special_note, name)
+      when 'other'
+        get_general_template(relationship, tone, special_note, name)
       else
         get_general_template(relationship, tone, special_note, name)
       end
@@ -280,6 +284,7 @@ class GeminiService
       when 'family_to_family' then "가족이 가족에게 주는 따뜻하고 사랑스러운 메시지"
       when 'friend_to_friend' then "친구가 친구에게 주는 친근하고 응원하는 메시지"
       when 'organization_to_individual' then "기관이 개인에게 주는 공식적이고 권위있는 메시지"
+      when 'other' then "특별한 관계에서 전하는 의미있는 메시지"
       else "일반적이고 정중한 메시지"
       end
     end

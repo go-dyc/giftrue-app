@@ -8,7 +8,11 @@
 }
 
 .btn-secondary {
-  @apply inline-flex items-center px-4 py-2 bg-gray-500 text-white font-medium rounded-md hover:bg-gray-600 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors;
+  @apply inline-flex items-center px-6 py-3 sm:px-4 sm:py-2 bg-gray-500 text-white font-medium text-base sm:text-sm rounded-md hover:bg-gray-600 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors;
+}
+
+.btn-upload {
+  @apply inline-flex items-center px-6 py-3 sm:px-4 sm:py-2 bg-gray-100 text-gray-700 font-medium text-base sm:text-sm rounded-md border border-gray-300 hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors w-full sm:w-auto justify-center;
 }
 
 .form-input {
@@ -22,6 +26,26 @@
 /* Image slot animations */
 .image-slot {
   @apply transition-all duration-200 ease-in-out;
+}
+
+/* Radio button selection styles for reference images */
+input[type="radio"]:checked + label .reference-overlay {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+input[type="radio"]:checked + label .reference-radio-outer {
+  border-color: #3b82f6;
+  background-color: #3b82f6;
+}
+
+input[type="radio"]:checked + label .reference-radio-inner {
+  background-color: white;
+  display: block;
+}
+
+input[type="radio"]:checked + label {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
 /* Plaque preview styles */
