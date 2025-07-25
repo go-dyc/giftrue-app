@@ -145,6 +145,34 @@ class Order < ApplicationRecord
     (@validating_step_3 || @validating_complete) && ['acrylic_cartoon', 'acrylic_realistic'].include?(plaque_style)
   end
 
+  # 스타일별 필드 표시 로직
+  def metal_plaque?
+    ['gold_metal', 'silver_metal'].include?(plaque_style)
+  end
+  
+  def acrylic_plaque?
+    ['acrylic_cartoon', 'acrylic_realistic'].include?(plaque_style)
+  end
+  
+  # 스타일별 필드 존재 여부 확인
+  def has_metal_plaque_fields?
+    metal_plaque? && [plaque_title, plaque_name, plaque_content].any?(&:present?)
+  end
+  
+  def has_acrylic_plaque_fields?
+    acrylic_plaque? && [plaque_top_message, plaque_main_message].any?(&:present?)
+  end
+  
+  # AI 문구 생성 정보 존재 여부 확인 (금속패만)
+  def has_ai_generation_info?
+    metal_plaque? && [relationship_giver, relationship_receiver, purpose_custom, tone_custom, special_note].any?(&:present?)
+  end
+  
+  # 아크릴패 참조 사진 정보 존재 여부 확인
+  def has_reference_image_info?
+    acrylic_plaque? && reference_image_index.present? && main_images.attached?
+  end
+
   # Custom validation method to ensure proper field completion
   def validate_plaque_fields_completion
     return unless plaque_style.present?

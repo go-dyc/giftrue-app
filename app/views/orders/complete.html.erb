@@ -55,54 +55,48 @@
         </div>
 
         <!-- Plaque Message -->
-        <div class="border-b border-gray-200 pb-4">
-          <p class="text-sm font-medium text-gray-500 mb-2">기념패 문구</p>
-          <div class="bg-gray-50 rounded-lg p-4">
-            <% case @order.plaque_style %>
-            <% when 'gold_metal', 'silver_metal' %>
-              <!-- 금속패 필드들 -->
-              <% if @order.plaque_title.present? %>
-                <div class="mb-2">
-                  <span class="text-sm font-medium text-gray-600">제목:</span>
-                  <span class="text-gray-900"><%= @order.plaque_title %></span>
-                </div>
+        <% if @order.has_metal_plaque_fields? || @order.has_acrylic_plaque_fields? %>
+          <div class="border-b border-gray-200 pb-4">
+            <p class="text-sm font-medium text-gray-500 mb-2">기념패 문구</p>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <% if @order.metal_plaque? %>
+                <!-- 금속패 필드들 -->
+                <% if @order.plaque_title.present? %>
+                  <div class="mb-2">
+                    <span class="text-sm font-medium text-gray-600">제목:</span>
+                    <span class="text-gray-900"><%= @order.plaque_title %></span>
+                  </div>
+                <% end %>
+                <% if @order.plaque_name.present? %>
+                  <div class="mb-2">
+                    <span class="text-sm font-medium text-gray-600">성함:</span>
+                    <span class="text-gray-900"><%= @order.plaque_name %></span>
+                  </div>
+                <% end %>
+                <% if @order.plaque_content.present? %>
+                  <div class="mb-2">
+                    <span class="text-sm font-medium text-gray-600">본문:</span>
+                    <p class="text-gray-900 whitespace-pre-wrap"><%= @order.plaque_content %></p>
+                  </div>
+                <% end %>
+              <% elsif @order.acrylic_plaque? %>
+                <!-- 아크릴패 필드들 -->
+                <% if @order.plaque_top_message.present? %>
+                  <div class="mb-2">
+                    <span class="text-sm font-medium text-gray-600">상단문구:</span>
+                    <span class="text-gray-900"><%= @order.plaque_top_message %></span>
+                  </div>
+                <% end %>
+                <% if @order.plaque_main_message.present? %>
+                  <div class="mb-2">
+                    <span class="text-sm font-medium text-gray-600">메시지:</span>
+                    <span class="text-gray-900"><%= @order.plaque_main_message %></span>
+                  </div>
+                <% end %>
               <% end %>
-              <% if @order.plaque_name.present? %>
-                <div class="mb-2">
-                  <span class="text-sm font-medium text-gray-600">성함:</span>
-                  <span class="text-gray-900"><%= @order.plaque_name %></span>
-                </div>
-              <% end %>
-              <% if @order.plaque_content.present? %>
-                <div class="mb-2">
-                  <span class="text-sm font-medium text-gray-600">본문:</span>
-                  <p class="text-gray-900 whitespace-pre-wrap"><%= @order.plaque_content %></p>
-                </div>
-              <% end %>
-            <% when 'acrylic_cartoon', 'acrylic_realistic' %>
-              <!-- 아크릴패 필드들 -->
-              <% if @order.plaque_top_message.present? %>
-                <div class="mb-2">
-                  <span class="text-sm font-medium text-gray-600">상단문구:</span>
-                  <span class="text-gray-900"><%= @order.plaque_top_message %></span>
-                </div>
-              <% end %>
-              <% if @order.plaque_main_message.present? %>
-                <div class="mb-2">
-                  <span class="text-sm font-medium text-gray-600">메시지:</span>
-                  <span class="text-gray-900"><%= @order.plaque_main_message %></span>
-                </div>
-              <% end %>
-            <% else %>
-              <!-- 레거시 호환성을 위한 fallback -->
-              <% if @order.plaque_message.present? %>
-                <p class="text-gray-900 whitespace-pre-wrap"><%= @order.plaque_message %></p>
-              <% else %>
-                <p class="text-gray-500 italic">입력된 문구가 없습니다.</p>
-              <% end %>
-            <% end %>
+            </div>
           </div>
-        </div>
+        <% end %>
 
         <!-- Additional Requests -->
         <% if @order.additional_requests.present? || @order.plaque_additional_requests.present? %>
@@ -125,8 +119,8 @@
           </div>
         <% end %>
 
-        <!-- 문구 생성 정보 -->
-        <% if (@order.relationship_giver.present? && @order.relationship_receiver.present?) || @order.purpose_custom.present? || @order.tone_custom.present? || @order.special_note.present? %>
+        <!-- AI 문구 생성 정보 (금속패만) -->
+        <% if @order.has_ai_generation_info? %>
           <div class="border-b border-gray-200 pb-4">
             <p class="text-sm font-medium text-gray-500 mb-2">🤖 문구 생성 정보</p>
             <div class="bg-blue-50 rounded-lg p-4 space-y-3">
@@ -159,7 +153,7 @@
         <% end %>
 
         <!-- 아크릴패 참조 사진 정보 -->
-        <% if (@order.plaque_style == 'acrylic_cartoon' || @order.plaque_style == 'acrylic_realistic') && @order.reference_image_index.present? && @order.main_images.attached? %>
+        <% if @order.has_reference_image_info? %>
           <div class="border-b border-gray-200 pb-4">
             <p class="text-sm font-medium text-gray-500 mb-2">📸 아크릴패 참조 사진</p>
             <div class="bg-green-50 rounded-lg p-4">

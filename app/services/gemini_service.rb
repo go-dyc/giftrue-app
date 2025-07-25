@@ -6,7 +6,6 @@ class GeminiService
       return "API 키가 설정되지 않았습니다." unless api_key.present?
       
       begin
-        # 금속패 스타일에 따른 문구 생성 (맥락 정보 포함)
         prompt = build_prompt(
           title: title, 
           name: name, 
@@ -32,10 +31,10 @@ class GeminiService
             parts: { text: prompt }
           },
           generationConfig: {
-            temperature: 0.7,
+            temperature: 0.8,
             topK: 40,
-            topP: 0.8,
-            maxOutputTokens: 200,
+            topP: 0.9,
+            maxOutputTokens: 400,
             stopSequences: []
           }
         })
@@ -43,8 +42,11 @@ class GeminiService
         # 응답에서 텍스트 추출
         generated_text = extract_text_from_response(result)
         
-        # 110자 제한 적용
-        truncate_to_limit(generated_text, 110)
+        # 자연스러운 줄바꿈 적용 (12자씩)
+        formatted_text = format_with_line_breaks(generated_text)
+        
+        # 길이 제한 적용 (완전한 문장으로)
+        truncate_to_complete_sentence(formatted_text, 90)
         
       rescue => e
         Rails.logger.error "Gemini API 호출 실패: #{e.message}"
@@ -59,278 +61,39 @@ class GeminiService
     end
 
     def build_prompt(title:, name:, style:, relationship: "", purpose: "", tone: "formal", special_note: "")
-      # 기본 정보 구성
       context_parts = []
-      context_parts << "제목: #{title}" if title.present?
-      context_parts << "성함: #{name}" if name.present?
+      context_parts << title if title.present?
+      context_parts << "#{name}님" if name.present?
+      context_parts << relationship if relationship.present?
+      context_parts << purpose if purpose.present?
+      context_parts << special_note if special_note.present?
       
-      # 맥락 정보 구성
-      context_parts << "관계: #{get_relationship_description(relationship)}" if relationship.present?
-      context_parts << "목적: #{get_purpose_description(purpose)}" if purpose.present?
-      context_parts << "톤: #{get_tone_description(tone)}" if tone.present?
-      context_parts << "특징: #{special_note}" if special_note.present?
+      situation = context_parts.any? ? context_parts.join(', ') + "를 위한 기념패" : "기념패"
+      style_guide = tone.present? ? "#{tone} 스타일로" : "마음을 담아"
       
-      context_info = context_parts.any? ? context_parts.join(" | ") : "기념패"
-      
-      # 맥락에 따른 맞춤형 템플릿 선택
-      template = get_enhanced_template(title, relationship, purpose, tone, special_note, name)
-      
-      prompt = <<~PROMPT
-        당신은 한국어 기념패 문구 전문 작가입니다. 주어진 맥락 정보를 바탕으로 최적화된 기념패 문구를 작성해주세요.
-
-        【맥락 정보】
-        #{context_info}
-
-        【작성 규칙】
-        ✅ 문자 수: 정확히 90-110자 (공백 포함)
-        ✅ 문체: #{get_tone_guide(tone)}
-        ✅ 감정: 감사, 축하, 격려의 의미 포함
-        ✅ 구성: 도입 → 본문 → 마무리 순서
-        ✅ 출력: 문구만 작성 (설명, 따옴표, 부가설명 금지)
-
-        #{template}
-
-        【금지사항】
-        ❌ 설명문, 해석, 부가설명 금지
-        ❌ 따옴표("", '') 사용 금지  
-        ❌ 110자 초과 또는 90자 미만 금지
-        ❌ 구어체, 반말 사용 금지
-
-        위 맥락과 조건을 모두 고려하여 완벽한 기념패 문구를 작성하세요:
+      <<~PROMPT
+        #{situation} 문구를 #{style_guide} 작성해주세요.
+        
+        기념패 문구의 핵심 원칙:
+        - 70-90자 내외의 적당한 분량 (5-7줄 구성)
+        - 편지가 아닌 기념패 특성에 맞는 함축적 표현
+        - 반드시 완전한 문장으로만 구성 (마침표/느낌표로 완결)
+        
+        구성 패턴 (3-4단계):
+        1. 대상자 호명: "송민수 부장님" 또는 "[이름]님"
+        2. 핵심 감사/축하: "[기간/상황] 진심으로 감사드립니다"
+        3. 구체적 공로/특징: "따뜻한 리더십과 헌신적인 노고"
+        4. 미래 축원: "건강하고 행복한 [미래상황] 기원합니다"
+        
+        표현 지침:
+        - 직설적이고 명확한 존댓말 ("~드립니다", "~합니다")
+        - 수식어 최소화, 핵심 키워드 중심
+        - 쉼표(,) 대신 마침표로 문장 분리
+        - 관계별 적절한 표현 (부하→상사: 존경/감사, 상사→부하: 격려/축복)
+        
+        참고 예시:
+        "송민수 부장님께. 20년간 성실한 근무 진심으로 감사드립니다. 따뜻한 리더십과 헌신적인 노고 깊이 존경합니다. 건강하고 행복한 제2의 인생 기원합니다."
       PROMPT
-    end
-
-    # 관계 설명 변환
-    def get_relationship_description(relationship)
-      case relationship
-      when 'superior_to_subordinate' then '상사가 부하직원에게'
-      when 'colleague_to_colleague' then '동료가 동료에게'
-      when 'subordinate_to_superior' then '부하직원이 상사에게'
-      when 'family_to_family' then '가족이 가족에게'
-      when 'friend_to_friend' then '친구가 친구에게'
-      when 'organization_to_individual' then '기관이 개인에게'
-      when 'other' then '특별한 관계에서'
-      else ''
-      end
-    end
-
-    # 목적 설명 변환
-    def get_purpose_description(purpose)
-      case purpose
-      when 'retirement' then '퇴직/전역 축하'
-      when 'promotion' then '승진/임명 축하'
-      when 'graduation' then '졸업/수료 축하'
-      when 'award' then '수상/표창 축하'
-      when 'appreciation' then '감사 표현'
-      when 'anniversary' then '기념일 축하'
-      when 'other' then '특별한 목적'
-      else ''
-      end
-    end
-
-    # 톤 설명 변환
-    def get_tone_description(tone)
-      case tone
-      when 'formal' then '격식있고 공식적'
-      when 'warm' then '따뜻하고 인간적'
-      when 'concise' then '간결하고 깔끔'
-      else '격식있고 공식적'
-      end
-    end
-
-    # 톤 가이드라인
-    def get_tone_guide(tone)
-      case tone
-      when 'formal' then '매우 정중하고 격식있는 존댓말 (공식 문서 수준)'
-      when 'warm' then '정중하되 따뜻하고 친근한 존댓말 (인간적 감정 표현)'
-      when 'concise' then '정중하고 간결한 존댓말 (핵심만 전달)'
-      else '매우 정중하고 격식있는 존댓말'
-      end
-    end
-
-    # 맥락 강화 템플릿 선택
-    def get_enhanced_template(title, relationship, purpose, tone, special_note, name)
-      # 목적 우선 템플릿 선택
-      primary_purpose = purpose.present? ? purpose : get_purpose_from_title(title)
-      
-      case primary_purpose
-      when 'retirement'
-        get_retirement_template(relationship, tone, special_note, name)
-      when 'promotion'
-        get_promotion_template(relationship, tone, special_note, name)
-      when 'graduation'
-        get_graduation_template(relationship, tone, special_note, name)
-      when 'award'
-        get_award_template(relationship, tone, special_note, name)
-      when 'appreciation'
-        get_appreciation_template(relationship, tone, special_note, name)
-      when 'anniversary'
-        get_anniversary_template(relationship, tone, special_note, name)
-      when 'other'
-        get_general_template(relationship, tone, special_note, name)
-      else
-        get_general_template(relationship, tone, special_note, name)
-      end
-    end
-
-    # 제목에서 목적 추론
-    def get_purpose_from_title(title)
-      return '' unless title.present?
-      
-      if title.include?('전역') || title.include?('퇴역') || title.include?('퇴직')
-        'retirement'
-      elsif title.include?('승진') || title.include?('임명') || title.include?('취업') || title.include?('입사')
-        'promotion'
-      elsif title.include?('졸업') || title.include?('수료') || title.include?('학위')
-        'graduation'
-      elsif title.include?('수상') || title.include?('표창') || title.include?('포상')
-        'award'
-      elsif title.include?('감사') || title.include?('고마')
-        'appreciation'
-      else
-        ''
-      end
-    end
-
-    # 퇴직/전역 템플릿
-    def get_retirement_template(relationship, tone, special_note, name)
-      relationship_context = get_relationship_context(relationship, 'retirement')
-      tone_keywords = get_tone_keywords(tone, 'retirement')
-      special_context = special_note.present? ? "특별히 #{special_note}에 대한 " : ""
-      
-      <<~TEMPLATE
-        【퇴직/전역 맞춤 템플릿】
-        관계적 맥락: #{relationship_context}
-        특별 고려사항: #{special_context}감사와 축하
-        
-        구성 가이드:
-        - 도입: "#{get_opening_phrase(relationship, tone, 'retirement')}"
-        - 본문: "#{name}님의 #{special_note.present? ? special_note + '와 ' : ''}#{tone_keywords[:main]}에..."
-        - 마무리: "#{get_closing_phrase(relationship, tone, 'retirement')}"
-        
-        핵심 키워드: #{tone_keywords[:keywords].join(', ')}
-        감정 톤: #{get_emotional_tone('retirement', tone)}
-      TEMPLATE
-    end
-
-    # 승진/임명 템플릿
-    def get_promotion_template(relationship, tone, special_note, name)
-      relationship_context = get_relationship_context(relationship, 'promotion')
-      tone_keywords = get_tone_keywords(tone, 'promotion')
-      special_context = special_note.present? ? "#{special_note}을/를 바탕으로 한 " : ""
-      
-      <<~TEMPLATE
-        【승진/임명 맞춤 템플릿】
-        관계적 맥락: #{relationship_context}
-        특별 고려사항: #{special_context}새로운 시작 축하
-        
-        구성 가이드:
-        - 도입: "#{get_opening_phrase(relationship, tone, 'promotion')}"
-        - 본문: "#{name}님의 #{special_note.present? ? special_note + '과 ' : ''}#{tone_keywords[:main]}이..."
-        - 마무리: "#{get_closing_phrase(relationship, tone, 'promotion')}"
-        
-        핵심 키워드: #{tone_keywords[:keywords].join(', ')}
-        감정 톤: #{get_emotional_tone('promotion', tone)}
-      TEMPLATE
-    end
-
-    # 기타 템플릿들 (간소화)
-    def get_graduation_template(relationship, tone, special_note, name)
-      get_general_template_with_purpose(relationship, tone, special_note, name, 'graduation', '학문적 성취', ['노력', '열정', '성취', '꿈', '미래'])
-    end
-
-    def get_award_template(relationship, tone, special_note, name)
-      get_general_template_with_purpose(relationship, tone, special_note, name, 'award', '뛰어난 성과', ['업적', '공로', '성과', '인정', '자랑'])
-    end
-
-    def get_appreciation_template(relationship, tone, special_note, name)
-      get_general_template_with_purpose(relationship, tone, special_note, name, 'appreciation', '소중한 기여', ['감사', '고마움', '헌신', '도움', '배려'])
-    end
-
-    def get_anniversary_template(relationship, tone, special_note, name)
-      get_general_template_with_purpose(relationship, tone, special_note, name, 'anniversary', '의미있는 순간', ['기념', '추억', '소중함', '감동', '축하'])
-    end
-
-    def get_general_template(relationship, tone, special_note, name)
-      get_general_template_with_purpose(relationship, tone, special_note, name, 'general', '노고와 헌신', ['진심', '감사', '인정', '격려', '응원'])
-    end
-
-    # 일반 템플릿 헬퍼
-    def get_general_template_with_purpose(relationship, tone, special_note, name, purpose, main_theme, keywords)
-      relationship_context = get_relationship_context(relationship, purpose)
-      special_context = special_note.present? ? "#{special_note}에 대한 " : ""
-      
-      <<~TEMPLATE
-        【#{get_purpose_description(purpose)} 맞춤 템플릿】
-        관계적 맥락: #{relationship_context}
-        특별 고려사항: #{special_context}#{main_theme} 강조
-        
-        구성 가이드:
-        - 도입: "#{get_opening_phrase(relationship, tone, purpose)}"
-        - 본문: "#{name}님의 #{special_note.present? ? special_note + '과 ' : ''}#{main_theme}에..."
-        - 마무리: "#{get_closing_phrase(relationship, tone, purpose)}"
-        
-        핵심 키워드: #{keywords.join(', ')}
-        감정 톤: #{get_emotional_tone(purpose, tone)}
-      TEMPLATE
-    end
-
-    # 헬퍼 메서드들
-    def get_relationship_context(relationship, purpose)
-      case relationship
-      when 'superior_to_subordinate' then "상급자가 부하직원에게 주는 공식적이고 격려적인 메시지"
-      when 'colleague_to_colleague' then "동료가 동료에게 주는 동등하고 지지적인 메시지"  
-      when 'subordinate_to_superior' then "부하직원이 상급자에게 주는 존경과 감사의 메시지"
-      when 'family_to_family' then "가족이 가족에게 주는 따뜻하고 사랑스러운 메시지"
-      when 'friend_to_friend' then "친구가 친구에게 주는 친근하고 응원하는 메시지"
-      when 'organization_to_individual' then "기관이 개인에게 주는 공식적이고 권위있는 메시지"
-      when 'other' then "특별한 관계에서 전하는 의미있는 메시지"
-      else "일반적이고 정중한 메시지"
-      end
-    end
-
-    def get_tone_keywords(tone, purpose)
-      base_keywords = {
-        'retirement' => ['헌신', '봉사', '수고', '희생'],
-        'promotion' => ['능력', '성과', '발전', '성장'],
-        'graduation' => ['노력', '열정', '성취', '완수'],
-        'appreciation' => ['감사', '고마움', '소중함', '배려']
-      }
-      
-      case tone
-      when 'warm'
-        { main: '따뜻한 마음과 진정성', keywords: base_keywords[purpose] || ['진심', '마음', '정성'] }
-      when 'concise'
-        { main: '뛰어난 능력과 성과', keywords: base_keywords[purpose] || ['능력', '성과', '결과'] }
-      else
-        { main: '숭고한 헌신과 노고', keywords: base_keywords[purpose] || ['헌신', '노고', '정성'] }
-      end
-    end
-
-    def get_opening_phrase(relationship, tone, purpose)
-      case relationship
-      when 'superior_to_subordinate' then tone == 'warm' ? "마음 깊이 감사드리며" : "공식적으로 표창하며"
-      when 'subordinate_to_superior' then "깊은 존경과 감사의 마음으로"
-      when 'colleague_to_colleague' then tone == 'warm' ? "동료로서 진심으로" : "같은 길을 걸어온 동료로서"
-      else "진심어린 마음으로"
-      end
-    end
-
-    def get_closing_phrase(relationship, tone, purpose)
-      case tone
-      when 'warm' then "언제나 행복하시길 진심으로 바랍니다"
-      when 'concise' then "앞으로도 성공하시길 기원합니다"
-      else "건강하시고 앞으로도 번영하시길 바랍니다"
-      end
-    end
-
-    def get_emotional_tone(purpose, tone)
-      emotions = {
-        'retirement' => { 'warm' => '따뜻한 감사와 아쉬움', 'formal' => '깊은 존경과 감사', 'concise' => '간결한 인정과 축하' },
-        'promotion' => { 'warm' => '진심어린 축하와 응원', 'formal' => '공식적인 축하와 격려', 'concise' => '명확한 축하와 기대' }
-      }
-      
-      emotions.dig(purpose, tone) || '정중한 감사와 축하'
     end
 
     def extract_text_from_response(result)
@@ -348,22 +111,92 @@ class GeminiService
       text_parts.join('').strip
     end
 
-    def truncate_to_limit(text, limit)
-      return text if text.length <= limit
+    # 간단하고 자연스러운 줄바꿈 적용
+    def format_with_line_breaks(text)
+      # 기존 줄바꿈 제거하고 공백 정리
+      clean_text = text.gsub(/\s+/, ' ').strip
       
-      # 단어 경계에서 자르기 시도
-      truncated = text[0, limit]
-      last_space = truncated.rindex(' ')
-      last_period = truncated.rindex('.')
+      # 문장별로 먼저 분리 (마침표, 느낌표 기준)
+      sentences = clean_text.split(/(?<=[.!?])\s+/).map(&:strip).reject(&:empty?)
       
-      # 마지막 공백이나 마침표가 있으면 그 지점에서 자르기
-      if last_period && last_period > limit * 0.8
-        truncated = truncated[0, last_period + 1]
-      elsif last_space && last_space > limit * 0.8
-        truncated = truncated[0, last_space]
+      # 각 문장을 한 줄로 처리 (길면 적절히 분할)
+      lines = []
+      
+      sentences.each do |sentence|
+        if sentence.length <= 15
+          # 짧은 문장은 그대로 한 줄
+          lines << sentence
+        else
+          # 긴 문장은 의미단위로 분할
+          words = sentence.split(' ')
+          current_line = ""
+          
+          words.each do |word|
+            test_line = current_line.empty? ? word : "#{current_line} #{word}"
+            
+            if test_line.length <= 15
+              current_line = test_line
+            else
+              # 현재 줄을 저장하고 새 줄 시작
+              lines << current_line unless current_line.empty?
+              current_line = word
+            end
+          end
+          
+          # 마지막 줄 추가
+          lines << current_line unless current_line.empty?
+        end
       end
       
-      truncated.strip
+      lines.join("\n")
+    end
+    
+    # 완전한 문장으로 자르기 (개선)
+    def truncate_to_complete_sentence(text, limit)
+      return text if text.length <= limit
+      
+      # 문장 단위로 분리 (마침표, 느낌표, 물음표 기준)
+      sentences = text.split(/(?<=[.!?])\s*/)
+      result = ""
+      
+      sentences.each do |sentence|
+        sentence = sentence.strip
+        next if sentence.empty?
+        
+        # 현재 결과에 이 문장을 추가했을 때의 길이
+        test_result = result.empty? ? sentence : "#{result}\n#{sentence}"
+        
+        if test_result.length <= limit
+          result = test_result
+        else
+          # 제한을 초과하면 여기서 중단
+          break
+        end
+      end
+      
+      # 결과가 비어있거나 문장부호로 끝나지 않으면 처리
+      if result.empty?
+        # 첫 문장도 너무 길면 적절히 자르고 마침표 추가
+        first_sentence = sentences.first&.strip || ""
+        if first_sentence.length > limit
+          truncated = first_sentence[0, limit - 1]
+          last_space = truncated.rindex(' ')
+          if last_space && last_space > limit * 0.7
+            result = truncated[0, last_space] + "."
+          else
+            result = truncated + "."
+          end
+        else
+          result = first_sentence
+        end
+      end
+      
+      # 마지막이 문장부호가 아니면 마침표 추가
+      unless result =~ /[.!?]$/
+        result += "."
+      end
+      
+      result.strip
     end
   end
 end
