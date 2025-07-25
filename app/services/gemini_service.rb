@@ -43,8 +43,8 @@ class GeminiService
         # 응답에서 텍스트 추출
         generated_text = extract_text_from_response(result)
         
-        # 150자 제한 적용
-        truncate_to_limit(generated_text, 150)
+        # 110자 제한 적용
+        truncate_to_limit(generated_text, 110)
         
       rescue => e
         Rails.logger.error "Gemini API 호출 실패: #{e.message}"
@@ -82,7 +82,7 @@ class GeminiService
         #{context_info}
 
         【작성 규칙】
-        ✅ 문자 수: 정확히 100-150자 (공백 포함)
+        ✅ 문자 수: 정확히 90-110자 (공백 포함)
         ✅ 문체: #{get_tone_guide(tone)}
         ✅ 감정: 감사, 축하, 격려의 의미 포함
         ✅ 구성: 도입 → 본문 → 마무리 순서
@@ -93,7 +93,7 @@ class GeminiService
         【금지사항】
         ❌ 설명문, 해석, 부가설명 금지
         ❌ 따옴표("", '') 사용 금지  
-        ❌ 150자 초과 또는 100자 미만 금지
+        ❌ 110자 초과 또는 90자 미만 금지
         ❌ 구어체, 반말 사용 금지
 
         위 맥락과 조건을 모두 고려하여 완벽한 기념패 문구를 작성하세요:

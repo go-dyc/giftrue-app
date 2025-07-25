@@ -10,7 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_24_180547) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_25_142328) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
+
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -64,6 +67,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_24_180547) do
     t.string "tone"
     t.text "special_note"
     t.integer "reference_image_index"
+    t.string "relationship_giver"
+    t.string "relationship_receiver"
+    t.string "purpose_custom"
+    t.string "tone_custom"
     t.index ["border_type"], name: "index_orders_on_border_type"
     t.index ["cancelled_at"], name: "index_orders_on_cancelled_at"
     t.index ["last_api_polled_at"], name: "index_orders_on_last_api_polled_at"

@@ -92,7 +92,12 @@ class OrdersController < ApplicationController
           redirect_to verify_order_path(@order.naver_order_number), notice: '주문이 성공적으로 완료되었습니다.'
         else
           @step = current_step
-          flash.now[:alert] = '기념패 스타일과 문구를 모두 입력해주세요.'
+          error_messages = @order.errors.full_messages
+          if error_messages.any?
+            flash.now[:alert] = error_messages.join(', ')
+          else
+            flash.now[:alert] = '입력 정보를 확인해주세요.'
+          end
           render :edit
         end
       else
@@ -169,12 +174,32 @@ class OrdersController < ApplicationController
         end
       elsif params[:complete_step].present?
         Rails.logger.info "COMPLETE_STEP - Going to complete!"
+        Rails.logger.info "Order details before validation:"
+        Rails.logger.info "  naver_order_number: #{@order.naver_order_number}"
+        Rails.logger.info "  orderer_name: #{@order.orderer_name}"
+        Rails.logger.info "  plaque_style: #{@order.plaque_style}"
+        Rails.logger.info "  main_images attached?: #{@order.main_images.attached?}"
+        Rails.logger.info "  optional_images attached?: #{@order.optional_images.attached?}"
+        Rails.logger.info "  plaque_title: #{@order.plaque_title}"
+        Rails.logger.info "  plaque_name: #{@order.plaque_name}"
+        Rails.logger.info "  plaque_content: #{@order.plaque_content}"
+        Rails.logger.info "  completed?: #{@order.completed?}"
+        
         @order.validating_complete!
+        Rails.logger.info "After validating_complete!"
+        Rails.logger.info "  valid?: #{@order.valid?}"
+        Rails.logger.info "  errors: #{@order.errors.full_messages}"
+        
         if @order.valid?
           redirect_to verify_order_path(@order.naver_order_number), notice: '주문이 성공적으로 완료되었습니다.'
         else
           @step = current_step
-          flash.now[:alert] = '기념패 스타일과 문구를 모두 입력해주세요.'
+          error_messages = @order.errors.full_messages
+          if error_messages.any?
+            flash.now[:alert] = error_messages.join(', ')
+          else
+            flash.now[:alert] = '입력 정보를 확인해주세요.'
+          end
           render :edit
         end
       else
@@ -320,10 +345,18 @@ class OrdersController < ApplicationController
       title = params[:title].to_s.strip
       name = params[:name].to_s.strip
       style = params[:style].to_s.strip
+      
+      # 새로운 커스텀 필드들 사용
+      relationship_giver = params[:relationship_giver].to_s.strip
+      relationship_receiver = params[:relationship_receiver].to_s.strip
+      purpose_custom = params[:purpose_custom].to_s.strip
+      tone_custom = params[:tone_custom].to_s.strip
+      special_note = params[:special_note].to_s.strip
+      
+      # 레거시 호환성을 위한 fallback
       relationship = params[:relationship].to_s.strip
       purpose = params[:purpose].to_s.strip
       tone = params[:tone].to_s.strip
-      special_note = params[:special_note].to_s.strip
       
       # 스타일 검증
       unless ['gold_metal', 'silver_metal'].include?(style)
@@ -332,13 +365,23 @@ class OrdersController < ApplicationController
       end
       
       # Gemini API를 통한 문구 생성 (맥락 정보 추가)
+      # 커스텀 필드 우선 사용, 없으면 레거시 필드 사용
+      final_relationship = if relationship_giver.present? && relationship_receiver.present?
+                            "#{relationship_giver} → #{relationship_receiver}"
+                          else
+                            relationship
+                          end
+      
+      final_purpose = purpose_custom.present? ? purpose_custom : purpose
+      final_tone = tone_custom.present? ? tone_custom : tone
+      
       generated_content = GeminiService.generate_plaque_content(
         title: title,
         name: name,
         style: style,
-        relationship: relationship,
-        purpose: purpose,
-        tone: tone,
+        relationship: final_relationship,
+        purpose: final_purpose,
+        tone: final_tone,
         special_note: special_note
       )
       
@@ -394,6 +437,7 @@ class OrdersController < ApplicationController
     permitted_params = params.require(:order).permit(:orderer_name, :plaque_style, :plaque_message, :additional_requests, :plaque_additional_requests,
                                                     :plaque_title, :plaque_name, :plaque_content, :plaque_top_message, :plaque_main_message, :border_type,
                                                     :relationship, :purpose, :tone, :special_note, :reference_image_index,
+                                                    :relationship_giver, :relationship_receiver, :purpose_custom, :tone_custom,
                                                     main_images: [], optional_images: [])
     
     # 빈 이미지 배열 필터링 (기존 이미지가 있을 때 빈 값으로 덮어쓰지 않도록)

@@ -40,6 +40,14 @@
         <% else %>
           <%= hidden_field_tag :complete_step, true %>
         <% end %>
+        
+        <!-- 커스텀 필드들의 현재 값을 hidden으로 유지 (3단계에서만) -->
+        <% if @step == 3 %>
+          <%= form.hidden_field :relationship_giver %>
+          <%= form.hidden_field :relationship_receiver %>
+          <%= form.hidden_field :purpose_custom %>
+          <%= form.hidden_field :tone_custom %>
+        <% end %>
 
         <!-- Step 1: Basic Information -->
         <% if @step == 1 %>
@@ -370,7 +378,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                       </svg>
                       <h4 class="text-sm font-semibold text-blue-800">문구 자동 생성</h4>
-                      <span class="text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">AI 지원</span>
                     </div>
                     <svg id="ai_settings_arrow_gold" class="w-4 h-4 text-blue-600 transform transition-transform duration-200 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -381,79 +388,89 @@
                     <!-- 관계 설정 -->
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">관계</label>
-                      <select name="order[relationship]" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">선택하지 않음</option>
-                        <option value="superior_to_subordinate">상사 → 부하직원</option>
-                        <option value="colleague_to_colleague">동료 → 동료</option>
-                        <option value="subordinate_to_superior">부하직원 → 상사</option>
-                        <option value="family_to_family">가족 → 가족</option>
-                        <option value="friend_to_friend">친구 → 친구</option>
-                        <option value="organization_to_individual">기관 → 개인</option>
-                        <option value="other">기타</option>
-                      </select>
+                      <div class="flex items-center space-x-3">
+                        <div class="flex-1">
+                          <input type="text" name="order[relationship_giver]" 
+                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                 placeholder="주는이 (예: 상사, 동료, 회사)"
+                                 value="<%= @order.relationship_giver || '' %>">
+                        </div>
+                        <div class="flex-shrink-0">
+                          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                          </svg>
+                        </div>
+                        <div class="flex-1">
+                          <input type="text" name="order[relationship_receiver]" 
+                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                 placeholder="받는이 (예: 부하직원, 동료, 개인)"
+                                 value="<%= @order.relationship_receiver || '' %>">
+                        </div>
+                      </div>
+                      <div class="mt-2 flex flex-wrap gap-1">
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillRelationship('상사', '부하직원')">상사→부하직원</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillRelationship('동료', '동료')">동료→동료</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillRelationship('부하직원', '상사')">부하직원→상사</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillRelationship('가족', '가족')">가족→가족</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillRelationship('친구', '친구')">친구→친구</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillRelationship('기관', '개인')">기관→개인</span>
+                      </div>
                     </div>
                     
                     <!-- 목적/상황 설정 -->
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">목적/상황</label>
-                      <div class="grid grid-cols-2 gap-2">
-                        <label class="flex items-center">
-                          <input type="radio" name="order[purpose]" value="retirement" class="mr-2 text-blue-600">
-                          <span class="text-sm">퇴직/전역</span>
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" name="order[purpose]" value="promotion" class="mr-2 text-blue-600">
-                          <span class="text-sm">승진/임명</span>
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" name="order[purpose]" value="graduation" class="mr-2 text-blue-600">
-                          <span class="text-sm">졸업/수료</span>
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" name="order[purpose]" value="award" class="mr-2 text-blue-600">
-                          <span class="text-sm">수상/표창</span>
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" name="order[purpose]" value="appreciation" class="mr-2 text-blue-600">
-                          <span class="text-sm">감사 표현</span>
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" name="order[purpose]" value="anniversary" class="mr-2 text-blue-600">
-                          <span class="text-sm">기념일</span>
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" name="order[purpose]" value="other" class="mr-2 text-blue-600">
-                          <span class="text-sm">기타</span>
-                        </label>
+                      <input type="text" name="order[purpose_custom]" 
+                             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                             placeholder="예: 퇴직 기념, 승진 축하, 졸업 선물 등"
+                             value="<%= @order.purpose_custom || '' %>">
+                      <div class="mt-2 flex flex-wrap gap-1">
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillPurpose('퇴직')">퇴직</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillPurpose('승진')">승진</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillPurpose('졸업')">졸업</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillPurpose('수상')">수상</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillPurpose('감사')">감사</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillPurpose('기념일')">기념일</span>
                       </div>
                     </div>
                     
                     <!-- 톤앤매너 설정 -->
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">문구 스타일</label>
-                      <div class="flex space-x-4">
-                        <label class="flex items-center">
-                          <input type="radio" name="order[tone]" value="formal" class="mr-2 text-blue-600" checked>
-                          <span class="text-sm">격식있고 공식적</span>
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" name="order[tone]" value="warm" class="mr-2 text-blue-600">
-                          <span class="text-sm">따뜻하고 인간적</span>
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" name="order[tone]" value="concise" class="mr-2 text-blue-600">
-                          <span class="text-sm">간결하고 깔끔</span>
-                        </label>
+                      <input type="text" name="order[tone_custom]" 
+                             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                             placeholder="예: 정중하고 격식있게, 따뜻하고 친근하게 등"
+                             value="<%= @order.tone_custom || '' %>">
+                      <div class="mt-2 flex flex-wrap gap-1">
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillTone('격식있고 공식적')">격식있고 공식적</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillTone('따뜻하고 인간적')">따뜻하고 인간적</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillTone('간결하고 깔끔')">간결하고 깔끔</span>
                       </div>
                     </div>
                     
                     <!-- 특별한 공로/특징 -->
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">특별한 공로나 특징 <span class="text-xs text-gray-500">(선택사항)</span></label>
-                      <input type="text" name="order[special_note]" 
-                             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                             placeholder="예: 20년간 성실근무, 팀워크 뛰어남, 신입 교육 담당 등"
-                             maxlength="50">
+                      <textarea name="order[special_note]" 
+                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                rows="3"
+                                placeholder="예: 20년간 성실근무, 팀워크 뛰어남, 신입 교육 담당 등"
+                                maxlength="50"></textarea>
                       <p class="text-xs text-gray-500 mt-1">더 정확한 문구를 위해 간단히 적어주세요 (최대 50자)</p>
                     </div>
                     
@@ -466,7 +483,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                         </svg>
-                        <span>AI로 문구 자동생성하기</span>
+                        <span>문구 자동생성하기</span>
                       </button>
                       <p class="text-xs text-blue-600 mt-2 text-center">위 설정을 바탕으로 맞춤형 문구를 생성합니다</p>
                     </div>
@@ -480,8 +497,8 @@
                   </div>
                   <div class="relative">
                     <%= form.text_area :plaque_content,
-                          class: "w-full px-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none min-h-[160px]",
-                          rows: 8,
+                          class: "w-full px-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none min-h-[200px]",
+                          rows: 10,
                           placeholder: "예: 오랜 시간 동안 헌신적으로 일해주신 노고에 깊이 감사드리며, 앞으로도 건강하고 행복한 나날 보내시길 바랍니다.",
                           maxlength: 150,
                           data: { style: 'gold_metal', counter: 'content' },
@@ -549,7 +566,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                       </svg>
                       <h4 class="text-sm font-semibold text-blue-800">문구 자동 생성</h4>
-                      <span class="text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">AI 지원</span>
                     </div>
                     <svg id="ai_settings_arrow_silver" class="w-4 h-4 text-blue-600 transform transition-transform duration-200 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -560,79 +576,89 @@
                     <!-- 관계 설정 -->
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">관계</label>
-                      <select name="order[relationship]" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">선택하지 않음</option>
-                        <option value="superior_to_subordinate">상사 → 부하직원</option>
-                        <option value="colleague_to_colleague">동료 → 동료</option>
-                        <option value="subordinate_to_superior">부하직원 → 상사</option>
-                        <option value="family_to_family">가족 → 가족</option>
-                        <option value="friend_to_friend">친구 → 친구</option>
-                        <option value="organization_to_individual">기관 → 개인</option>
-                        <option value="other">기타</option>
-                      </select>
+                      <div class="flex items-center space-x-3">
+                        <div class="flex-1">
+                          <input type="text" name="order[relationship_giver]" 
+                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                 placeholder="주는이 (예: 상사, 동료, 회사)"
+                                 value="<%= @order.relationship_giver || '' %>">
+                        </div>
+                        <div class="flex-shrink-0">
+                          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                          </svg>
+                        </div>
+                        <div class="flex-1">
+                          <input type="text" name="order[relationship_receiver]" 
+                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                 placeholder="받는이 (예: 부하직원, 동료, 개인)"
+                                 value="<%= @order.relationship_receiver || '' %>">
+                        </div>
+                      </div>
+                      <div class="mt-2 flex flex-wrap gap-1">
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillRelationship('상사', '부하직원')">상사→부하직원</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillRelationship('동료', '동료')">동료→동료</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillRelationship('부하직원', '상사')">부하직원→상사</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillRelationship('가족', '가족')">가족→가족</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillRelationship('친구', '친구')">친구→친구</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillRelationship('기관', '개인')">기관→개인</span>
+                      </div>
                     </div>
                     
                     <!-- 목적/상황 설정 -->
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">목적/상황</label>
-                      <div class="grid grid-cols-2 gap-2">
-                        <label class="flex items-center">
-                          <input type="radio" name="order[purpose]" value="retirement" class="mr-2 text-blue-600">
-                          <span class="text-sm">퇴직/전역</span>
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" name="order[purpose]" value="promotion" class="mr-2 text-blue-600">
-                          <span class="text-sm">승진/임명</span>
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" name="order[purpose]" value="graduation" class="mr-2 text-blue-600">
-                          <span class="text-sm">졸업/수료</span>
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" name="order[purpose]" value="award" class="mr-2 text-blue-600">
-                          <span class="text-sm">수상/표창</span>
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" name="order[purpose]" value="appreciation" class="mr-2 text-blue-600">
-                          <span class="text-sm">감사 표현</span>
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" name="order[purpose]" value="anniversary" class="mr-2 text-blue-600">
-                          <span class="text-sm">기념일</span>
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" name="order[purpose]" value="other" class="mr-2 text-blue-600">
-                          <span class="text-sm">기타</span>
-                        </label>
+                      <input type="text" name="order[purpose_custom]" 
+                             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                             placeholder="예: 퇴직 기념, 승진 축하, 졸업 선물 등"
+                             value="<%= @order.purpose_custom || '' %>">
+                      <div class="mt-2 flex flex-wrap gap-1">
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillPurpose('퇴직')">퇴직</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillPurpose('승진')">승진</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillPurpose('졸업')">졸업</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillPurpose('수상')">수상</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillPurpose('감사')">감사</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillPurpose('기념일')">기념일</span>
                       </div>
                     </div>
                     
                     <!-- 톤앤매너 설정 -->
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">문구 스타일</label>
-                      <div class="flex space-x-4">
-                        <label class="flex items-center">
-                          <input type="radio" name="order[tone]" value="formal" class="mr-2 text-blue-600" checked>
-                          <span class="text-sm">격식있고 공식적</span>
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" name="order[tone]" value="warm" class="mr-2 text-blue-600">
-                          <span class="text-sm">따뜻하고 인간적</span>
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" name="order[tone]" value="concise" class="mr-2 text-blue-600">
-                          <span class="text-sm">간결하고 깔끔</span>
-                        </label>
+                      <input type="text" name="order[tone_custom]" 
+                             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                             placeholder="예: 정중하고 격식있게, 따뜻하고 친근하게 등"
+                             value="<%= @order.tone_custom || '' %>">
+                      <div class="mt-2 flex flex-wrap gap-1">
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillTone('격식있고 공식적')">격식있고 공식적</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillTone('따뜻하고 인간적')">따뜻하고 인간적</span>
+                        <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200" 
+                              onclick="fillTone('간결하고 깔끔')">간결하고 깔끔</span>
                       </div>
                     </div>
                     
                     <!-- 특별한 공로/특징 -->
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">특별한 공로나 특징 <span class="text-xs text-gray-500">(선택사항)</span></label>
-                      <input type="text" name="order[special_note]" 
-                             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                             placeholder="예: 20년간 성실근무, 팀워크 뛰어남, 신입 교육 담당 등"
-                             maxlength="50">
+                      <textarea name="order[special_note]" 
+                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                rows="3"
+                                placeholder="예: 20년간 성실근무, 팀워크 뛰어남, 신입 교육 담당 등"
+                                maxlength="50"></textarea>
                       <p class="text-xs text-gray-500 mt-1">더 정확한 문구를 위해 간단히 적어주세요 (최대 50자)</p>
                     </div>
                     
@@ -645,7 +671,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                         </svg>
-                        <span>AI로 문구 자동생성하기</span>
+                        <span>문구 자동생성하기</span>
                       </button>
                       <p class="text-xs text-blue-600 mt-2 text-center">위 설정을 바탕으로 맞춤형 문구를 생성합니다</p>
                     </div>
@@ -659,8 +685,8 @@
                   </div>
                   <div class="relative">
                     <%= form.text_area :plaque_content,
-                          class: "w-full px-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none min-h-[160px]",
-                          rows: 8,
+                          class: "w-full px-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none min-h-[200px]",
+                          rows: 10,
                           placeholder: "예: 오랜 시간 동안 헌신적으로 일해주신 노고에 깊이 감사드리며, 앞으로도 건강하고 행복한 나날 보내시길 바랍니다.",
                           maxlength: 150,
                           data: { style: 'silver_metal', counter: 'content' },
@@ -1765,16 +1791,27 @@ function initializePageFunctionality() {
         const title = titleInput ? titleInput.value.trim() : '';
         const name = nameInput ? nameInput.value.trim() : '';
         
-        // AI 맞춤 설정 정보 수집
+        // AI 맞춤 설정 정보 수집 (새로운 커스텀 필드들)
+        const relationshipGiverInput = styleSection.querySelector('input[name="order[relationship_giver]"]');
+        const relationshipReceiverInput = styleSection.querySelector('input[name="order[relationship_receiver]"]');
+        const purposeCustomInput = styleSection.querySelector('input[name="order[purpose_custom]"]');
+        const toneCustomInput = styleSection.querySelector('input[name="order[tone_custom]"]');
+        const specialNoteInput = styleSection.querySelector('textarea[name="order[special_note]"]');
+        
+        const relationshipGiver = relationshipGiverInput ? relationshipGiverInput.value.trim() : '';
+        const relationshipReceiver = relationshipReceiverInput ? relationshipReceiverInput.value.trim() : '';
+        const purposeCustom = purposeCustomInput ? purposeCustomInput.value.trim() : '';
+        const toneCustom = toneCustomInput ? toneCustomInput.value.trim() : '';
+        const specialNote = specialNoteInput ? specialNoteInput.value.trim() : '';
+        
+        // 레거시 호환성을 위한 fallback
         const relationshipSelect = styleSection.querySelector('select[name="order[relationship]"]');
         const purposeRadio = styleSection.querySelector('input[name="order[purpose]"]:checked');
         const toneRadio = styleSection.querySelector('input[name="order[tone]"]:checked');
-        const specialNoteInput = styleSection.querySelector('input[name="order[special_note]"]');
         
         const relationship = relationshipSelect ? relationshipSelect.value : '';
         const purpose = purposeRadio ? purposeRadio.value : '';
         const tone = toneRadio ? toneRadio.value : 'formal';
-        const specialNote = specialNoteInput ? specialNoteInput.value.trim() : '';
         
         // 로딩 상태 표시
         const originalText = clickedButton.innerHTML;
@@ -1803,10 +1840,16 @@ function initializePageFunctionality() {
               title: title,
               name: name,
               style: style,
+              // 새로운 커스텀 필드들
+              relationship_giver: relationshipGiver,
+              relationship_receiver: relationshipReceiver,
+              purpose_custom: purposeCustom,
+              tone_custom: toneCustom,
+              special_note: specialNote,
+              // 레거시 호환성을 위한 필드들
               relationship: relationship,
               purpose: purpose,
-              tone: tone,
-              special_note: specialNote
+              tone: tone
             })
           });
           
@@ -1840,6 +1883,11 @@ function initializePageFunctionality() {
               setTimeout(() => {
                 contentTextarea.classList.remove('ring-2', 'ring-green-500', 'bg-green-50');
               }, 2000);
+            }
+            
+            // 커스텀 필드들을 hidden 필드에 동기화
+            if (window.syncCustomFields) {
+              window.syncCustomFields();
             }
           } else {
             console.error('API 오류:', data); // 디버깅용
@@ -1879,6 +1927,68 @@ function initializePageFunctionality() {
         }
       }
     };
+    
+    // fillRelationship 함수를 전역으로 정의
+    window.fillRelationship = function(giver, receiver) {
+      const giverInputs = document.querySelectorAll('input[name="order[relationship_giver]"]');
+      const receiverInputs = document.querySelectorAll('input[name="order[relationship_receiver]"]');
+      
+      giverInputs.forEach(input => input.value = giver);
+      receiverInputs.forEach(input => input.value = receiver);
+    };
+    
+    // fillPurpose 함수를 전역으로 정의
+    window.fillPurpose = function(purpose) {
+      const purposeInputs = document.querySelectorAll('input[name="order[purpose_custom]"]');
+      purposeInputs.forEach(input => input.value = purpose);
+    };
+    
+    // fillTone 함수를 전역으로 정의
+    window.fillTone = function(tone) {
+      const toneInputs = document.querySelectorAll('input[name="order[tone_custom]"]');
+      toneInputs.forEach(input => input.value = tone);
+    };
+    
+    // 커스텀 필드 값 변경 시 hidden 필드에도 동기화
+    window.syncCustomFields = function() {
+      const giverInput = document.querySelector('input[name="order[relationship_giver]"]:not([type="hidden"])');
+      const receiverInput = document.querySelector('input[name="order[relationship_receiver]"]:not([type="hidden"])');
+      const purposeInput = document.querySelector('input[name="order[purpose_custom]"]:not([type="hidden"])');
+      const toneInput = document.querySelector('input[name="order[tone_custom]"]:not([type="hidden"])');
+      
+      const hiddenGiver = document.querySelector('input[name="order[relationship_giver]"][type="hidden"]');
+      const hiddenReceiver = document.querySelector('input[name="order[relationship_receiver]"][type="hidden"]');
+      const hiddenPurpose = document.querySelector('input[name="order[purpose_custom]"][type="hidden"]');
+      const hiddenTone = document.querySelector('input[name="order[tone_custom]"][type="hidden"]');
+      
+      if (giverInput && hiddenGiver) hiddenGiver.value = giverInput.value;
+      if (receiverInput && hiddenReceiver) hiddenReceiver.value = receiverInput.value;
+      if (purposeInput && hiddenPurpose) hiddenPurpose.value = purposeInput.value;
+      if (toneInput && hiddenTone) hiddenTone.value = toneInput.value;
+    };
+  }
+
+  // Setup custom field synchronization
+  function setupCustomFieldSync() {
+    const customFieldInputs = document.querySelectorAll('input[name="order[relationship_giver]"]:not([type="hidden"]), input[name="order[relationship_receiver]"]:not([type="hidden"]), input[name="order[purpose_custom]"]:not([type="hidden"]), input[name="order[tone_custom]"]:not([type="hidden"])');
+    
+    customFieldInputs.forEach(input => {
+      input.addEventListener('input', function() {
+        if (window.syncCustomFields) {
+          window.syncCustomFields();
+        }
+      });
+    });
+    
+    // 폼 제출 전에도 동기화
+    const form = document.querySelector('form');
+    if (form) {
+      form.addEventListener('submit', function() {
+        if (window.syncCustomFields) {
+          window.syncCustomFields();
+        }
+      });
+    }
   }
 
   // Initialize all functionality
@@ -1891,6 +2001,7 @@ function initializePageFunctionality() {
   setupButtonValidation();
   setupAIContentGeneration();
   setupAiSettingsToggle();
+  setupCustomFieldSync();
   initializeExistingData();
 }
 

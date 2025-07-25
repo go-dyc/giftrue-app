@@ -10,8 +10,8 @@ test.describe('기본 스모크 테스트', () => {
     // 간단한 HTTP 요청으로 서버 상태 확인
     const response = await page.goto('http://localhost:3001/');
     
-    // 200번대 응답 또는 리다이렉트 응답 확인
-    expect(response?.status()).toBeLessThan(500);
+    // 200번대 응답 또는 리다이렉트 응답 확인 (3xx 리다이렉트도 정상)
+    expect(response?.status()).toBeLessThan(400);
     
     // 페이지가 로드되었는지 확인
     await expect(page).toHaveURL(/localhost:3001/);

@@ -125,6 +125,67 @@
           </div>
         <% end %>
 
+        <!-- 문구 생성 정보 -->
+        <% if (@order.relationship_giver.present? && @order.relationship_receiver.present?) || @order.purpose_custom.present? || @order.tone_custom.present? || @order.special_note.present? %>
+          <div class="border-b border-gray-200 pb-4">
+            <p class="text-sm font-medium text-gray-500 mb-2">🤖 문구 생성 정보</p>
+            <div class="bg-blue-50 rounded-lg p-4 space-y-3">
+              <% if @order.relationship_giver.present? && @order.relationship_receiver.present? %>
+                <div>
+                  <span class="text-sm font-medium text-blue-700">👔 관계:</span>
+                  <span class="text-blue-900"><%= @order.relationship_giver %> → <%= @order.relationship_receiver %></span>
+                </div>
+              <% end %>
+              <% if @order.purpose_custom.present? %>
+                <div>
+                  <span class="text-sm font-medium text-blue-700">🎯 목적/상황:</span>
+                  <span class="text-blue-900"><%= @order.purpose_custom %></span>
+                </div>
+              <% end %>
+              <% if @order.tone_custom.present? %>
+                <div>
+                  <span class="text-sm font-medium text-blue-700">📜 문구 스타일:</span>
+                  <span class="text-blue-900"><%= @order.tone_custom %></span>
+                </div>
+              <% end %>
+              <% if @order.special_note.present? %>
+                <div>
+                  <span class="text-sm font-medium text-blue-700">✨ 특별 메모:</span>
+                  <p class="text-blue-900 whitespace-pre-wrap"><%= @order.special_note %></p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- 아크릴패 참조 사진 정보 -->
+        <% if (@order.plaque_style == 'acrylic_cartoon' || @order.plaque_style == 'acrylic_realistic') && @order.reference_image_index.present? && @order.main_images.attached? %>
+          <div class="border-b border-gray-200 pb-4">
+            <p class="text-sm font-medium text-gray-500 mb-2">📸 아크릴패 참조 사진</p>
+            <div class="bg-green-50 rounded-lg p-4">
+              <% if @order.main_images[@order.reference_image_index] %>
+                <div class="flex items-center space-x-3">
+                  <div class="flex-shrink-0">
+                    <% begin %>
+                      <%= image_tag @order.main_images[@order.reference_image_index], class: "w-16 h-16 object-cover rounded-lg border-2 border-green-300" %>
+                    <% rescue => e %>
+                      <div class="w-16 h-16 bg-gray-100 rounded-lg border-2 border-green-300 flex items-center justify-center">
+                        <span class="text-xs text-gray-500">이미지<br>오류</span>
+                      </div>
+                    <% end %>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-green-700">메인 사진 <%= @order.reference_image_index + 1 %>번 선택됨</p>
+                    <p class="text-xs text-green-600">이 사진을 기준으로 아크릴패가 제작됩니다</p>
+                  </div>
+                </div>
+              <% else %>
+                <p class="text-sm text-green-700">참조 사진: 메인 사진 <%= @order.reference_image_index + 1 %>번 (이미지를 불러올 수 없습니다)</p>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
         <!-- Images -->
         <div>
           <p class="text-sm font-medium text-gray-500 mb-4">첨부된 사진</p>

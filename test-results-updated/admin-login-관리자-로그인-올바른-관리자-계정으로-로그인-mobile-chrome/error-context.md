@@ -1,0 +1,190 @@
+# Page snapshot
+
+```yaml
+- navigation:
+  - heading "기념패 관리자" [level=1]:
+    - link "기념패 관리자":
+      - /url: /admin
+  - navigation:
+    - link "주문 관리":
+      - /url: /admin/orders
+    - link "시스템 설정":
+      - /url: /admin/settings
+  - text: "관리자: admin"
+  - link "로그아웃":
+    - /url: /admin/logout
+- main:
+  - text: 로그인되었습니다.
+  - button:
+    - img
+  - heading "주문 관리" [level=1]
+  - paragraph: 기념패 주문 현황을 확인하고 관리할 수 있습니다.
+  - navigation:
+    - link "전체 14":
+      - /url: /admin/orders?status=%EC%A0%84%EC%B2%B4
+    - link "주문접수 14":
+      - /url: /admin/orders?status=%EC%A3%BC%EB%AC%B8%EC%A0%91%EC%88%98
+    - link "시안확정 0":
+      - /url: /admin/orders?status=%EC%8B%9C%EC%95%88%ED%99%95%EC%A0%95
+    - link "제작중 0":
+      - /url: /admin/orders?status=%EC%A0%9C%EC%9E%91%EC%A4%91
+    - link "배송중 0":
+      - /url: /admin/orders?status=%EB%B0%B0%EC%86%A1%EC%A4%91
+    - link "배송완료 0":
+      - /url: /admin/orders?status=%EB%B0%B0%EC%86%A1%EC%99%84%EB%A3%8C
+    - link "주문취소 0":
+      - /url: /admin/orders?status=%EC%A3%BC%EB%AC%B8%EC%B7%A8%EC%86%8C
+    - link "취소됨 0":
+      - /url: /admin/orders?status=%EC%B7%A8%EC%86%8C%EB%90%A8
+  - table:
+    - rowgroup:
+      - row "주문번호 주문자 상태 스타일 주문일시 미리보기 Actions":
+        - columnheader "주문번호"
+        - columnheader "주문자"
+        - columnheader "상태"
+        - columnheader "스타일"
+        - columnheader "주문일시"
+        - columnheader "미리보기"
+        - columnheader "Actions"
+    - rowgroup:
+      - row "TEST-E2E-1753388963394 주문접수 2025-07-25 05:29 이미지 없음 상세보기":
+        - cell "TEST-E2E-1753388963394"
+        - cell
+        - cell "주문접수"
+        - cell
+        - cell "2025-07-25 05:29"
+        - cell "이미지 없음"
+        - cell "상세보기":
+          - link "상세보기":
+            - /url: /admin/orders/TEST-E2E-1753388963394
+      - row "TEST-E2E-1753388957653 주문접수 2025-07-25 05:29 이미지 없음 상세보기":
+        - cell "TEST-E2E-1753388957653"
+        - cell
+        - cell "주문접수"
+        - cell
+        - cell "2025-07-25 05:29"
+        - cell "이미지 없음"
+        - cell "상세보기":
+          - link "상세보기":
+            - /url: /admin/orders/TEST-E2E-1753388957653
+      - row "TEST-E2E-1753388957259 주문접수 2025-07-25 05:29 이미지 없음 상세보기":
+        - cell "TEST-E2E-1753388957259"
+        - cell
+        - cell "주문접수"
+        - cell
+        - cell "2025-07-25 05:29"
+        - cell "이미지 없음"
+        - cell "상세보기":
+          - link "상세보기":
+            - /url: /admin/orders/TEST-E2E-1753388957259
+      - row "NONEXISTENT 주문접수 2025-07-25 05:26 이미지 없음 상세보기":
+        - cell "NONEXISTENT"
+        - cell
+        - cell "주문접수"
+        - cell
+        - cell "2025-07-25 05:26"
+        - cell "이미지 없음"
+        - cell "상세보기":
+          - link "상세보기":
+            - /url: /admin/orders/NONEXISTENT
+      - row "TEST-001 주문접수 2025-07-25 05:24 이미지 없음 상세보기":
+        - cell "TEST-001"
+        - cell
+        - cell "주문접수"
+        - cell
+        - cell "2025-07-25 05:24"
+        - cell "이미지 없음"
+        - cell "상세보기":
+          - link "상세보기":
+            - /url: /admin/orders/TEST-001
+      - row "TEST-E2E-1753388206416 주문접수 2025-07-25 05:16 이미지 없음 상세보기":
+        - cell "TEST-E2E-1753388206416"
+        - cell
+        - cell "주문접수"
+        - cell
+        - cell "2025-07-25 05:16"
+        - cell "이미지 없음"
+        - cell "상세보기":
+          - link "상세보기":
+            - /url: /admin/orders/TEST-E2E-1753388206416
+      - row "TEST-E2E-1753388204230 주문접수 2025-07-25 05:16 이미지 없음 상세보기":
+        - cell "TEST-E2E-1753388204230"
+        - cell
+        - cell "주문접수"
+        - cell
+        - cell "2025-07-25 05:16"
+        - cell "이미지 없음"
+        - cell "상세보기":
+          - link "상세보기":
+            - /url: /admin/orders/TEST-E2E-1753388204230
+      - row "TEST-E2E-1753388202030 주문접수 2025-07-25 05:16 이미지 없음 상세보기":
+        - cell "TEST-E2E-1753388202030"
+        - cell
+        - cell "주문접수"
+        - cell
+        - cell "2025-07-25 05:16"
+        - cell "이미지 없음"
+        - cell "상세보기":
+          - link "상세보기":
+            - /url: /admin/orders/TEST-E2E-1753388202030
+      - row "TEST-E2E-1753388196751 주문접수 2025-07-25 05:16 이미지 없음 상세보기":
+        - cell "TEST-E2E-1753388196751"
+        - cell
+        - cell "주문접수"
+        - cell
+        - cell "2025-07-25 05:16"
+        - cell "이미지 없음"
+        - cell "상세보기":
+          - link "상세보기":
+            - /url: /admin/orders/TEST-E2E-1753388196751
+      - row "NONEXISTENT-123 주문접수 2025-07-25 05:16 이미지 없음 상세보기":
+        - cell "NONEXISTENT-123"
+        - cell
+        - cell "주문접수"
+        - cell
+        - cell "2025-07-25 05:16"
+        - cell "이미지 없음"
+        - cell "상세보기":
+          - link "상세보기":
+            - /url: /admin/orders/NONEXISTENT-123
+      - row "TEST-E2E-1753388192539 주문접수 2025-07-25 05:16 이미지 없음 상세보기":
+        - cell "TEST-E2E-1753388192539"
+        - cell
+        - cell "주문접수"
+        - cell
+        - cell "2025-07-25 05:16"
+        - cell "이미지 없음"
+        - cell "상세보기":
+          - link "상세보기":
+            - /url: /admin/orders/TEST-E2E-1753388192539
+      - row "TEST-E2E-1753388189967 주문접수 2025-07-25 05:16 이미지 없음 상세보기":
+        - cell "TEST-E2E-1753388189967"
+        - cell
+        - cell "주문접수"
+        - cell
+        - cell "2025-07-25 05:16"
+        - cell "이미지 없음"
+        - cell "상세보기":
+          - link "상세보기":
+            - /url: /admin/orders/TEST-E2E-1753388189967
+      - row "TEST002 김철수 주문접수 🥈 금속패 (실버) 2025-07-25 03:57 이미지 없음 상세보기":
+        - cell "TEST002"
+        - cell "김철수"
+        - cell "주문접수"
+        - cell "🥈 금속패 (실버)"
+        - cell "2025-07-25 03:57"
+        - cell "이미지 없음"
+        - cell "상세보기":
+          - link "상세보기":
+            - /url: /admin/orders/TEST002
+      - row "TEST001 홍길동 주문접수 🥇 금속패 (골드) 2025-07-25 03:57 이미지 없음 상세보기":
+        - cell "TEST001"
+        - cell "홍길동"
+        - cell "주문접수"
+        - cell "🥇 금속패 (골드)"
+        - cell "2025-07-25 03:57"
+        - cell "이미지 없음"
+        - cell "상세보기":
+          - link "상세보기":
+            - /url: /admin/orders/TEST001
+```

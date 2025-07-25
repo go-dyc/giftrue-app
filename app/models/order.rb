@@ -4,11 +4,11 @@ class Order < ApplicationRecord
   has_many_attached :optional_images
   
   # Validations
-  validates :naver_order_number, presence: true, uniqueness: true
+  validates :naver_order_number, presence: { message: "주문번호가 필요합니다" }, uniqueness: { message: "이미 존재하는 주문번호입니다" }
   validates :status, presence: true, inclusion: { in: %w[주문접수 시안확정 제작중 배송중 배송완료 주문취소] }
-  validates :plaque_style, inclusion: { in: %w[gold_metal silver_metal acrylic_cartoon acrylic_realistic], allow_blank: true }
-  validates :border_type, inclusion: { in: %w[type_a type_b type_c], allow_blank: true }
-  validates :expected_delivery_days, presence: true, numericality: { greater_than: 0, less_than_or_equal_to: 90 }
+  validates :plaque_style, inclusion: { in: %w[gold_metal silver_metal acrylic_cartoon acrylic_realistic], allow_blank: true, message: "올바른 기념패 스타일을 선택해주세요" }
+  validates :border_type, inclusion: { in: %w[type_a type_b type_c], allow_blank: true, message: "올바른 테두리 타입을 선택해주세요" }
+  validates :expected_delivery_days, presence: { message: "배송일이 필요합니다" }, numericality: { greater_than: 0, less_than_or_equal_to: 90, greater_than_message: "배송일은 1일 이상이어야 합니다", less_than_or_equal_to_message: "배송일은 90일 이하여야 합니다" }
   
   # 새 주문 생성 시 및 업데이트 시 시스템 기본값 적용
   before_validation :set_default_delivery_days
@@ -17,10 +17,10 @@ class Order < ApplicationRecord
   after_update :send_slack_notification_if_completed
   
   # Step-based validations
-  validates :orderer_name, presence: true, if: :validate_step_1_or_complete?
-  validates :main_images, presence: true, if: :validate_step_1_or_complete?
-  validates :optional_images, presence: true, if: :validate_step_2_or_complete?
-  validates :plaque_style, presence: true, if: :validate_step_3_or_complete?
+  validates :orderer_name, presence: { message: "주문자 성함을 입력해주세요" }, if: :validate_step_1_or_complete?
+  validates :main_images, presence: { message: "정면 사진을 업로드해주세요" }, if: :validate_step_1_or_complete?
+  validates :optional_images, presence: { message: "포즈 및 의상 사진을 업로드해주세요" }, if: :validate_step_2_or_complete?
+  validates :plaque_style, presence: { message: "기념패 스타일을 선택해주세요" }, if: :validate_step_3_or_complete?
   # Remove old plaque_message validation - replaced with detailed field validations
   # validates :plaque_message, presence: true, if: :validate_step_3_or_complete?
   
@@ -34,16 +34,16 @@ class Order < ApplicationRecord
   # Custom validation to ensure at least one set of fields is filled
   validate :validate_plaque_fields_completion, if: :validate_step_3_or_complete?
   
-  # Length validations for new fields
-  validates :plaque_title, length: { maximum: 15 }, if: :validate_metal_plaque_fields?
-  validates :plaque_name, length: { maximum: 40 }, if: :validate_metal_plaque_fields?
-  validates :plaque_content, length: { maximum: 150 }, if: :validate_metal_plaque_fields?
-  validates :plaque_top_message, length: { maximum: 10 }, if: :validate_acrylic_plaque_fields?
-  validates :plaque_main_message, length: { maximum: 25 }, if: :validate_acrylic_plaque_fields?
+  # Length validations for new fields (with Korean messages)
+  validates :plaque_title, length: { maximum: 15, too_long: "제목은 15자를 초과할 수 없습니다" }, if: :validate_metal_plaque_fields?
+  validates :plaque_name, length: { maximum: 40, too_long: "성함은 40자를 초과할 수 없습니다" }, if: :validate_metal_plaque_fields?
+  validates :plaque_content, length: { maximum: 150, too_long: "본문은 150자를 초과할 수 없습니다" }, if: :validate_metal_plaque_fields?
+  validates :plaque_top_message, length: { maximum: 10, too_long: "상단문구는 10자를 초과할 수 없습니다" }, if: :validate_acrylic_plaque_fields?
+  validates :plaque_main_message, length: { maximum: 25, too_long: "메시지는 25자를 초과할 수 없습니다" }, if: :validate_acrylic_plaque_fields?
   
-  # Reference image validation for acrylic plaques
-  validates :reference_image_index, presence: true, if: :validate_acrylic_plaque_fields?
-  validates :reference_image_index, inclusion: { in: 0..4 }, if: :validate_acrylic_plaque_fields?
+  # Reference image validation for acrylic plaques (with Korean messages)
+  validates :reference_image_index, presence: { message: "아크릴패 참조 사진을 선택해주세요" }, if: :validate_acrylic_plaque_fields?
+  validates :reference_image_index, inclusion: { in: 0..4, message: "올바른 참조 사진을 선택해주세요" }, if: :validate_acrylic_plaque_fields?
   
   # Custom validation for file types and sizes
   validate :validate_main_images_content_type_and_size
